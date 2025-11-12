@@ -37,4 +37,7 @@ public class Player {
     @ManyToOne
     @JoinColumn(name = "card_id")
     private Card card;
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
 }
