@@ -2,12 +2,20 @@ package com.example.premier_league.entity;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "matches")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class MatchSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
