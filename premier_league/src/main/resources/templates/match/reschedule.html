@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Dời lịch thi đấu</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    .container {
+      max-width: 650px;
+    }
+    .match-info {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border-left: 4px solid #0d6efd;
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-4">
+
+  <h2 class="text-center mb-4">⚽ Dời lịch thi đấu</h2>
+
+  <!-- Thông tin trận đấu -->
+  <div class="match-info">
+    <h5 th:text="${match.homeTeam.name} + ' vs ' + ${match.awayTeam.name}"></h5>
+
+    <p class="mb-1">
+      <strong>Vòng:</strong> <span th:text="${match.round}"></span>
+    </p>
+
+    <p class="mb-1">
+      <strong>Ngày cũ:</strong>
+      <span th:text="${match.matchDate}"></span>
+    </p>
+
+    <p class="mb-1">
+      <strong>Giờ cũ:</strong>
+      <span th:text="${match.matchTime}"></span>
+    </p>
+
+    <p class="mb-1">
+      <strong>Trạng thái:</strong>
+      <span th:switch="${match.status}">
+                <span th:case="'SCHEDULED'">Sắp diễn ra</span>
+                <span th:case="'POSTPONED'">Bị hoãn</span>
+                <span th:case="'FINISHED'">Đã kết thúc</span>
+            </span>
+    </p>
+  </div>
+
+  <!-- Form dời lịch -->
+  <form th:action="@{/matches/reschedule/save/{id}(id=${match.id})}" method="post">
+
+    <div class="mb-3">
+      <label class="form-label">Ngày mới</label>
+      <input type="date" class="form-control" name="newDate" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Giờ mới</label>
+      <input type="time" class="form-control" name="newTime" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Lý do hoãn (tùy chọn)</label>
+      <textarea class="form-control" rows="4" name="note" placeholder="Ví dụ: Mưa lớn, sân ngập nước..."></textarea>
+    </div>
+
+    <button class="btn btn-primary w-100">Xác nhận dời lịch</button>
+
+    <a th:href="@{/matches}" class="btn btn-secondary w-100 mt-2">Quay lại</a>
+
+  </form>
+
+</div>
+
+</body>
+</html>

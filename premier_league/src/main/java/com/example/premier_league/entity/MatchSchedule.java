@@ -16,10 +16,6 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "matches")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class MatchSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,4 +38,7 @@ public class MatchSchedule {
     private Integer round;
 
     private String note;
+
+    @Enumerated(EnumType.STRING)
+    private MatchStatus status = MatchStatus.SCHEDULED;
 }
