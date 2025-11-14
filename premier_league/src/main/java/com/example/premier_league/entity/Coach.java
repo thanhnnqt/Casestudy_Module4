@@ -14,32 +14,32 @@ public class Coach {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 🔹 Mã định danh duy nhất cho huấn luyện viên
+    private Long id;
 
     @Column(nullable = false)
-    private String fullName; // 🔹 Họ và tên của huấn luyện viên
+    private String fullName;
 
-    private String nationality; // 🔹 Quốc tịch
+    private String nationality;
 
-    private String phoneNumber; // 🔹 Số điện thoại liên hệ
+    private String phoneNumber;
 
-    private String email; // 🔹 Email (có thể dùng để đăng nhập hoặc nhận thông báo)
+    private String email;
 
-    private String avatarUrl; // 🔹 Ảnh đại diện (lưu link trên Cloudinary)
+    private String avatarUrl;
 
-    private int experienceYears; // 🔹 Số năm kinh nghiệm huấn luyện
+    private int experienceYears;
 
-    private String specialization; // 🔹 Chuyên môn (vd: Chiến thuật tấn công, phòng ngự…)
+    private String specialization;
 
-    private String licenseLevel; // 🔹 Trình độ huấn luyện (vd: AFC Pro, UEFA A…)
+    private String licenseLevel;
 
-    private String note; // 🔹 Ghi chú thêm (vd: tình trạng hợp đồng, sức khỏe…)
+    private String note;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
-    private Team team; // 🔹 Mối quan hệ nhiều-huấn luyện viên-thuộc-về-1 đội bóng
+    private Team team;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
-    private Account account; // 🔹 Liên kết với tài khoản đăng nhập (phân quyền là “COACH”)
+    private Account account;
 }
