@@ -16,11 +16,10 @@ import java.time.LocalDate;
 public class Owner {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    private Long id;
     private String name;
     private LocalDate dob;
     private String phoneNumber;
-    private boolean gender;
     @OneToOne
     @JoinColumn(name = "id_account")
     private Account account;

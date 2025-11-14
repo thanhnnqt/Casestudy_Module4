@@ -11,11 +11,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "matches")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "matches")
 public class MatchSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,15 +27,18 @@ public class MatchSchedule {
 
     private LocalTime matchTime;
 
-//    @ManyToOne
-//    @JoinColumn(name = "home_team_id")
-//    private Team homeTeam;
+    @ManyToOne
+    @JoinColumn(name = "home_team_id")
+    private Team homeTeam;
 
-//    @ManyToOne
-//    @JoinColumn(name = "away_team_id")
-//    private Team awayTeam;
+    @ManyToOne
+    @JoinColumn(name = "away_team_id")
+    private Team awayTeam;
 
     private Integer round;
 
     private String note;
+
+    @Enumerated(EnumType.STRING)
+    private MatchStatus status = MatchStatus.SCHEDULED;
 }
