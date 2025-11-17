@@ -10,11 +10,11 @@ public interface ITeamService {
 
     void save (Team team);
 
-    Team findById(int id);
+    Team findById(Long id);
 
     List<Team> findByName(String name);
 
     void update(Team team);
 
-    void delete(int id);
+    void delete(Long id);
 }
