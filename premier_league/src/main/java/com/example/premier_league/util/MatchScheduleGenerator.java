@@ -21,7 +21,7 @@ public class MatchScheduleGenerator {
 
     private final IMatchScheduleRepository matchScheduleRepository;
 
-    public MatchScheduleGenerator (IMatchScheduleRepository matchScheduleRepository, ITeamRepository teamRepository){
+    public MatchScheduleGenerator(IMatchScheduleRepository matchScheduleRepository, ITeamRepository teamRepository) {
         this.matchScheduleRepository = matchScheduleRepository;
         this.teamRepository = teamRepository;
     }
@@ -52,7 +52,7 @@ public class MatchScheduleGenerator {
                 m.setHomeTeam(home);
                 m.setAwayTeam(away);
                 m.setMatchDate(startDate.plusWeeks(round));
-                m.setMatchTime(LocalTime.of(16,0));
+                m.setMatchTime(LocalTime.of(16, 0));
                 m.setRound(round + 1);
                 m.setStatus(MatchStatus.SCHEDULED);
                 m.setName(home.getName() + " vs " + away.getName());
@@ -73,7 +73,7 @@ public class MatchScheduleGenerator {
                 m.setHomeTeam(home);
                 m.setAwayTeam(away);
                 m.setMatchDate(startDate.plusWeeks(totalRounds + round));
-                m.setMatchTime(LocalTime.of(16,0));
+                m.setMatchTime(LocalTime.of(16, 0));
                 m.setRound(totalRounds + round + 1);
                 m.setStatus(MatchStatus.SCHEDULED);
                 m.setName(home.getName() + " vs " + away.getName());
