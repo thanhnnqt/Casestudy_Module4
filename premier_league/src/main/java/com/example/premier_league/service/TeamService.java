@@ -1,7 +1,6 @@
 package com.example.premier_league.service;
 
 import com.example.premier_league.entity.Team;
-import com.example.premier_league.repository.IStaffRepository;
 import com.example.premier_league.repository.ITeamRepository;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +26,7 @@ public class TeamService implements ITeamService{
     }
 
     @Override
-    public Team findById(int id) {
+    public Team findById(Long id) {
         return teamRepository.findById(id).orElse(null);
     }
 
@@ -45,7 +44,7 @@ public class TeamService implements ITeamService{
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(Long id) {
         if (teamRepository.existsById(id)) {
             teamRepository.deleteById(id);
         }
