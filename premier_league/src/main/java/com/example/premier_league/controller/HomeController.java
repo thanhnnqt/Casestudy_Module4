@@ -29,10 +29,8 @@ public class HomeController {
 
     }
 
-
-
     // 2. Trang danh sách giải đấu
-    @GetMapping("/tournaments")
+    @GetMapping("/tournament")
     public String listMatchesViews(Model model) {
         model.addAttribute("matches", matchScheduleService.getAllMatches());
         return "home/tournaments";
@@ -79,14 +77,14 @@ public class HomeController {
     }
 
     // 8. Trang đặt vé
-    @GetMapping("/tickets")
+    @GetMapping("/ticket")
     public String tickets(Model model) {
         // TODO: Thêm dữ liệu: upcomingMatches (để hiển thị list chọn trận)
         return "home/ticket";
     }
 
     // 9. Trang tin tức
-    @GetMapping("/news")
+    @GetMapping("/new")
     public String news(Model model) {
         // TODO: Thêm dữ liệu: newsList (List tin tức)
         return "home/new";

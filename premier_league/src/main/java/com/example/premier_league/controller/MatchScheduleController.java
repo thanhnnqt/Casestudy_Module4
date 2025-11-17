@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Controller
-@RequestMapping("")
+@RequestMapping("/admin")
 public class MatchScheduleController {
 
     private final MatchScheduleService matchScheduleService;
@@ -36,7 +36,7 @@ public class MatchScheduleController {
         MatchSchedule match = matchScheduleService.findById(id);
         match.setStatus(MatchStatus.POSTPONED);
         matchScheduleService.save(match);
-        return "redirect:/matches";
+        return "redirect:/admin/matches";
     }
     @GetMapping("/matches/reschedule/{id}")
     public String showRescheduleForm(@PathVariable Long id, Model model) {
@@ -56,11 +56,11 @@ public class MatchScheduleController {
         match.setStatus(MatchStatus.SCHEDULED); // Đặt lại thành sắp diễn ra
 
         matchScheduleService.save(match);
-        return "redirect:/matches";
+        return "redirect:/admin/matches";
     }
     @PostMapping("/matches/resume/{id}")
     public String resumeMatch(@PathVariable Long id) {
         matchScheduleService.resumeMatch(id);
-        return "redirect:/matches";
+        return "redirect:/admin/matches";
     }
 }
