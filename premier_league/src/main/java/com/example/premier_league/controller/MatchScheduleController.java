@@ -25,11 +25,6 @@ public class MatchScheduleController {
         model.addAttribute("matches", matchScheduleService.getAllMatches());
         return "match/list";
     }
-//    @GetMapping("/matches")
-//    public String listMatches(Model model) {
-//        model.addAttribute("matches", matchScheduleService.getAllMatches());
-//        return "matches";
-//    }
 
     @GetMapping("/matches/postpone/{id}")
     public String postponeMatch(@PathVariable Long id) {
