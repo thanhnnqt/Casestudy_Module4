@@ -9,7 +9,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Coach {
 
     @Id
@@ -29,9 +28,9 @@ public class Coach {
 
     private int experienceYears;
 
-    private String specialization;
+    private String specialization; //Chuyên môn (HLV chiến thuật, thể lực, thủ môn..)
 
-    private String licenseLevel;
+    private String licenseLevel; //Bằng cấp
 
     private String note;
 

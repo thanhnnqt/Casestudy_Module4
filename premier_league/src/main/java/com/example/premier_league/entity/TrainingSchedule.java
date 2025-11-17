@@ -23,9 +23,9 @@ public class TrainingSchedule {
 
     private LocalDateTime endTime;
 
-    private String location;
+    private String location; //Chỗ tập
 
     @ManyToOne
     @JoinColumn(name = "team_id")
-    private Team team;
+    private Team team; //Buổi tập của đội mô
 }
