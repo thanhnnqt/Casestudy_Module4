@@ -1,0 +1,59 @@
+/* Định nghĩa biến (CSS Variables) */
+:root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* ĐÃ SỬA: Màu Primary -> Tím than Premier League (#38003c) */
+    /* HSL: 276deg 100% 12% */
+    --primary: 276 100% 12%;
+    --primary-foreground: 0 0% 100%;
+
+    /* ĐÃ SỬA: Màu Secondary -> Đổi từ Xanh lá sang Tím nhạt hơn một chút để làm nền phụ */
+    --secondary: 276 60% 95%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    /* QUAN TRỌNG: Màu Accent (Dùng cho Hover) -> Hồng Ruby (#ff2882) */
+    /* Đây là màu sẽ thay thế màu "lá cây" khi bạn kéo chuột vào */
+    /* HSL: 335deg 100% 58% */
+    --accent: 335 100% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+
+    /* Ring đổi theo màu Accent để khi focus vào input sẽ ra màu Hồng */
+    --ring: 335 100% 58%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+}
+
+/* Áp dụng styles cơ bản (Base layer) */
+* {
+    border-color: hsl(var(--border));
+}
+
+body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+}
