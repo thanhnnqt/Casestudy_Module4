@@ -17,24 +17,24 @@ public class HomeController {
     public HomeController(MatchScheduleService matchScheduleService) {
         this.matchScheduleService = matchScheduleService;
     }
-    @GetMapping("/")
-    public String home(Model model) {
-        System.out.println("Matches size: " + matchScheduleService.getAllMatches().size());
-
-        List<MatchSchedule> round1Matches = matchScheduleService.getAllMatches().stream()
-                .filter(m -> m.getRound() == 1)
-                .collect(Collectors.toList());
-        model.addAttribute("upcomingMatches", round1Matches);
-        return "home/home";
-
-    }
+//    @GetMapping("/")
+//    public String home(Model model) {
+//        System.out.println("Matches size: " + matchScheduleService.getAllMatches().size());
+//
+//        List<MatchSchedule> round1Matches = matchScheduleService.getAllMatches().stream()
+//                .filter(m -> m.getRound() == 1)
+//                .collect(Collectors.toList());
+//        model.addAttribute("upcomingMatches", round1Matches);
+//        return "home/home";
+//
+//    }
 
     // 2. Trang danh sách giải đấu
-    @GetMapping("/tournament")
-    public String listMatchesViews(Model model) {
-        model.addAttribute("matches", matchScheduleService.getAllMatches());
-        return "home/tournaments";
-    }
+//    @GetMapping("/tournament")
+//    public String listMatchesViews(Model model) {
+//        model.addAttribute("matches", matchScheduleService.getAllMatches());
+//        return "home/tournaments";
+//    }
 
     // 3. Trang chi tiết giải đấu
     @GetMapping("/tournament/{id}")
