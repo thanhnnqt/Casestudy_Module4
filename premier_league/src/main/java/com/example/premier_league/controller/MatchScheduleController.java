@@ -67,10 +67,6 @@ public class MatchScheduleController {
         return "match/list";
     }
 
-
-
-    /* ======================= ACTIONS ======================= */
-
     @GetMapping("/matches/postpone/{id}")
     public String postponeMatch(@PathVariable Long id) {
         matchScheduleService.updateStatus(id, MatchStatus.POSTPONED);
