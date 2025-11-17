@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký đội hình</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        select[multiple] {
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h2 class="mb-3">Đăng ký đội hình cho đội: <span class="text-primary" th:text="${teamName}"></span></h2>
+    <h4>Trận: <span th:text="${match.homeTeam.name} + ' vs ' + ${match.awayTeam.name}"></span></h4>
+    <p>Vòng <span th:text="${match.round}"></span> - <span th:text="${match.matchDate}"></span></p>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/coach/team/{teamId}/match/{matchId}/lineup/save(teamId=${teamId}, matchId=${match.id})}"
+          method="post">
+
+        <div class="row mt-4">
+
+            <div class="col-md-4">
+                <h5>Chưa đăng ký (<span id="available-count" th:text="${#lists.size(availablePlayers)}"></span>)</h5>
+                <select id="available-select" multiple class="form-select">
+                    <option th:each="p : ${availablePlayers}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.position} + ')'"></option>
+                </select>
+            </div>
+
+            <div class="col-md-1 d-flex flex-column justify-content-center align-items-center gap-2">
+                <button type="button" class="btn btn-primary" onclick="move('available-select', 'main-select', 11, 'main-count')">&gt;&gt; Chính</button>
+                <button type="button" class="btn btn-info" onclick="move('available-select', 'sub-select', 7, 'sub-count')">&gt; Dự bị</button>
+                <hr class="w-100">
+                <button type="button" class="btn btn-outline-secondary" onclick="move('main-select', 'available-select', 99, 'available-count')">&lt;&lt; Bỏ</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="move('sub-select', 'available-select', 99, 'available-count')">&lt; Bỏ</button>
+            </div>
+
+            <div class="col-md-7">
+                <div class="mb-3">
+                    <h5>Đội hình chính (<span id="main-count" th:text="${#lists.size(mainPlayers)}"></span>/11)</h5>
+                    <select name="mainPlayerIds" id="main-select" multiple class="form-select" required>
+                        <option th:each="p : ${mainPlayers}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.position} + ')'" selected></option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <h5>Đội hình dự bị (<span id="sub-count" th:text="${#lists.size(subPlayers)}"></span>)</h5>
+                    <select name="subPlayerIds" id="sub-select" multiple class="form-select">
+                        <option th:each="p : ${subPlayers}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.position} + ')'" selected></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <hr class="mt-4">
+
+        <button type="submit" class="btn btn-success btn-lg">Lưu Đội Hình</button>
+        <a th:href="@{/coach/team/{teamId}/schedule(teamId=${teamId})}" class="btn btn-secondary btn-lg">Quay lại</a>
+    </form>
+
+    <script>
+        // JS để di chuyển cầu thủ giữa các list
+        function move(fromSelectId, toSelectId, limit, toCounterId) {
+            const fromSelect = document.getElementById(fromSelectId);
+            const toSelect = document.getElementById(toSelectId);
+            const toCounter = document.getElementById(toCounterId);
+
+            // Lấy các options đang được chọn
+            const selectedOptions = Array.from(fromSelect.selectedOptions);
+
+            // Kiểm tra giới hạn
+            if (toSelect.options.length + selectedOptions.length > limit) {
+                alert('Vượt quá giới hạn cho phép! (Đội hình chính tối đa ' + limit + ' cầu thủ)');
+                return;
+            }
+
+            // Di chuyển
+            selectedOptions.forEach(option => {
+                // Thêm selected=true cho form submit
+                option.selected = true;
+                toSelect.appendChild(option);
+            });
+
+            // Cập nhật số lượng
+            updateAllCounts();
+        }
+
+        function updateAllCounts() {
+            document.getElementById('available-count').innerText = document.getElementById('available-select').options.length;
+            document.getElementById('main-count').innerText = document.getElementById('main-select').options.length;
+            document.getElementById('sub-count').innerText = document.getElementById('sub-select').options.length;
+        }
+
+        // Đảm bảo tất cả cầu thủ trong 2 list main/sub đều được 'selected' khi submit
+        document.querySelector('form').addEventListener('submit', function() {
+            Array.from(document.getElementById('main-select').options).forEach(opt => opt.selected = true);
+            Array.from(document.getElementById('sub-select').options).forEach(opt => opt.selected = true);
+        });
+    </script>
+</div>
+</body>
+</html>

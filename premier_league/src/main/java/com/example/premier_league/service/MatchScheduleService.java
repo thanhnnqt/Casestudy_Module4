@@ -77,4 +77,10 @@ public class MatchScheduleService implements IMatchScheduleService {
         match.setStatus(MatchStatus.SCHEDULED);
         matchScheduleRepository.save(match);
     }
+
+    @Override
+    public List<MatchSchedule> findMatchesByTeamId(Long teamId) {
+        // Sử dụng method đã có sẵn trong repository
+        return matchScheduleRepository.findAllByHomeTeamIdOrAwayTeamIdOrderByMatchDateAscMatchTimeAsc(teamId, teamId);
+    }
 }
