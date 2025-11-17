@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Premier League – Matches & Rankings</title>
+
+    <!-- SockJS + STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .match {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            font-size: 1.1rem;
+        }
+
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .winner {
+            color: green;
+            font-weight: bold;
+        }
+
+        #ranking {
+            margin-top: 30px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #ranking th,
+        #ranking td {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        #ranking th {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Lịch Thi Đấu</h1>
+
+<div id="matches"></div>
+
+<h2 style="margin-top: 40px">Bảng Xếp Hạng</h2>
+
+<table id="ranking">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Đội</th>
+        <th>Điểm</th>
+        <th>Hiệu số</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function(frame) {
+            console.log("Connected: " + frame);
+
+            // Matches update
+            stompClient.subscribe('/topic/matches', function(message) {
+                const match = JSON.parse(message.body);
+                updateMatchUI(match);
+            });
+
+            // Rankings update
+            stompClient.subscribe('/topic/rankings', function(message) {
+                const rankings = JSON.parse(message.body);
+                renderRanking(rankings);
+            });
+        });
+    }
+
+    // Load initial data
+    async function loadInitial() {
+        // load matches
+        const res = await fetch('/api/matches');
+        const matches = await res.json();
+        matches.forEach(m => updateMatchUI(m));
+
+        // load ranking
+        const r = await fetch('/api/rankings');
+        if (r.ok) {
+            const rankings = await r.json();
+            renderRanking(rankings);
+        }
+    }
+
+    function updateMatchUI(m) {
+        const container = document.getElementById('matches');
+        let el = document.getElementById('match-' + m.id);
+
+        if (!el) {
+            el = document.createElement('div');
+            el.className = 'match';
+            el.id = 'match-' + m.id;
+            container.appendChild(el);
+        }
+
+        const homeId = m.homeTeam.id;
+        const awayId = m.awayTeam.id;
+        const homeName = m.homeTeam.name;
+        const awayName = m.awayTeam.name;
+
+        if (m.status === 'SCHEDULED') {
+            el.innerHTML = `
+            <img src="/images/team-${homeId}.png" width="40">
+            <div>${homeName}</div>
+            <div class="vs">VS</div>
+            <img src="/images/team-${awayId}.png" width="40">
+            <div>${awayName}</div>
+            <div>${new Date(m.matchDate).toLocaleString()} - ${m.stadium}</div>
+        `;
+        } else if (m.status === 'FINISHED') {
+            el.innerHTML = `
+            <div class="team ${m.homeScore > m.awayScore ? 'winner' : ''}">${homeName}</div>
+            <div class="score">${m.homeScore} - ${m.awayScore}</div>
+            <div class="team ${m.awayScore > m.homeScore ? 'winner' : ''}">${awayName}</div>
+        `;
+        }
+    }
+
+
+    function renderRanking(rankings) {
+        const tbody = document.querySelector('#ranking tbody');
+        tbody.innerHTML = "";
+
+        rankings.forEach((r, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${idx + 1}</td>
+                <td>${r.teamName}</td>
+                <td>${r.points}</td>
+                <td>${r.goalDifference}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    connect();
+    loadInitial();
+</script>
+
+</body>
+</html>
