@@ -8,22 +8,19 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Setter
-@Getter
 @Entity
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Owner {
+public class Audience {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     private String name;
-    private LocalDate dob;
+    private LocalDate DOB;
     private String phoneNumber;
     @OneToOne
     @JoinColumn(name = "account_id")
-    private Account account;
-    @OneToOne
-    @JoinColumn(name = "team_id")
-    private Team team;
+    Account account;
 }
