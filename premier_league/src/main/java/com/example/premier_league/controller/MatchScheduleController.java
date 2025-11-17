@@ -2,8 +2,7 @@ package com.example.premier_league.controller;
 
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
-import com.example.premier_league.serivce.MatchScheduleService;
-import lombok.RequiredArgsConstructor;
+import com.example.premier_league.service.MatchScheduleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;

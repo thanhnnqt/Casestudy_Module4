@@ -1,4 +1,4 @@
-package com.example.premier_league.serivce;
+package com.example.premier_league.service;
 
 import com.example.premier_league.entity.MatchSchedule;
 
@@ -10,4 +10,5 @@ public interface IMatchScheduleService {
     MatchSchedule postponeMatch(Long id);
     MatchSchedule findById(Long id);
     MatchSchedule resumeMatch(Long id);
+    List<MatchSchedule> findMatchesByTeamId(Long teamId); //Thới bổ sung
 }

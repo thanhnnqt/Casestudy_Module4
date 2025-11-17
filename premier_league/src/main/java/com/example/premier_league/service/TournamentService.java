@@ -1,4 +1,4 @@
-package com.example.premier_league.serivce;
+package com.example.premier_league.service;
 
 import com.example.premier_league.entity.Tournament;
 import com.example.premier_league.repository.ITournamentRepository;

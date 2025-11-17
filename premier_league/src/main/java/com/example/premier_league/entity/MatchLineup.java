@@ -10,6 +10,16 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class MatchLineup {
+
+    /**
+     * Định nghĩa Enum LineupType
+     * (Di chuyển vào BÊN TRONG class MatchLineup để sửa lỗi)
+     */
+    public enum LineupType {
+        MAIN,
+        SUB
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,11 +37,5 @@ public class MatchLineup {
     private Team team;
 
     @Enumerated(EnumType.STRING)
-    private LineupType type; // Sử dụng enum đã khai báo bên dưới
-}
-
-
-enum LineupType {
-    MAIN,
-    SUB
+    private LineupType type; // Bây giờ trình biên dịch sẽ thấy
 }

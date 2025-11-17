@@ -1,4 +1,4 @@
-package com.example.premier_league.serivce;
+package com.example.premier_league.service;
 
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
@@ -41,5 +41,11 @@ public class MatchScheduleService implements IMatchScheduleService {
         MatchSchedule match = findById(id);
         match.setStatus(MatchStatus.SCHEDULED);
         return matchScheduleRepository.save(match);
+    }
+
+    @Override
+    public List<MatchSchedule> findMatchesByTeamId(Long teamId) {
+        // Sử dụng method đã có sẵn trong repository
+        return matchScheduleRepository.findAllByHomeTeamIdOrAwayTeamIdOrderByMatchDateAscMatchTimeAsc(teamId, teamId);
     }
 }
