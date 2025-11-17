@@ -21,10 +21,15 @@ public class MatchScheduleController {
         this.matchScheduleService = matchScheduleService;
     }
 
+//    @GetMapping("/matches")
+//    public String listMatches(Model model) {
+//        model.addAttribute("matches", matchScheduleService.getAllMatches());
+//        return "match/list";
+//    }
     @GetMapping("/matches")
     public String listMatches(Model model) {
         model.addAttribute("matches", matchScheduleService.getAllMatches());
-        return "match/list";
+        return "matches";
     }
 
     @GetMapping("/matches/postpone/{id}")
