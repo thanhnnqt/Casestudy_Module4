@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Các giải đấu - Premier League</title>
+
+    <link rel="stylesheet" th:href="@{/css/application.css}" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#38003c',
+                        secondary: '#00ff85'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/home-css.css}" />
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+<div th:replace="~{layout/navbar.html :: header}"></div>
+
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold mb-2">Premier League</h1>
+            <p class="text-gray-600">Nhấn vào để xem tất cả trận đấu mùa giải 2025/26</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <a th:href="@{/matches}"
+               class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 block">
+
+                <div class="relative h-48 bg-gradient-to-br from-primary to-green-600">
+                    <img src="/images/epl-logo.png" alt="Premier League"
+                         class="absolute inset-0 w-full h-full object-cover mix-blend-overlay" />
+                    <div class="absolute inset-0 bg-black/30"></div>
+
+                    <div class="relative h-full flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <i data-lucide="trophy" class="mx-auto mb-2 w-12 h-12"></i>
+                            <h2 class="text-3xl font-bold">Premier League</h2>
+                            <p class="text-lg mt-1">Mùa giải 2025/26</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <p class="text-gray-600 mb-4">
+                        Giải đấu Ngoại hạng Anh, nơi quy tụ các CLB hàng đầu xứ sở sương mù.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex items-center gap-2 text-gray-700">
+                            <i data-lucide="users" class="text-primary w-5 h-5"></i>
+                            <span>20 đội bóng</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-700">
+                            <i data-lucide="calendar" class="text-primary w-5 h-5"></i>
+                            <span>380 trận đấu</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/footer.html :: footer}"></div>
+
+<script>
+    lucide.createIcons();
+</script>
+</body>
+</html>

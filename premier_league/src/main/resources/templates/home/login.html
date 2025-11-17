@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập - Premier League</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // Màu chuẩn Premier League
+                        plPurple: "#38003c", // Tím than chủ đạo
+                        plCyan: "#00ff85",   // Xanh neon (điểm nhấn)
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* NỀN TRANG: Tím than đậm */
+        body {
+            background-color: #38003c;
+            background-image:
+                    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                    radial-gradient(at 100% 100%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #toast-notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            background-color: #00ff85;
+            color: #38003c;
+            font-weight: bold;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            visibility: hidden;
+        }
+
+        #toast-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .hidden-field {
+            display: none;
+        }
+
+        .input-focus:focus {
+            border-color: #00ff85;
+            box-shadow: 0 0 0 3px rgba(0, 255, 133, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center py-12 px-4">
+
+<div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+        <div class="bg-white rounded-full w-28 h-28 flex items-center justify-center mx-auto mb-6 shadow-2xl border-4 border-white/10 overflow-hidden">
+            <img src="img/logoo.png" alt="Logo" class="w-20 h-20 object-contain"/>
+        </div>
+        <h1 class="text-5xl font-black text-white mb-2 tracking-tight drop-shadow-xl">Premier League</h1>
+        <p class="text-gray-300 text-lg font-medium">Giải bóng đá hấp dẫn nhất hành tinh</p>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-2xl p-8">
+
+        <div class="flex mb-8 bg-gray-100 p-1 rounded-xl">
+            <button type="button" id="tab-login" onclick="toggleMode(true)"
+                    class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all bg-plPurple text-white shadow-md">
+                Đăng nhập
+            </button>
+            <button type="button" id="tab-register" onclick="toggleMode(false)"
+                    class="flex-1 py-2.5 rounded-lg font-bold text-sm transition-all text-gray-500 hover:text-plPurple">
+                Đăng ký
+            </button>
+        </div>
+
+        <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-5">
+
+            <div id="field-name" class="hidden-field">
+                <label class="block text-sm font-bold text-plPurple mb-1">Họ và tên</label>
+                <div class="relative">
+                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    </div>
+                    <input type="text" name="name" id="input-name"
+                           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg outline-none transition-all input-focus text-gray-900 font-medium"
+                           placeholder="Nhập họ và tên"/>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-plPurple mb-1">Email</label>
+                <div class="relative">
+                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <i data-lucide="mail" class="w-5 h-5"></i>
+                    </div>
+                    <input type="email" name="email" required
+                           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg outline-none transition-all input-focus text-gray-900 font-medium"
+                           placeholder="Nhập email"/>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-plPurple mb-1">Mật khẩu</label>
+                <div class="relative">
+                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <i data-lucide="lock" class="w-5 h-5"></i>
+                    </div>
+                    <input type="password" name="password" required
+                           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg outline-none transition-all input-focus text-gray-900 font-medium"
+                           placeholder="Nhập mật khẩu"/>
+                </div>
+            </div>
+
+            <div id="login-extras" class="flex items-center justify-between text-sm">
+                <label class="flex items-center text-gray-600 cursor-pointer">
+                    <input type="checkbox" class="mr-2 w-4 h-4 text-plPurple focus:ring-plCyan border-gray-300 rounded"/>
+                    <span>Ghi nhớ đăng nhập</span>
+                </label>
+                <a href="#" class="text-plPurple font-bold hover:text-plCyan transition-colors">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit" id="btn-submit"
+                    class="w-full bg-plPurple text-white py-3.5 rounded-xl font-bold text-lg shadow-lg hover:bg-[#500055] transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group">
+                <span>Đăng nhập</span>
+                <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+            </button>
+        </form>
+
+        <div class="mt-8 relative flex items-center justify-center">
+            <div class="border-t border-gray-200 w-full absolute"></div>
+            <span class="bg-white px-4 text-sm text-gray-500 font-medium relative z-10">Hoặc tiếp tục với</span>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-4">
+            <button type="button" onclick="loginWithGoogle()"
+                    class="w-full bg-white text-gray-700 py-2.5 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50 hover:border-gray-400 transition font-semibold text-sm shadow-sm">
+                <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                Google
+            </button>
+
+            <button type="button" onclick="loginWithFacebook()"
+                    class="w-full bg-[#1877F2] text-white py-2.5 rounded-lg border border-[#1877F2] flex items-center justify-center hover:bg-[#166fe5] transition font-semibold text-sm shadow-sm">
+                <svg class="w-5 h-5 mr-2 fill-current" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                Facebook
+            </button>
+        </div>
+
+        <div class="mt-8 text-center text-sm text-gray-600">
+            <span id="footer-text">Chưa có tài khoản? </span>
+            <button type="button" onclick="toggleMode(!isLogin)"
+                    class="text-plPurple font-extrabold hover:text-plCyan transition-colors hover:underline ml-1">
+                <span id="footer-btn-text">Đăng ký ngay</span>
+            </button>
+        </div>
+
+    </div>
+
+    <p class="text-center text-white/40 text-xs">© 2025 Premier League. All rights reserved.</p>
+</div>
+
+<div id="toast-notification">
+    <h3 id="toast-title" class="font-bold">Title</h3>
+    <p id="toast-desc" class="font-normal text-sm">Description</p>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    let isLogin = true;
+
+    function toggleMode(loginState) {
+        isLogin = loginState;
+
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const btnSubmit = document.querySelector('#btn-submit span');
+
+        if (isLogin) {
+            tabLogin.className = 'flex-1 py-2.5 rounded-lg font-bold text-sm transition-all bg-plPurple text-white shadow-md';
+            tabRegister.className = 'flex-1 py-2.5 rounded-lg font-bold text-sm transition-all text-gray-500 hover:text-plPurple';
+            btnSubmit.innerText = 'Đăng nhập';
+        } else {
+            tabLogin.className = 'flex-1 py-2.5 rounded-lg font-bold text-sm transition-all text-gray-500 hover:text-plPurple';
+            tabRegister.className = 'flex-1 py-2.5 rounded-lg font-bold text-sm transition-all bg-plPurple text-white shadow-md';
+            btnSubmit.innerText = 'Đăng ký';
+        }
+
+        const fieldName = document.getElementById('field-name');
+        const inputName = document.getElementById('input-name');
+        const loginExtras = document.getElementById('login-extras');
+
+        if (isLogin) {
+            fieldName.classList.add('hidden-field');
+            inputName.removeAttribute('required');
+            loginExtras.classList.remove('hidden-field');
+            loginExtras.classList.add('flex');
+        } else {
+            fieldName.classList.remove('hidden-field');
+            inputName.setAttribute('required', 'true');
+            loginExtras.classList.add('hidden-field');
+            loginExtras.classList.remove('flex');
+        }
+
+        document.getElementById('footer-text').innerText = isLogin ? 'Chưa có tài khoản? ' : 'Đã có tài khoản? ';
+        document.getElementById('footer-btn-text').innerText = isLogin ? 'Đăng ký ngay' : 'Đăng nhập';
+    }
+
+    function handleAuthSubmit(e) {
+        e.preventDefault();
+        const title = isLogin ? "Đăng nhập thành công!" : "Đăng ký thành công!";
+        const desc = isLogin ? "Chào mừng bạn trở lại với Premier League" : "Tài khoản của bạn đã được tạo";
+        showToast(title, desc);
+        setTimeout(() => window.location.href = '/', 1000);
+    }
+
+    function showToast(title, desc) {
+        const toast = document.getElementById('toast-notification');
+        document.getElementById('toast-title').innerText = title;
+        document.getElementById('toast-desc').innerText = desc;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function loginWithGoogle() {
+        window.location.href = "/oauth2/authorization/google";
+    }
+    function loginWithFacebook() {
+        window.location.href = "/oauth2/authorization/facebook";
+    }
+</script>
+</body>
+</html>

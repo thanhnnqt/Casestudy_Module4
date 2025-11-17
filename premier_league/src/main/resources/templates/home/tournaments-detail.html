@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${tournament != null ? tournament.name + ' - V.League' : 'Không tìm thấy giải đấu'}">Chi tiết giải đấu</title>
+
+    <link rel="stylesheet" th:href="@{/css/application.css}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        // Các màu khác...
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<div class="min-h-screen bg-gray-50 py-12">
+
+    <div th:if="${tournament == null}" class="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-gray-600">Không tìm thấy giải đấu</p>
+    </div>
+
+    <div th:if="${tournament != null}" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="bg-gradient-to-r from-primary to-green-600 rounded-xl p-8 mb-8 text-white">
+            <div class="flex items-center gap-4 mb-4">
+                <i data-lucide="trophy" class="w-12 h-12"></i>
+                <div>
+                    <h1 class="text-4xl font-bold" th:text="${tournament.name}">V.League 1</h1>
+                    <p class="text-xl">Mùa giải <span th:text="${tournament.season}">2024</span></p>
+                </div>
+            </div>
+            <p class="text-lg" th:text="${tournament.description}">Mô tả giải đấu...</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md mb-8">
+            <div class="flex border-b">
+                <button onclick="switchTab('teams')" id="btn-teams"
+                        class="tab-btn flex-1 py-4 px-6 font-semibold transition-colors text-primary border-b-2 border-primary">
+                    Bảng xếp hạng
+                </button>
+                <button onclick="switchTab('schedule')" id="btn-schedule"
+                        class="tab-btn flex-1 py-4 px-6 font-semibold transition-colors text-gray-600 hover:text-primary">
+                    Lịch thi đấu
+                </button>
+                <button onclick="switchTab('results')" id="btn-results"
+                        class="tab-btn flex-1 py-4 px-6 font-semibold transition-colors text-gray-600 hover:text-primary">
+                    Kết quả
+                </button>
+            </div>
+
+            <div class="p-6">
+                <div id="content-teams" class="tab-content block">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="text-left py-3 px-4">Hạng</th>
+                                <th class="text-left py-3 px-4">Đội bóng</th>
+                                <th class="text-center py-3 px-4">Trận</th>
+                                <th class="text-center py-3 px-4">Thắng</th>
+                                <th class="text-center py-3 px-4">Hòa</th>
+                                <th class="text-center py-3 px-4">Thua</th>
+                                <th class="text-center py-3 px-4">Bàn thắng</th>
+                                <th class="text-center py-3 px-4">Hiệu số</th>
+                                <th class="text-center py-3 px-4 font-bold">Điểm</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="team, iterStat : ${sortedTeams}" class="border-b hover:bg-gray-50 transition-colors">
+                                <td class="py-4 px-4 font-semibold" th:text="${iterStat.count}">1</td>
+                                <td class="py-4 px-4">
+                                    <a th:href="@{/team/{id}(id=${team.id})}"
+                                       class="flex items-center gap-3 hover:text-primary transition-colors">
+                                        <img th:src="${team.logo}" th:alt="${team.name}" class="w-8 h-8 object-cover rounded" />
+                                        <span class="font-medium" th:text="${team.name}">Team Name</span>
+                                    </a>
+                                </td>
+                                <td class="text-center py-4 px-4" th:text="${team.wins + team.draws + team.losses}">0</td>
+                                <td class="text-center py-4 px-4" th:text="${team.wins}">0</td>
+                                <td class="text-center py-4 px-4" th:text="${team.draws}">0</td>
+                                <td class="text-center py-4 px-4" th:text="${team.losses}">0</td>
+                                <td class="text-center py-4 px-4">
+                                    <span th:text="${team.goalsFor}">0</span>:<span th:text="${team.goalsAgainst}">0</span>
+                                </td>
+                                <td class="text-center py-4 px-4" th:text="${team.goalsFor - team.goalsAgainst}">0</td>
+                                <td class="text-center py-4 px-4 font-bold text-primary" th:text="${team.points}">0</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="content-schedule" class="tab-content hidden">
+                    <div class="space-y-4">
+                        <div th:if="${#lists.isEmpty(upcomingMatches)}" class="text-center text-gray-600 py-8">
+                            Không có trận đấu sắp diễn ra
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(upcomingMatches)}" th:each="match : ${upcomingMatches}"
+                             class="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition-colors">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                    <span th:text="${#dates.format(match.date, 'dd/MM/yyyy')} + ' - ' + ${match.time}">01/01/2024 - 19:00</span>
+                                </div>
+                                <span th:if="${match.isImportant}"
+                                      class="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                        QUAN TRỌNG
+                                    </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="text-lg font-semibold flex-1 text-right" th:text="${match.homeTeam}">Home</div>
+                                <div class="text-2xl font-bold text-primary mx-8">VS</div>
+                                <div class="text-lg font-semibold flex-1" th:text="${match.awayTeam}">Away</div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-center gap-1 text-sm text-gray-600">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                                <span th:text="${match.stadium}">Stadium Name</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-results" class="tab-content hidden">
+                    <div class="space-y-4">
+                        <div th:if="${#lists.isEmpty(finishedMatches)}" class="text-center text-gray-600 py-8">
+                            Chưa có kết quả trận đấu
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(finishedMatches)}" th:each="match : ${finishedMatches}"
+                             class="bg-gray-50 rounded-lg p-6">
+                            <div class="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                                <span th:text="${#dates.format(match.date, 'dd/MM/yyyy')}">01/01/2024</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="text-lg font-semibold flex-1 text-right" th:text="${match.homeTeam}">Home</div>
+                                <div class="text-3xl font-bold text-primary mx-8">
+                                    <span th:text="${match.homeScore}">0</span> - <span th:text="${match.awayScore}">0</span>
+                                </div>
+                                <div class="text-lg font-semibold flex-1" th:text="${match.awayTeam}">Away</div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-center gap-1 text-sm text-gray-600">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                                <span th:text="${match.stadium}">Stadium Name</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    // Initialize Icons
+    lucide.createIcons();
+
+    // Hàm chuyển Tab
+    function switchTab(tabName) {
+        // 1. Reset styles của tất cả Buttons
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            btn.className = 'tab-btn flex-1 py-4 px-6 font-semibold transition-colors text-gray-600 hover:text-primary';
+        });
+
+        // 2. Set active style cho Button được chọn
+        const activeBtn = document.getElementById('btn-' + tabName);
+        activeBtn.className = 'tab-btn flex-1 py-4 px-6 font-semibold transition-colors text-primary border-b-2 border-primary';
+
+        // 3. Ẩn tất cả Content
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(content => {
+            content.classList.add('hidden');
+            content.classList.remove('block');
+        });
+
+        // 4. Hiện Content được chọn
+        const activeContent = document.getElementById('content-' + tabName);
+        activeContent.classList.remove('hidden');
+        activeContent.classList.add('block');
+    }
+</script>
+</body>
+</html>

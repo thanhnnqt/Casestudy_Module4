@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${stadium != null ? stadium.name + ' - Sân vận động' : 'Không tìm thấy sân vận động'}">Chi tiết sân vận động</title>
+
+    <link rel="stylesheet" th:href="@{/css/application.css}" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        // Các màu khác...
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/home-css.css}" />
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<div class="min-h-screen bg-gray-50 py-12">
+
+    <div th:if="${stadium == null}" class="min-h-screen flex items-center justify-center">
+        <p class="text-xl text-gray-600">Không tìm thấy sân vận động</p>
+    </div>
+
+    <div th:if="${stadium != null}" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <a th:if="${team != null}"
+           th:href="@{/team/{id}(id=${team.id})}"
+           class="inline-flex items-center gap-2 text-primary hover:underline mb-6">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            Quay lại đội bóng
+        </a>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="relative h-96">
+                <img th:src="${stadium.image}"
+                     th:alt="${stadium.name}"
+                     class="w-full h-full object-cover" />
+
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+
+                <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+                    <h1 class="text-5xl font-bold mb-2" th:text="${stadium.name}">Stadium Name</h1>
+                    <div class="flex items-center gap-2 text-xl">
+                        <i data-lucide="map-pin" class="w-6 h-6"></i>
+                        <span th:text="${stadium.location}">Location</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+                    <div class="bg-green-50 rounded-lg p-6 text-center">
+                        <div class="flex justify-center mb-3">
+                            <i data-lucide="users" class="text-primary w-10 h-10"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-primary mb-1"
+                             th:text="${#numbers.formatInteger(stadium.capacity, 3, 'POINT')}">40.000</div>
+                        <div class="text-gray-600">Sức chứa</div>
+                    </div>
+
+                    <div class="bg-blue-50 rounded-lg p-6 text-center">
+                        <div class="flex justify-center mb-3">
+                            <i data-lucide="calendar" class="text-blue-600 w-10 h-10"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-blue-600 mb-1"
+                             th:text="${stadium.yearBuilt}">2000</div>
+                        <div class="text-gray-600">Năm xây dựng</div>
+                    </div>
+
+                    <div class="bg-purple-50 rounded-lg p-6 text-center">
+                        <div class="flex justify-center mb-3">
+                            <i data-lucide="map-pin" class="text-purple-600 w-10 h-10"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-purple-600 mb-1"
+                             th:text="${#dates.year(#dates.createNow()) - stadium.yearBuilt}">24</div>
+                        <div class="text-gray-600">Năm tuổi</div>
+                    </div>
+                </div>
+
+                <div th:if="${team != null}" class="bg-gray-50 rounded-lg p-6 mb-8">
+                    <h2 class="text-xl font-bold mb-3">Đội bóng chủ nhà</h2>
+                    <a th:href="@{/team/{id}(id=${team.id})}"
+                       class="flex items-center gap-4 hover:text-primary transition-colors">
+                        <img th:src="${team.logo}" th:alt="${team.name}" class="w-16 h-16 object-cover rounded-lg" />
+                        <span class="text-2xl font-semibold" th:text="${team.name}">Team Name</span>
+                    </a>
+                </div>
+
+                <div class="border-t pt-6">
+                    <h2 class="text-2xl font-bold mb-4">Giới thiệu</h2>
+                    <p class="text-lg text-gray-700 leading-relaxed" th:text="${stadium.description}">
+                        Mô tả chi tiết sân vận động...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    lucide.createIcons();
+</script>
+</body>
+</html>
