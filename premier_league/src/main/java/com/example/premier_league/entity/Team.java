@@ -1,10 +1,7 @@
 package com.example.premier_league.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "teams")
@@ -16,7 +13,7 @@ public class Team {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     private String name;
 
@@ -26,19 +23,25 @@ public class Team {
 
     private String city; // Thành phố
 
-    private String stadium; // Sân vận động chính của đội
+    private String stadium; // Sân vận động chính
 
-    private String coachName; // Tên huấn luyện viên
+    private String coachName; // Huấn luyện viên
 
-    private String logoUrl; // Link logo đội
+    private String logoUrl; // Logo đội
 
-    private String description; // Mô tả ngắn gọn về đội
+    @Column(length = 1000)
+    private String description;
 
-    private int totalPlayers; // Tổng số cầu thủ hiện tại trong đội
+    private int totalPlayers;
 
-    private int winCount; // Tổng số trận thắng
-    private int drawCount; // Tổng số trận hòa
-    private int loseCount; // Tổng số trận thua
-    private int points; // Tổng điểm
+    // Thống kê mùa giải
+    private int winCount;
+    private int drawCount;
+    private int loseCount;
+
+    private int goalsFor;       // bàn thắng
+    private int goalsAgainst;   // bàn thua
+    private int goalDifference; // hiệu số (goalsFor - goalsAgainst)
+
+    private int points; // điểm số (3 thắng - 1 hòa - 0 thua)
 }
-
