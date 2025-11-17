@@ -2,7 +2,7 @@ package com.example.premier_league.controller;
 
 import com.example.premier_league.entity.Match;
 import com.example.premier_league.repository.IMatchRepository;
-import com.example.premier_league.serivce.MatchService;
+import com.example.premier_league.service.MatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

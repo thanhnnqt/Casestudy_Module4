@@ -3,7 +3,7 @@ package com.example.premier_league.controller;
 
 
 import com.example.premier_league.entity.Team;
-import com.example.premier_league.serivce.RankingService;
+import com.example.premier_league.service.RankingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;

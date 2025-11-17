@@ -1,7 +1,7 @@
 package com.example.premier_league.controller;
 
 import com.example.premier_league.entity.Tournament;
-import com.example.premier_league.serivce.ITournamentService;
+import com.example.premier_league.service.ITournamentService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

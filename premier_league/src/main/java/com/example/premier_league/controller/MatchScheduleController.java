@@ -2,8 +2,7 @@ package com.example.premier_league.controller;
 
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
-import com.example.premier_league.serivce.MatchScheduleService;
-import lombok.RequiredArgsConstructor;
+import com.example.premier_league.service.MatchScheduleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +36,7 @@ public class MatchScheduleController {
         MatchSchedule match = matchScheduleService.findById(id);
         match.setStatus(MatchStatus.POSTPONED);
         matchScheduleService.save(match);
-        return "redirect:/matches";
+        return "redirect:/admin/matches";
     }
     @GetMapping("/matches/reschedule/{id}")
     public String showRescheduleForm(@PathVariable Long id, Model model) {
@@ -57,11 +56,11 @@ public class MatchScheduleController {
         match.setStatus(MatchStatus.SCHEDULED); // Đặt lại thành sắp diễn ra
 
         matchScheduleService.save(match);
-        return "redirect:/matches";
+        return "redirect:/admin/matches";
     }
     @PostMapping("/matches/resume/{id}")
     public String resumeMatch(@PathVariable Long id) {
         matchScheduleService.resumeMatch(id);
-        return "redirect:/matches";
+        return "redirect:/admin/matches";
     }
 }
