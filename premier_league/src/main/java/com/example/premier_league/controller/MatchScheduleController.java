@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Controller
-@RequestMapping("")
+@RequestMapping("/admin")
 public class MatchScheduleController {
 
     private final MatchScheduleService matchScheduleService;
