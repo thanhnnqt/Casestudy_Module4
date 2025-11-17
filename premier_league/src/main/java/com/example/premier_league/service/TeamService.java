@@ -1,7 +1,6 @@
 package com.example.premier_league.service;
 
 import com.example.premier_league.entity.Team;
-import com.example.premier_league.repository.IStaffRepository;
 import com.example.premier_league.repository.ITeamRepository;
 import org.springframework.stereotype.Service;
 

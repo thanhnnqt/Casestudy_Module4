@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="bg-[#38003c] text-white mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden p-1">
+                        <img th:src="@{/images/logoo.png}" alt="Logo" class="w-full h-full object-contain" />
+                    </div>
+                    <span class="text-xl font-bold">Premier League</span>
+                </div>
+                <p class="text-gray-300 text-sm">
+                    Giải bóng đá hấp dẫn nhất hành tinh
+                </p>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-4 text-[#00ff85]">Liên kết</h3>
+                <ul class="space-y-2 text-sm text-gray-300">
+                    <li><a th:href="@{/}" class="hover:text-[#00ff85] transition-colors">Trang chủ</a></li>
+                    <li><a th:href="@{/tournaments}" class="hover:text-[#00ff85] transition-colors">Giải đấu</a></li>
+                    <li><a th:href="@{/tickets}" class="hover:text-[#00ff85] transition-colors">Đặt vé</a></li>
+                    <li><a th:href="@{/news}" class="hover:text-[#00ff85] transition-colors">Tin tức</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-4 text-[#00ff85]">Thông tin</h3>
+                <ul class="space-y-2 text-sm text-gray-300">
+                    <li>Email: huyduong031101@gmail.com</li>
+                    <li>Hotline: 0363901888</li>
+                    <li>Địa chỉ: Đà Nẵng, Việt Nam</li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-semibold mb-4 text-[#00ff85]">Theo dõi chúng tôi</h3>
+                <div class="flex gap-4">
+                    <a href="#" class="hover:text-[#00ff85] transition-colors"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                    <a href="#" class="hover:text-[#00ff85] transition-colors"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                    <a href="#" class="hover:text-[#00ff85] transition-colors"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                    <a href="#" class="hover:text-[#00ff85] transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-white/10 mt-8 pt-8 text-center text-sm text-gray-400">
+            <p>&copy; 2025 Premier League. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+</body>
+</html>
