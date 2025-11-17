@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TeamDto {
 
-    private Integer id;
+    private Long id;
 
     @NotBlank(message = "Tên đội bóng không được để trống")
     @Size(max = 100, message = "Tên đội bóng không được vượt quá 100 ký tự")

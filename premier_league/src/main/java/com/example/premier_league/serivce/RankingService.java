@@ -33,11 +33,11 @@ public class RankingService {
                 .toList();
     }
 
-    public void delete(int id) {
+    public void delete(Long id) {
         teamRepository.deleteById(id);
     }
 
-    public Team findById(int id) {
+    public Team findById(Long id) {
         return teamRepository.findById(id).orElse(null);
     }
 

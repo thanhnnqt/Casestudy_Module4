@@ -56,7 +56,7 @@ public class TeamController {
 
     // ==================== CHI TIẾT ====================
     @GetMapping("/{id}")
-    public String detail(@PathVariable Integer id, Model model) {
+    public String detail(@PathVariable Long id, Model model) {
         Team team = teamService.findById(id);
         if (team == null) {
             throw new TeamNotFoundException("Không tìm thấy đội bóng với ID: " + id);
@@ -68,7 +68,7 @@ public class TeamController {
 
     // ==================== CẬP NHẬT ====================
     @GetMapping("/update/{id}")
-    public String updateForm(@PathVariable Integer id, Model model) {
+    public String updateForm(@PathVariable Long id, Model model) {
         Team team = teamService.findById(id);
         if (team == null) {
             throw new TeamNotFoundException("Không tìm thấy đội bóng với ID: " + id);
@@ -106,7 +106,7 @@ public class TeamController {
 
     // ==================== XÓA ====================
     @GetMapping("/delete/{id}")
-    public String deleteTeam(@PathVariable Integer id, RedirectAttributes redirect) {
+    public String deleteTeam(@PathVariable Long id, RedirectAttributes redirect) {
         Team team = teamService.findById(id);
         if (team == null) {
             throw new TeamNotFoundException("Không tìm thấy đội bóng với ID: " + id);
