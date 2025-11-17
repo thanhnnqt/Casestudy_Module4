@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/matches")
 @RequiredArgsConstructor
-class MatchController {
+class MatchRestController {
 
 
     private final MatchService matchService;

@@ -27,7 +27,7 @@ public class TeamService implements ITeamService{
     }
 
     @Override
-    public Team findById(int id) {
+    public Team findById(Long id) {
         return teamRepository.findById(id).orElse(null);
     }
 
@@ -45,7 +45,7 @@ public class TeamService implements ITeamService{
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(Long id) {
         if (teamRepository.existsById(id)) {
             teamRepository.deleteById(id);
         }
