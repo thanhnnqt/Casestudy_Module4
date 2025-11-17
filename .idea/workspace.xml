@@ -4,7 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9e40aeef-4952-4b67-8261-51729f2f910a" name="Changes" comment="" />
+    <list default="true" id="9e40aeef-4952-4b67-8261-51729f2f910a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/HomeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/HomeController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/MatchScheduleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/MatchScheduleController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/TeamController.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/TeamController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/repository/ITeamRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/repository/ITeamRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/match/list.html" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/resources/templates/match/list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/match/reschedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/resources/templates/match/reschedule.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,6 +41,16 @@
       </state>
     </system>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="com.intellij.jpb.JpaEntity" />
+        <option value="Enum" />
+        <option value="Class" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -51,18 +70,29 @@
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="35HXm5SrdN2e9yrWek22Go72CmG" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Gradle.Build premier_league.executor": "Run",
     "Gradle.E:/codegym/module_4_again/case_study_module_4/Casestudy_Module4/premier_league/build.gradle.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.PremierLeagueApplication.executor": "Run",
     "deletionFromPopupRequiresConfirmation": "false",
-    "git-widget-placeholder": "thoi",
+    "git-widget-placeholder": "Merging thoi",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
@@ -72,6 +102,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "pProject Default",
     "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   }
@@ -98,8 +129,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
-        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26199.169" />
+        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-IU-252.26199.169" />
       </set>
     </attachedChunks>
   </component>
@@ -114,6 +145,7 @@
       <workItem from="1762768127273" duration="107000" />
       <workItem from="1762825274711" duration="53000" />
       <workItem from="1762825345530" duration="211000" />
+      <workItem from="1763342902467" duration="17965000" />
     </task>
     <servers />
   </component>
