@@ -29,4 +29,9 @@ public class Account {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    // Quan hệ 1-1 với Team
+    @OneToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
 }

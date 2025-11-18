@@ -1,0 +1,118 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Admin - Thêm Sự Kiện Trận Đấu</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#38003c',
+                        secondary: '#00ff85',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+<!-- NAVBAR -->
+<div th:replace="layout/navbar :: header"></div>
+
+<!-- CONTENT -->
+<div class="max-w-3xl mx-auto p-6 bg-white mt-10 shadow-xl rounded-2xl border-t-4 border-primary">
+
+    <h2 class="text-3xl font-bold text-primary mb-6 flex items-center gap-2">
+        <i data-lucide="settings" class="w-7 h-7 text-secondary"></i>
+        Thêm Sự Kiện Trận Đấu (Admin)
+    </h2>
+
+    <div class="space-y-4">
+
+        <div>
+            <label class="font-semibold">Match ID</label>
+            <input id="matchId" type="number"
+                   class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary"
+                   value="1"/>
+        </div>
+
+        <div>
+            <label class="font-semibold">Team ID (optional)</label>
+            <input id="teamId" type="number"
+                   class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary"
+                   placeholder="ID đội ghi bàn / thẻ"/>
+        </div>
+
+        <div>
+            <label class="font-semibold">Minute</label>
+            <input id="minute" type="number"
+                   class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary"
+                   placeholder="Phút xảy ra"/>
+        </div>
+
+        <div>
+            <label class="font-semibold">Loại Sự Kiện</label>
+            <select id="type"
+                    class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary">
+                <option>GOAL</option>
+                <option>YELLOW_CARD</option>
+                <option>RED_CARD</option>
+                <option>PENALTY</option>
+                <option>MATCH_END</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="font-semibold">Mô tả</label>
+            <input id="desc" type="text"
+                   class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary"
+                   placeholder="Ví dụ: 'Ghi bàn đẹp mắt từ ngoài vòng cấm'"/>
+        </div>
+
+        <button id="send"
+                class="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-secondary hover:text-primary transition">
+            Gửi Sự Kiện
+        </button>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div class="mt-auto" th:replace="layout/footer :: footer"></div>
+
+<script>
+    lucide.createIcons();
+
+    document.getElementById('send').addEventListener('click', () => {
+        const payload = {
+            teamId: document.getElementById('teamId').value || null,
+            minute: document.getElementById('minute').value || null,
+            type: document.getElementById('type').value,
+            description: document.getElementById('desc').value
+        };
+
+        const matchId = +document.getElementById('matchId').value;
+
+        fetch(`/api/matches/${matchId}/events`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        })
+            .then(async resp => {
+                const text = await resp.text();
+                if (!resp.ok) alert("❌ Lỗi: " + text);
+                else alert("✅ Thành công!");
+            })
+            .catch(() => alert("❌ Network error!"));
+    });
+</script>
+
+</body>
+</html>

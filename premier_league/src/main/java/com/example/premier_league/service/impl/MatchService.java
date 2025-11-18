@@ -1,4 +1,4 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 import com.example.premier_league.dto.MatchDto;
 import com.example.premier_league.entity.Match;
@@ -6,13 +6,14 @@ import com.example.premier_league.entity.MatchStatus;
 import com.example.premier_league.entity.Team;
 import com.example.premier_league.repository.IMatchRepository;
 import com.example.premier_league.repository.ITeamRepository;
+import com.example.premier_league.service.IMatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class MatchService {
+public class MatchService implements IMatchService {
 
 
     private final IMatchRepository matchRepository;
@@ -114,5 +115,11 @@ public class MatchService {
         dto.stadium = m.getStadium();
         dto.matchDate = m.getMatchDate().toString();
         return dto;
+    }
+
+    @Override
+    public Match findById(Long id) {
+        return matchRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Match not found: " + id));
     }
 }

@@ -1,8 +1,9 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
 import com.example.premier_league.repository.IMatchScheduleRepository;
+import com.example.premier_league.service.IMatchScheduleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,6 @@ import com.example.premier_league.repository.IMatchLineupRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 

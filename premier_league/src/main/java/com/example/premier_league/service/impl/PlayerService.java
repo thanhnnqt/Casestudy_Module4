@@ -1,7 +1,8 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 import com.example.premier_league.entity.Player;
 import com.example.premier_league.repository.IPlayerRepository;
+import com.example.premier_league.service.IPlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,5 +27,10 @@ public class PlayerService implements IPlayerService {
     @Override
     public List<Player> findAllByIds(List<Long> playerIds) {
         return iPlayerRepository.findAllById(playerIds);
+    }
+
+    @Override
+    public List<Player> findAll() {
+        return iPlayerRepository.findAll();
     }
 }
