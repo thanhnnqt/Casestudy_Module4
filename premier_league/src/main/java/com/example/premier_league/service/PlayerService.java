@@ -17,12 +17,13 @@ public class PlayerService implements IPlayerService {
 
     @Override
     public List<Player> findByTeamId(Long teamId) {
-        return List.of();
+
+        return playerRepository.findByTeamId(teamId);
     }
 
     @Override
     public List<Player> findAllByIds(List<Long> playerIds) {
-        return List.of();
+        return playerRepository.findAllById(playerIds);
     }
 
     @Override
