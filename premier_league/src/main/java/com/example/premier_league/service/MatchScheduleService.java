@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class MatchScheduleService implements IMatchScheduleService {
@@ -19,48 +19,66 @@ public class MatchScheduleService implements IMatchScheduleService {
         this.matchScheduleRepository = matchScheduleRepository;
     }
 
+
+    /* ================= FETCH DATA ================= */
+
     @Override
     public Page<MatchSchedule> getAllMatches(Pageable pageable) {
-        return matchScheduleRepository.findAllByOrderByMatchDateAscMatchTimeAsc(pageable);
-    }
 
-    @Override
-    public MatchSchedule save(MatchSchedule matchSchedule) {
-        return null;
-    }
+        Page<MatchSchedule> page = matchScheduleRepository
+                .findAllByOrderByMatchDateAscMatchTimeAsc(pageable);
 
-    @Override
-    public MatchSchedule postponeMatch(Long id) {
-        return null;
+        // ✔ Update trạng thái tự động theo ngày mỗi lần list
+        page.forEach(this::autoUpdateStatus);
+
+        return page;
     }
 
     @Override
     public Page<MatchSchedule> searchByTeam(String team, Pageable pageable) {
-        return matchScheduleRepository
-                .findByHomeTeam_NameContainingIgnoreCaseOrAwayTeam_NameContainingIgnoreCase(
-                        team, team, pageable);
+        Page<MatchSchedule> page =
+                matchScheduleRepository.findByHomeTeam_NameContainingIgnoreCaseOrAwayTeam_NameContainingIgnoreCase(
+                        team, team, pageable
+                );
+
+        page.forEach(this::autoUpdateStatus);
+        return page;
     }
 
     @Override
     public Page<MatchSchedule> searchByDate(LocalDate date, Pageable pageable) {
-        return matchScheduleRepository.findByMatchDate(date, pageable);
+        Page<MatchSchedule> page = matchScheduleRepository.findByMatchDate(date, pageable);
+        page.forEach(this::autoUpdateStatus);
+        return page;
     }
 
     @Override
     public Page<MatchSchedule> searchByRound(Integer round, Pageable pageable) {
-        return matchScheduleRepository.findByRound(round, pageable);
+        Page<MatchSchedule> page = matchScheduleRepository.findByRound(round, pageable);
+        page.forEach(this::autoUpdateStatus);
+        return page;
     }
 
     @Override
     public MatchSchedule findById(Long id) {
-        return matchScheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Match not found"));
+        MatchSchedule match = matchScheduleRepository.findById(id).orElseThrow();
+        autoUpdateStatus(match);
+        return match;
     }
 
+
+
+    /* ================= CREATE / SAVE ================= */
+
     @Override
-    public MatchSchedule resumeMatch(Long id) {
-        return null;
+    public MatchSchedule save(MatchSchedule matchSchedule) {
+        autoUpdateStatus(matchSchedule);
+        return matchScheduleRepository.save(matchSchedule);
     }
+
+
+
+    /* ================= STATUS ACTIONS ================= */
 
     @Override
     public void updateStatus(Long id, MatchStatus status) {
@@ -70,11 +88,62 @@ public class MatchScheduleService implements IMatchScheduleService {
     }
 
     @Override
+    public MatchSchedule postponeMatch(Long id) {
+        MatchSchedule match = findById(id);
+        match.setStatus(MatchStatus.POSTPONED);
+        return matchScheduleRepository.save(match);
+    }
+
+    @Override
+    public MatchSchedule resumeMatch(Long id) {
+        MatchSchedule match = findById(id);
+        match.setStatus(MatchStatus.SCHEDULED);
+        return matchScheduleRepository.save(match);
+    }
+
+
+
+    /* ================= RESCHEDULE ================= */
+
+    @Override
     public void reschedule(Long id, LocalDate newDate, String newTime) {
         MatchSchedule match = findById(id);
+
         match.setMatchDate(newDate);
-        match.setMatchTime(LocalTime.parse(newTime));
-        match.setStatus(MatchStatus.SCHEDULED);
+        match.setMatchTime(java.time.LocalTime.parse(newTime));
+
+        autoUpdateStatus(match);
+
         matchScheduleRepository.save(match);
+    }
+
+
+
+    /* ================= AUTO STATUS BY DATE ================= */
+
+    /**
+     * ✔ Nếu còn >= 2 ngày -> UPCOMING
+     * ✔ Nếu còn < 2 ngày -> SCHEDULED
+     * ✔ Trận đã qua, POSTPONED, LIVE, FINISHED -> giữ nguyên
+     */
+    private void autoUpdateStatus(MatchSchedule match) {
+
+        // Không update nếu match đang LIVE, POSTPONED, FINISHED
+        if (match.getStatus() == MatchStatus.POSTPONED ||
+                match.getStatus() == MatchStatus.LIVE ||
+                match.getStatus() == MatchStatus.FINISHED) {
+            return;
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate matchDate = match.getMatchDate();
+
+        long daysLeft = ChronoUnit.DAYS.between(today, matchDate);
+
+        if (daysLeft >= 2) {
+            match.setStatus(MatchStatus.UPCOMING);
+        } else if (daysLeft < 2 && daysLeft >= 0) {
+            match.setStatus(MatchStatus.SCHEDULED);
+        }
     }
 }

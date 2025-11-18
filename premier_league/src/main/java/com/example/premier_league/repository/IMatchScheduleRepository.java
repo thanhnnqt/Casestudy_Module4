@@ -8,10 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
 
 public interface IMatchScheduleRepository extends JpaRepository<MatchSchedule, Long> {
+
     Page<MatchSchedule> findAllByOrderByMatchDateAscMatchTimeAsc(Pageable pageable);
 
     Page<MatchSchedule> findByHomeTeam_NameContainingIgnoreCaseOrAwayTeam_NameContainingIgnoreCase(
-            String homeTeam, String awayTeam, Pageable pageable);
+            String homeTeam, String awayTeam, Pageable pageable
+    );
 
     Page<MatchSchedule> findByMatchDate(LocalDate date, Pageable pageable);
 
