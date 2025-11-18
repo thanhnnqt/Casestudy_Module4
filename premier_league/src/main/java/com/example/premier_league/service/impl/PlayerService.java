@@ -1,7 +1,8 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 import com.example.premier_league.entity.Player;
 import com.example.premier_league.repository.IPlayerRepository;
+import com.example.premier_league.service.IPlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

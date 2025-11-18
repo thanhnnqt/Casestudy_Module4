@@ -1,8 +1,9 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 
 import com.example.premier_league.entity.Staff;
 import com.example.premier_league.repository.IStaffRepository;
+import com.example.premier_league.service.IStaffService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

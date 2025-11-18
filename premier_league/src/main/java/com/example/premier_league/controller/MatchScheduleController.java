@@ -2,7 +2,7 @@ package com.example.premier_league.controller;
 
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
-import com.example.premier_league.service.MatchScheduleService;
+import com.example.premier_league.service.impl.MatchScheduleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
