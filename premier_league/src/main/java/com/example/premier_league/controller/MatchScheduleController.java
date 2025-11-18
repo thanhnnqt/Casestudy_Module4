@@ -22,16 +22,17 @@ public class MatchScheduleController {
         this.matchScheduleService = matchScheduleService;
     }
 
-    /* ======================= LIST + SEARCH + PAGINATION ======================= */
+    /* ================= LIST + SEARCH + PAGINATION ================= */
 
     @GetMapping("/matches")
     public String listMatches(Model model,
                               @RequestParam(required = false) String team,
                               @RequestParam(required = false) LocalDate date,
-                              @RequestParam(required = false) String round,   // IMPORTANT: nhận String để tránh lỗi
+                              @RequestParam(required = false) String round,
                               @RequestParam(defaultValue = "0") int page) {
 
-        Pageable pageable = PageRequest.of(page, 5); // 5 trận mỗi trang
+        Pageable pageable = PageRequest.of(page, 5);
+
         Page<MatchSchedule> matchPage;
 
         Integer roundValue = null;
@@ -39,9 +40,8 @@ public class MatchScheduleController {
             try {
                 roundValue = Integer.parseInt(round);
                 model.addAttribute("round", round);
-            } catch (NumberFormatException e) {
+            } catch (Exception e) {
                 model.addAttribute("message", "Vòng đấu phải là số!");
-                roundValue = null;
             }
         }
 
@@ -60,12 +60,23 @@ public class MatchScheduleController {
             matchPage = matchScheduleService.getAllMatches(pageable);
         }
 
+        int totalPages = matchPage.getTotalPages();
+        int currentPage = page;
+
+        int startPage = Math.max(0, currentPage - 1);     // 1 trang trước
+        int endPage   = Math.min(totalPages - 1, currentPage + 1); // 1 trang sau
+
         model.addAttribute("matches", matchPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", matchPage.getTotalPages());
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
 
         return "match/list";
     }
+
+
+    /* ======================== Actions ======================== */
 
     @GetMapping("/matches/postpone/{id}")
     public String postponeMatch(@PathVariable Long id) {
@@ -98,16 +109,15 @@ public class MatchScheduleController {
     }
 
     @GetMapping("/matches/reschedule/{id}")
-    public String showRescheduleForm(@PathVariable Long id, Model model) {
+    public String showReschedule(@PathVariable Long id, Model model) {
         model.addAttribute("match", matchScheduleService.findById(id));
         return "match/reschedule";
     }
 
     @PostMapping("/matches/reschedule/save/{id}")
-    public String rescheduleMatch(@PathVariable Long id,
-                                  @RequestParam LocalDate newDate,
-                                  @RequestParam String newTime) {
-
+    public String saveReschedule(@PathVariable Long id,
+                                 @RequestParam LocalDate newDate,
+                                 @RequestParam String newTime) {
         matchScheduleService.reschedule(id, newDate, newTime);
         return "redirect:/admin/matches";
     }
