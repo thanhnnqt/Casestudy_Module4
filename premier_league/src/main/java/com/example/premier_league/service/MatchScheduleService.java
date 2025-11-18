@@ -111,7 +111,14 @@ public class MatchScheduleService implements IMatchScheduleService {
 
     @Override
     public List<MatchSchedule> findMatchesByTeamId(Long teamId) {
-        return List.of();
+        // SỬA 1: Thay vì "return List.of()", hãy gọi repository
+        List<MatchSchedule> matches = matchScheduleRepository
+                .findAllByHomeTeamIdOrAwayTeamIdOrderByMatchDateAscMatchTimeAsc(teamId, teamId);
+
+        // SỬA 2: Thêm autoUpdateStatus cho các trận này
+        matches.forEach(this::autoUpdateStatus);
+
+        return matches;
     }
 
 
