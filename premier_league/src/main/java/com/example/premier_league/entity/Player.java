@@ -1,10 +1,7 @@
 package com.example.premier_league.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -15,29 +12,31 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Player {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "player_name")
+    @Column(name = "player_name", length = 100, nullable = false)
     private String name;
 
-    @Column(name = "dob")
+    @Column(name = "dob", nullable = false)
     private LocalDate dob;
 
     @Column(name = "experience", length = 50)
     private String experience;
 
-    @Column(name = "position", length = 50)
+    @Column(name = "position", length = 50, nullable = false)
     private String position;
 
     @Column(name = "avatar", length = 500)
     private String avatar;
 
-    @ManyToOne
-    @JoinColumn(name = "card_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "card_id", nullable = true)
     private Card card;
-    @ManyToOne
-    @JoinColumn(name = "team_id")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id", nullable = true)
     private Team team;
 }

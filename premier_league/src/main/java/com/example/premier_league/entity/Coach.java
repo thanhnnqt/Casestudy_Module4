@@ -1,10 +1,15 @@
 package com.example.premier_league.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
 
 @Entity
-@Table(name = "coach")
+@Table(name = "coaches")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,32 +18,50 @@ public class Coach {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @Column(nullable = false)
+    // Họ tên HLV
+    @Column(nullable = false, length = 100)
     private String fullName;
 
-    private String nationality;
+    // Chức vụ: Head Coach, Assistant Coach,...
+    @Column(nullable = false, length = 50)
+    private String role;
 
-    private String phoneNumber;
-
-    private String email;
-
+    // Link ảnh avatar
+    @Column(length = 255)
     private String avatarUrl;
 
-    private int experienceYears;
+    // Quốc tịch
+    @Column(length = 50)
+    private String nationality;
 
-    private String specialization; //Chuyên môn (HLV chiến thuật, thể lực, thủ môn..)
+    private LocalDate dateOfBirth;
 
-    private String licenseLevel; //Bằng cấp
+    // Số năm kinh nghiệm
+    private Integer experienceYears;
 
+    // Chứng chỉ huấn luyện: UEFA Pro/A/B...
+    @Column(length = 50)
+    private String licenseLevel;
+
+    private LocalDate joinDate;
+
+    // Trạng thái: Active / Inactive
+    @Column(length = 20)
+    private String status = "Active";
+
+    @Column(length = 100)
+    private String email;
+
+    @Column(length = 20)
+    private String phone;
+
+    @Column(columnDefinition = "TEXT")
     private String note;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "team_id")
     private Team team;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id")
-    private Account account;
 }

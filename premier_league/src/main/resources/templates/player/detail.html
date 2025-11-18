@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout('Chi tiết cầu thủ', 'players', ~{::content})">
+
+<th:block th:fragment="content">
+
+    <h2 class="mb-4 text-uppercase fw-bold" style="letter-spacing: 1px;">Thông tin chi tiết cầu thủ</h2>
+
+    <div class="row">
+        <!-- Avatar -->
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <img class="card-img-top"
+                     th:src="${player.avatar}"
+                     alt="avatar"
+                     onerror="this.src='https://via.placeholder.com/400x300?text=No+Image';">
+            </div>
+        </div>
+
+        <!-- Thông tin -->
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0" th:text="${player.name}">Tên cầu thủ</h3>
+                <div>
+                    <a th:href="@{'/players/update/' + ${player.id}}" class="btn btn-sm btn-outline-primary">
+                        Sửa
+                    </a>
+                    <a th:href="@{'/players/delete/' + ${player.id}}"
+                       onclick="return confirm('Bạn có chắc chắn muốn xóa cầu thủ này?')"
+                       class="btn btn-sm btn-outline-danger">
+                        Xóa
+                    </a>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Ngày sinh: </strong>
+                        <span th:text="${player.dob}">2000-01-01</span>
+                    </p>
+                    <p><strong>Kinh nghiệm: </strong>
+                        <span th:text="${player.experience}">0</span> năm
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Vị trí: </strong>
+                        <span th:text="${player.position}">Tiền vệ</span>
+                    </p>
+                    <p><strong>Đội: </strong>
+                        <span th:text="${player.team != null ? player.team.name : 'Chưa có đội'}">Arsenal</span>
+                    </p>
+                </div>
+            </div>
+
+            <hr>
+
+            <a href="/players" class="btn btn-secondary mt-2">Quay lại danh sách</a>
+        </div>
+    </div>
+
+</th:block>
+</html>
