@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Lỗi hệ thống</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f9fa; text-align: center; padding: 50px; }
+    .error-box { background: #fff3f3; border: 1px solid #ffcccc; padding: 20px; border-radius: 8px; display: inline-block; }
+    h2 { color: #cc0000; }
+    a { display: inline-block; margin-top: 15px; text-decoration: none; color: white; background: #007bff; padding: 8px 15px; border-radius: 5px; }
+    a:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+<div class="error-box">
+  <h2>Lỗi!</h2>
+  <p th:text="${message}">Có lỗi xảy ra.</p>
+  <a th:href="@{/templates/player}">Quay lại danh sách cầu thủ</a>
+</div>
+</body>
+</html>
