@@ -1,104 +1,627 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng ký đội hình</title>
+    <title>Quản lý đội hình - <span th:text="${teamName}"></span></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        select[multiple] {
-            height: 300px;
+        body {
+            background-color: #f4f7f6;
         }
+        .lineup-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+        }
+
+        /* 1. DANH SÁCH CẦU THỦ BÊN TRÁI */
+        .player-list-sidebar {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .player-list-sidebar .nav-pills .nav-link {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.8rem;
+        }
+        .player-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: grab;
+            transition: background-color 0.2s;
+            border: 1px solid #eee;
+        }
+        .player-item:hover {
+            background-color: #f0f0f0;
+        }
+        .player-item[draggable="true"]:active {
+            cursor: grabbing;
+        }
+        .player-item.dragging {
+            opacity: 0.5;
+            background: #cce5ff;
+        }
+        .player-item .position {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #fff;
+            background: #0d6efd;
+            border-radius: 4px;
+            padding: 2px 6px;
+            min-width: 35px;
+            text-align: center;
+            margin-right: 10px;
+        }
+        /* Màu vị trí */
+        .player-item[data-pos="GK"] .position { background: #f0ad4e; }
+        .player-item[data-pos="DF"] .position { background: #5cb85c; }
+        .player-item[data-pos="MF"] .position { background: #0275d8; }
+        .player-item[data-pos="FW"] .position { background: #d9534f; }
+
+        /* 2. SÂN BÓNG BÊN PHẢI */
+        .pitch-area {
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Football_field_with_metric_distances.svg/1024px-Football_field_with_metric_distances.svg.png');
+            background-size: cover;
+            background-position: center;
+            background-color: #538d32;
+            height: 600px;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 5px solid #fff;
+        }
+        .player-slot {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+        }
+        /* CSS cho slot khi kéo thả */
+        .player-slot.drag-over {
+            background: rgba(0, 255, 133, 0.7);
+            border: 2px solid #fff;
+            transform: scale(1.1);
+        }
+        .player-slot.filled {
+            border: 2px solid #00ff85;
+            background: rgba(56, 0, 60, 0.8);
+            color: white;
+            border-radius: 8px;
+            width: 100px;
+            height: auto;
+            padding: 8px 5px;
+            font-size: 0.85rem;
+            text-align: center;
+            cursor: grab;
+        }
+        .player-slot.filled:active { cursor: grabbing; }
+        .player-slot.filled .slot-label {
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #00ff85;
+        }
+        .player-slot .slot-label {
+            font-weight: bold;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        /* Vị trí các slot 4-4-2 */
+        .formation[data-formation="4-4-2"] .slot-GK  { top: 50%; left: 10%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-RB  { top: 80%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-RCB { top: 60%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-LCB { top: 40%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-LB  { top: 20%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-RM  { top: 80%; left: 60%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-RCM { top: 60%; left: 55%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-LCM { top: 40%; left: 55%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-LM  { top: 20%; left: 60%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-RST { top: 60%; left: 85%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-LST { top: 40%; left: 85%; transform: translate(-50%, -50%); }
+
+        /* Vị trí các slot 4-3-3 */
+        .formation[data-formation="4-3-3"] .slot-GK  { top: 50%; left: 10%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-RB  { top: 80%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-RCB { top: 60%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-LCB { top: 40%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-LB  { top: 20%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-RCM { top: 70%; left: 55%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-CM  { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-LCM { top: 30%; left: 55%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-RW  { top: 80%; left: 80%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-ST  { top: 50%; left: 85%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-LW  { top: 20%; left: 80%; transform: translate(-50%, -50%); }
+
+        /* Vị trí các slot 4-2-3-1 */
+        .formation[data-formation="4-2-3-1"] .slot-GK  { top: 50%; left: 10%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-RB  { top: 80%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-RCB { top: 60%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-LCB { top: 40%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-LB  { top: 20%; left: 30%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-RDM { top: 65%; left: 50%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-LDM { top: 35%; left: 50%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-RAM { top: 80%; left: 70%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-CAM { top: 50%; left: 70%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-LAM { top: 20%; left: 70%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-ST  { top: 50%; left: 90%; transform: translate(-50%, -50%); }
+
+        /* 3. GHẾ DỰ BỊ */
+        .bench-area {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .bench-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .bench-slot {
+            width: 100px;
+            height: 60px;
+            border: 2px dashed #ccc;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #888;
+            background: #f8f9fa;
+        }
+        .bench-slot.drag-over {
+            background: #cce5ff;
+            border-color: #0d6efd;
+        }
+        .bench-slot.filled {
+            border: 1px solid #0d6efd;
+            padding: 5px;
+            background: #e7f1ff;
+            color: #000;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: grab;
+            text-align: center;
+        }
+        .bench-slot.filled .position {
+            font-size: 0.7rem; font-weight: bold; color: #0d6efd;
+        }
+
     </style>
 </head>
 <body>
-<div class="container mt-4">
-    <h2 class="mb-3">Đăng ký đội hình cho đội: <span class="text-primary" th:text="${teamName}"></span></h2>
-    <h4>Trận: <span th:text="${match.homeTeam.name} + ' vs ' + ${match.awayTeam.name}"></span></h4>
-    <p>Vòng <span th:text="${match.round}"></span> - <span th:text="${match.matchDate}"></span></p>
+<div class="container-fluid my-4">
 
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class_ ="mb-0">Đăng ký đội hình: <span class="text-primary" th:text="${teamName}"></span></h2>
+            <p class="fs-5 text-muted"
+               th:text="'Trận: ' + ${match.homeTeam.name} + ' vs ' + ${match.awayTeam.name}">
+                Trận đấu
+            </p>
+        </div>
+        <div>
+            <label for="formation-select" class="form-label fw-bold">Chọn sơ đồ:</label>
+            <select id="formation-select" class="form-select form-select-lg" style="width: 200px;">
+                <option th:each="f : ${formations}"
+                        th:value="${f.key}"
+                        th:text="${f.key}"
+                        th:selected="${f.key == currentFormationName}">
+                </option>
+            </select>
+        </div>
+    </div>
 
-    <form th:action="@{/coach/team/{teamId}/match/{matchId}/lineup/save(teamId=${teamId}, matchId=${match.id})}"
+    <form id="lineup-form"
+          th:action="@{/coach/team/{teamId}/match/{matchId}/lineup/save(teamId=${teamId}, matchId=${match.id})}"
           method="post">
 
-        <div class="row mt-4">
+        <div class="lineup-container">
 
-            <div class="col-md-4">
-                <h5>Chưa đăng ký (<span id="available-count" th:text="${#lists.size(availablePlayers)}"></span>)</h5>
-                <select id="available-select" multiple class="form-select">
-                    <option th:each="p : ${availablePlayers}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.position} + ')'"></option>
-                </select>
-            </div>
+            <div class="player-list-sidebar" id="player-list-pool">
+                <h5>Danh sách cầu thủ (<span id="available-count"></span>)</h5>
 
-            <div class="col-md-1 d-flex flex-column justify-content-center align-items-center gap-2">
-                <button type="button" class="btn btn-primary" onclick="move('available-select', 'main-select', 11, 'main-count')">&gt;&gt; Chính</button>
-                <button type="button" class="btn btn-info" onclick="move('available-select', 'sub-select', 7, 'sub-count')">&gt; Dự bị</button>
-                <hr class="w-100">
-                <button type="button" class="btn btn-outline-secondary" onclick="move('main-select', 'available-select', 99, 'available-count')">&lt;&lt; Bỏ</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="move('sub-select', 'available-select', 99, 'available-count')">&lt; Bỏ</button>
-            </div>
+                <ul class="nav nav-pills nav-fill my-3" id="pos-filter">
+                    <li class="nav-item"><a class="nav-link active" href="#" data-pos="ALL">Tất cả</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-pos="GK" style="background-color: #f0ad4e; color: white;">GK</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-pos="DF" style="background-color: #5cb85c; color: white;">DF</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-pos="MF" style="background-color: #0275d8; color: white;">MF</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-pos="FW" style="background-color: #d9534f; color: white;">FW</a></li>
+                </ul>
 
-            <div class="col-md-7">
-                <div class="mb-3">
-                    <h5>Đội hình chính (<span id="main-count" th:text="${#lists.size(mainPlayers)}"></span>/11)</h5>
-                    <select name="mainPlayerIds" id="main-select" multiple class="form-select" required>
-                        <option th:each="p : ${mainPlayers}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.position} + ')'" selected></option>
-                    </select>
+                <div id="available-players">
+                    <div th:each="p : ${availablePlayers}"
+                         class="player-item"
+                         th:data-player-id="${p.id}"
+                         th:data-player-name="${p.name}"
+                         th:data-pos="${p.position}"
+                         draggable="true">
+                        <span class="position" th:text="${p.position}"></span>
+                        <span class="name" th:text="${p.name}"></span>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <h5>Đội hình dự bị (<span id="sub-count" th:text="${#lists.size(subPlayers)}"></span>)</h5>
-                    <select name="subPlayerIds" id="sub-select" multiple class="form-select">
-                        <option th:each="p : ${subPlayers}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.position} + ')'" selected></option>
-                    </select>
+            </div>
+
+            <div class="pitch-and-bench">
+                <div class="pitch-area">
+                    <div th:each="f : ${formations}"
+                         th:id="'formation-' + ${f.key}"
+                         class="formation"
+                         th:data-formation="${f.key}"
+                         th:style="${f.key == currentFormationName} ? '' : 'display: none;'">
+
+                        <div th:each="pos : ${f.value.positions}"
+                             class="player-slot"
+                             th:classappend="'slot-' + ${pos.key}"
+                             th:data-slot-pos="${pos.key}">
+                            <span class="slot-label" th:text="${pos.value}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bench-area">
+                    <h5>Ghế dự bị (<span id="bench-count">0</span>/9)</h5>
+                    <div class="bench-slots" id="bench-slots-container">
+                        <div class="bench-slot" data-slot-pos="SUB_1"><span class="slot-label">Dự bị 1</span></div>
+                        <div class="bench-slot" data-slot-pos="SUB_2"><span class="slot-label">Dự bị 2</span></div>
+                        <div class="bench-slot" data-slot-pos="SUB_3"><span class="slot-label">Dự bị 3</span></div>
+                        <div class="bench-slot" data-slot-pos="SUB_4"><span class="slot-label">Dự bị 4</span></div>
+                        <div class="bench-slot" data-slot-pos="SUB_5"><span class="slot-label">Dự bị 5</span></div>
+                        <div class="bench-slot" data-slot-pos="SUB_6"><span class="slot-label">Dự bị 6</span></div>
+                        <div class="bench-slot" data-slot-pos="SUB_7"><span class="slot-label">Dự bị 7</span></div>
+                        <div class="bench-slot" data-slot-pos="SUB_8"><span class="slot-label">Dự bị 8</span></div>
+                        <div class="bench-slot" data-slot-pos="SUB_9"><span class="slot-label">Dự bị 9</span></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <hr class="mt-4">
+        <div id="hidden-inputs"></div>
 
-        <button type="submit" class="btn btn-success btn-lg">Lưu Đội Hình</button>
-        <a th:href="@{/coach/team/{teamId}/schedule(teamId=${teamId})}" class="btn btn-secondary btn-lg">Quay lại</a>
+        <div class="mt-4 d-flex justify-content-end gap-2">
+            <a th:href="@{/coach/team/{teamId}/schedule(teamId=${teamId})}" class="btn btn-secondary btn-lg">Quay lại</a>
+            <button type="button" id="save-button" class="btn btn-primary btn-lg" disabled>
+                Lưu đội hình
+            </button>
+        </div>
+
     </form>
+</div>
 
-    <script>
-        // JS để di chuyển cầu thủ giữa các list
-        function move(fromSelectId, toSelectId, limit, toCounterId) {
-            const fromSelect = document.getElementById(fromSelectId);
-            const toSelect = document.getElementById(toSelectId);
-            const toCounter = document.getElementById(toCounterId);
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const initialMainPlayers = /*[[${mainPlayers}]]*/ [];
+    const initialSubPlayers = /*[[${subPlayers}]]*/ [];
+    const allFormations = /*[[${formations}]]*/ {};
+    /*]]>*/
+</script>
 
-            // Lấy các options đang được chọn
-            const selectedOptions = Array.from(fromSelect.selectedOptions);
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // === 1. KHAI BÁO BIẾN ===
+        let draggedItem = null; // Cầu thủ đang được kéo
+        const playerPool = document.getElementById('available-players');
+        const pitchSlots = document.querySelectorAll('.player-slot');
+        const benchSlots = document.querySelectorAll('.bench-slot');
+        const allDropZones = [...pitchSlots, ...benchSlots, playerPool];
+        const saveButton = document.getElementById('save-button');
+        const formationSelect = document.getElementById('formation-select');
 
-            // Kiểm tra giới hạn
-            if (toSelect.options.length + selectedOptions.length > limit) {
-                alert('Vượt quá giới hạn cho phép! (Đội hình chính tối đa ' + limit + ' cầu thủ)');
-                return;
+        // === 2. CÁC HÀM TẠO/XÓA CẦU THỦ TRỰC QUAN ===
+
+        /** Tạo một element cầu thủ (dạng kéo thả được) */
+        function createPlayerElement(id, name, pos) {
+            const el = document.createElement('div');
+            el.className = 'player-item';
+            el.draggable = true;
+            el.dataset.playerId = id;
+            el.dataset.playerName = name;
+            el.dataset.pos = pos;
+            el.innerHTML = `<span class="position">${pos}</span> <span class="name">${name}</span>`;
+            addDragEventsToPlayer(el);
+            return el;
+        }
+
+        /** Tạo một element cầu thủ (khi đã nằm trên sân) */
+        function createFilledSlotElement(id, name, pos, slotLabel) {
+            const el = document.createElement('div');
+            el.className = 'player-item';
+            el.draggable = true;
+            el.dataset.playerId = id;
+            el.dataset.playerName = name;
+            el.dataset.pos = pos;
+            el.innerHTML = `<div class="slot-label">${slotLabel}</div> <span class="name">${name}</span>`;
+            addDragEventsToPlayer(el);
+            return el;
+        }
+
+        /** Tạo một element cầu thủ (khi đã nằm trên ghế dự bị) */
+        function createFilledBenchElement(id, name, pos) {
+            const el = document.createElement('div');
+            el.className = 'player-item';
+            el.draggable = true;
+            el.dataset.playerId = id;
+            el.dataset.playerName = name;
+            el.dataset.pos = pos;
+            el.innerHTML = `<span class="position">${pos}</span> <span class="name">${name}</span>`;
+            addDragEventsToPlayer(el);
+            return el;
+        }
+
+        /** Xóa cầu thủ khỏi vị trí (slot) và trả về trạng thái rỗng */
+        function clearSlot(slot) {
+            if(slot.classList.contains('bench-slot')) {
+                slot.innerHTML = `<span class="slot-label">Dự bị ${slot.dataset.slotPos.split('_')[1]}</span>`;
+            } else {
+                const formationName = document.querySelector('.formation:not([style*="display: none"])').dataset.formation;
+                const slotKey = slot.dataset.slotPos;
+                const slotLabel = allFormations[formationName].positions[slotKey];
+                slot.innerHTML = `<span class="slot-label">${slotLabel}</span>`;
+            }
+            slot.classList.remove('filled');
+        }
+
+        // === 3. LOGIC KÉO THẢ (DRAG & DROP) ===
+
+        /** Gắn sự kiện kéo cho 1 cầu thủ */
+        function addDragEventsToPlayer(player) {
+            player.addEventListener('dragstart', (e) => {
+                draggedItem = e.target;
+                setTimeout(() => e.target.classList.add('dragging'), 0);
+            });
+            player.addEventListener('dragend', () => {
+                draggedItem.classList.remove('dragging');
+                draggedItem = null;
+            });
+        }
+
+        // Gắn sự kiện cho các cầu thủ có sẵn
+        document.querySelectorAll('.player-item').forEach(addDragEventsToPlayer);
+
+        // Gắn sự kiện cho các khu vực thả
+        allDropZones.forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                // Kiểm tra logic thả
+                if (canDrop(draggedItem, zone)) {
+                    zone.classList.add('drag-over');
+                }
+            });
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-over');
+            });
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+
+                if (!canDrop(draggedItem, zone)) return;
+
+                const data = {
+                    id: draggedItem.dataset.playerId,
+                    name: draggedItem.dataset.playerName,
+                    pos: draggedItem.dataset.pos
+                };
+
+                // 1. Nếu cầu thủ đang được kéo từ 1 slot, xóa slot cũ
+                const originalSlot = draggedItem.closest('.player-slot, .bench-slot');
+                if (originalSlot) {
+                    clearSlot(originalSlot);
+                } else {
+                    draggedItem.remove(); // Xóa khỏi danh sách bên trái
+                }
+
+                // 2. Thả vào đâu?
+                if (zone.id === 'player-list-pool') {
+                    // Thả về danh sách
+                    zone.appendChild(createPlayerElement(data.id, data.name, data.pos));
+
+                } else if (zone.classList.contains('player-slot')) {
+                    // Thả vào sân
+                    const slotLabel = zone.querySelector('.slot-label').innerText;
+                    zone.innerHTML = '';
+                    zone.appendChild(createFilledSlotElement(data.id, data.name, data.pos, slotLabel));
+                    zone.classList.add('filled');
+
+                } else if (zone.classList.contains('bench-slot')) {
+                    // Thả vào ghế dự bị
+                    zone.innerHTML = '';
+                    zone.appendChild(createFilledBenchElement(data.id, data.name, data.pos));
+                    zone.classList.add('filled');
+                }
+
+                // Cập nhật trạng thái
+                updateAllCounts();
+            });
+        });
+
+        /** Kiểm tra xem có được phép thả không */
+        function canDrop(item, zone) {
+            if (!item) return false;
+
+            // 1. Không thể thả vào vị trí đã có cầu thủ
+            if (zone.classList.contains('filled')) return false;
+
+            // 2. Kiểm tra giới hạn ghế dự bị (9 người)
+            if (zone.classList.contains('bench-slot')) {
+                const filledBenchSlots = document.querySelectorAll('.bench-slot.filled').length;
+                if (filledBenchSlots >= 9) {
+                    // Nếu kéo từ sân/pool -> bench (quá 9) -> cấm
+                    if (!item.closest('.bench-slot')) {
+                        return false;
+                    }
+                }
             }
 
-            // Di chuyển
-            selectedOptions.forEach(option => {
-                // Thêm selected=true cho form submit
-                option.selected = true;
-                toSelect.appendChild(option);
+            // 3. Kiểm tra giới hạn sân (11 người)
+            if (zone.classList.contains('player-slot')) {
+                const filledPitchSlots = document.querySelectorAll('.player-slot.filled').length;
+                const activeFormation = document.querySelector('.formation:not([style*="display: none"])');
+                const totalSlotsInFormation = activeFormation.querySelectorAll('.player-slot').length; // Thường là 11
+
+                if (filledPitchSlots >= totalSlotsInFormation) {
+                    // Nếu kéo từ bench/pool -> pitch (quá 11) -> cấm
+                    if (!item.closest('.player-slot')) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // === 4. LOGIC ĐỔI SƠ ĐỒ ===
+        formationSelect.addEventListener('change', (e) => {
+            const newFormationName = e.target.value;
+
+            // Ẩn tất cả sơ đồ
+            document.querySelectorAll('.formation').forEach(f => f.style.display = 'none');
+
+            // Hiện sơ đồ được chọn
+            const newFormationEl = document.getElementById('formation-' + newFormationName);
+            newFormationEl.style.display = 'block';
+
+            // Cập nhật lại nhãn cho các cầu thủ đang trên sân
+            newFormationEl.querySelectorAll('.player-slot.filled').forEach(slot => {
+                const slotKey = slot.dataset.slotPos;
+                const slotLabel = allFormations[newFormationName].positions[slotKey];
+                slot.querySelector('.slot-label').innerText = slotLabel;
+            });
+        });
+
+        // === 5. LOGIC FILTER VỊ TRÍ ===
+        document.getElementById('pos-filter').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (e.target.tagName !== 'A') return;
+
+            // Bỏ active cũ
+            document.querySelectorAll('#pos-filter .nav-link').forEach(a => a.classList.remove('active'));
+            // Set active mới
+            e.target.classList.add('active');
+
+            const posFilter = e.target.dataset.pos;
+
+            // Lọc
+            document.querySelectorAll('#available-players .player-item').forEach(playerEl => {
+                if (posFilter === 'ALL' || playerEl.dataset.pos === posFilter) {
+                    playerEl.style.display = 'flex';
+                } else {
+                    playerEl.style.display = 'none';
+                }
+            });
+        });
+
+        // === 6. LOGIC VALIDATE VÀ SUBMIT ===
+
+        /** Cập nhật số lượng + kiểm tra nút Save */
+        function updateAllCounts() {
+            // Cầu thủ có sẵn
+            const availableCount = document.querySelectorAll('#available-players .player-item').length;
+            document.getElementById('available-count').innerText = availableCount;
+
+            // Cầu thủ trên sân (chính)
+            const mainCount = document.querySelectorAll('.player-slot.filled').length;
+            document.getElementById('main-count').innerText = mainCount;
+
+            // Cầu thủ dự bị
+            const subCount = document.querySelectorAll('.bench-slot.filled').length;
+            document.getElementById('bench-count').innerText = subCount;
+
+            // Validate nút Save
+            if (mainCount === 11) {
+                saveButton.disabled = false;
+                saveButton.innerText = `Lưu đội hình (${mainCount} chính, ${subCount} dự bị)`;
+            } else {
+                saveButton.disabled = true;
+                saveButton.innerText = `Phải có đủ 11 cầu thủ chính`;
+            }
+        }
+
+        /** Nút Save */
+        saveButton.addEventListener('click', () => {
+            const form = document.getElementById('lineup-form');
+            const hiddenInputs = document.getElementById('hidden-inputs');
+            hiddenInputs.innerHTML = ''; // Xóa input cũ
+
+            // Lấy 11 cầu thủ chính
+            const mainPlayers = document.querySelectorAll('.player-slot.filled .player-item');
+            if (mainPlayers.length !== 11) {
+                alert('Đội hình chính phải có đúng 11 cầu thủ!');
+                return;
+            }
+            mainPlayers.forEach(p => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'mainPlayerIds';
+                input.value = p.dataset.playerId;
+                hiddenInputs.appendChild(input);
             });
 
-            // Cập nhật số lượng
+            // Lấy cầu thủ dự bị (tối đa 9)
+            const subPlayers = document.querySelectorAll('.bench-slot.filled .player-item');
+            subPlayers.forEach(p => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'subPlayerIds';
+                input.value = p.dataset.playerId;
+                hiddenInputs.appendChild(input);
+            });
+
+            // Submit
+            form.submit();
+        });
+
+        // === 7. KHỞI TẠO TRẠNG THÁI ===
+
+        /** Tải đội hình đã lưu (nếu có) */
+        function loadInitialLineup() {
+            // 1. Tải đội hình chính
+            initialMainPlayers.forEach(player => {
+                const playerEl = document.querySelector(`.player-item[data-player-id="${player.id}"]`);
+                if(playerEl) playerEl.remove(); // Xóa khỏi danh sách chờ
+
+                // Tìm slot trống (chỉ là để xếp tạm, không đúng 100% vị trí)
+                // Một logic tốt hơn sẽ cần lưu cả vị trí (slot_key) trong DB
+                const emptySlot = document.querySelector('.player-slot:not(.filled)');
+                if (emptySlot) {
+                    const slotLabel = emptySlot.querySelector('.slot-label').innerText;
+                    emptySlot.innerHTML = '';
+                    emptySlot.appendChild(createFilledSlotElement(player.id, player.name, player.position, slotLabel));
+                    emptySlot.classList.add('filled');
+                }
+            });
+
+            // 2. Tải đội hình dự bị
+            initialSubPlayers.forEach(player => {
+                const playerEl = document.querySelector(`.player-item[data-player-id="${player.id}"]`);
+                if(playerEl) playerEl.remove(); // Xóa khỏi danh sách chờ
+
+                const emptyBenchSlot = document.querySelector('.bench-slot:not(.filled)');
+                if (emptyBenchSlot) {
+                    emptyBenchSlot.innerHTML = '';
+                    emptyBenchSlot.appendChild(createFilledBenchElement(player.id, player.name, player.position));
+                    emptyBenchSlot.classList.add('filled');
+                }
+            });
+
             updateAllCounts();
         }
 
-        function updateAllCounts() {
-            document.getElementById('available-count').innerText = document.getElementById('available-select').options.length;
-            document.getElementById('main-count').innerText = document.getElementById('main-select').options.length;
-            document.getElementById('sub-count').innerText = document.getElementById('sub-select').options.length;
-        }
+        loadInitialLineup();
+    });
+</script>
 
-        // Đảm bảo tất cả cầu thủ trong 2 list main/sub đều được 'selected' khi submit
-        document.querySelector('form').addEventListener('submit', function() {
-            Array.from(document.getElementById('main-select').options).forEach(opt => opt.selected = true);
-            Array.from(document.getElementById('sub-select').options).forEach(opt => opt.selected = true);
-        });
-    </script>
-</div>
 </body>
 </html>

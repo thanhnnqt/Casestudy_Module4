@@ -15,4 +15,5 @@ public interface IMatchLineupRepository extends JpaRepository<MatchLineup, Long>
      * Xóa đội hình cũ trước khi lưu đội hình mới
      */
     void deleteByMatchIdAndTeamId(Long matchId, Long teamId);
+    boolean existsByMatchIdAndTeamId(Long matchId, Long teamId);
 }

@@ -26,7 +26,7 @@ public class MatchScheduleGenerator {
         this.teamRepository = teamRepository;
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void generateSchedule() {
         List<Team> teams = teamRepository.findAll();
         if (teams.size() != 10) return; // chỉ áp dụng 10 đội

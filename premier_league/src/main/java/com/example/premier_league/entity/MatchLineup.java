@@ -11,10 +11,7 @@ import lombok.*;
 @Builder
 public class MatchLineup {
 
-    /**
-     * Định nghĩa Enum LineupType
-     * (Di chuyển vào BÊN TRONG class MatchLineup để sửa lỗi)
-     */
+
     public enum LineupType {
         MAIN,
         SUB

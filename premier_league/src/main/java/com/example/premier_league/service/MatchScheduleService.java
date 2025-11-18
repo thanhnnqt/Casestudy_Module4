@@ -6,18 +6,23 @@ import com.example.premier_league.repository.IMatchScheduleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
+import com.example.premier_league.dto.CoachMatchScheduleDto;
+import com.example.premier_league.repository.IMatchLineupRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MatchScheduleService implements IMatchScheduleService {
 
     private final IMatchScheduleRepository matchScheduleRepository;
 
-    public MatchScheduleService(IMatchScheduleRepository matchScheduleRepository) {
+    private final IMatchLineupRepository iMatchLineupRepository; //Thới
+
+    public MatchScheduleService(IMatchScheduleRepository matchScheduleRepository, IMatchLineupRepository iMatchLineupRepository) {
         this.matchScheduleRepository = matchScheduleRepository;
+        this.iMatchLineupRepository = iMatchLineupRepository; //THới
     }
 
     @Override
@@ -83,5 +88,16 @@ public class MatchScheduleService implements IMatchScheduleService {
     public List<MatchSchedule> findMatchesByTeamId(Long teamId) {
         // Sử dụng method đã có sẵn trong repository
         return matchScheduleRepository.findAllByHomeTeamIdOrAwayTeamIdOrderByMatchDateAscMatchTimeAsc(teamId, teamId);
+    }
+
+    @Override
+    public List<CoachMatchScheduleDto> getCoachMatchSchedules(Long teamId) {
+        List<MatchSchedule> matches = this.findMatchesByTeamId(teamId);
+
+        return matches.stream().map(match -> {
+            // Kiểm tra xem đã đăng ký đội hình cho trận này chưa
+            boolean isRegistered = iMatchLineupRepository.existsByMatchIdAndTeamId(match.getId(), teamId);
+            return new CoachMatchScheduleDto(match, isRegistered);
+        }).collect(Collectors.toList());
     }
 }
