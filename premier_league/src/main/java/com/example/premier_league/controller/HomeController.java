@@ -28,8 +28,8 @@ public class HomeController {
 //        return "home/home";
 //
 //    }
-
-    // 2. Trang danh sách giải đấu
+//
+////     2. Trang danh sách giải đấu
 //    @GetMapping("/tournament")
 //    public String listMatchesViews(Model model) {
 //        model.addAttribute("matches", matchScheduleService.getAllMatches());
