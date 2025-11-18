@@ -40,5 +40,5 @@ public class MatchSchedule {
     private String note;
 
     @Enumerated(EnumType.STRING)
-    private MatchStatus status = MatchStatus.SCHEDULED;
+    private MatchStatus status = MatchStatus.UPCOMING;
 }

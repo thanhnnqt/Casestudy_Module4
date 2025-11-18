@@ -16,7 +16,8 @@ public interface IMatchScheduleRepository extends JpaRepository<MatchSchedule, L
     Page<MatchSchedule> findAllByOrderByMatchDateAscMatchTimeAsc(Pageable pageable);
 
     Page<MatchSchedule> findByHomeTeam_NameContainingIgnoreCaseOrAwayTeam_NameContainingIgnoreCase(
-            String homeTeam, String awayTeam, Pageable pageable);
+            String homeTeam, String awayTeam, Pageable pageable
+    );
 
     Page<MatchSchedule> findByMatchDate(LocalDate date, Pageable pageable);
 
