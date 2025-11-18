@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,21 +40,27 @@ public class HomeController {
 //        return "home/tournaments";
 //    }
 @GetMapping("/")
-public String home(Model model) {
+public String home(
+        @RequestParam(value = "round", required = false, defaultValue = "1") Integer round,
+        Model model
+) {
     Pageable pageable = PageRequest.of(0, 100);
     Page<MatchSchedule> matchPage = matchScheduleService.getAllMatches(pageable);
 
-    // Lọc vòng 1
-    List<MatchSchedule> round1Matches = new ArrayList<>();
+    // Lọc theo vòng linh hoạt
+    List<MatchSchedule> roundMatches = new ArrayList<>();
     for (MatchSchedule m : matchPage.getContent()) {
-        if (m != null && m.getRound() != null && m.getRound() == 1) {
-            round1Matches.add(m);
+        if (m != null && m.getRound() != null && m.getRound().equals(round)) {
+            roundMatches.add(m);
         }
     }
 
-    model.addAttribute("upcomingMatches", round1Matches);
+    model.addAttribute("upcomingMatches", roundMatches);
+    model.addAttribute("selectedRound", round);
+
     return "home/home";
 }
+
 
     @GetMapping("/tournament")
     public String listMatchesViews(Model model) {
@@ -70,7 +77,6 @@ public String home(Model model) {
         // TODO: Thêm sortedTeams, upcomingMatches, finishedMatches
         return "home/tournaments-detail";
     }
-
     // 4. Trang chi tiết đội bóng
     @GetMapping("/team/{id}")
     public String teamDetail(@PathVariable("id") String id, Model model) {
@@ -122,4 +128,27 @@ public String home(Model model) {
     public String login() {
         return "home/login";
     }
+    @GetMapping("/tournaments-detail")
+    public String tournamentsDetail(
+            @RequestParam(value = "round", required = false, defaultValue = "1") Integer round,
+            Model model
+    ) {
+        Pageable pageable = PageRequest.of(0, 100);
+        Page<MatchSchedule> matchPage = matchScheduleService.getAllMatches(pageable);
+
+        List<MatchSchedule> roundMatches = new ArrayList<>();
+        for (MatchSchedule m : matchPage.getContent()) {
+            if (m != null && m.getRound() != null && m.getRound().equals(round)) {
+                roundMatches.add(m);
+            }
+        }
+
+        model.addAttribute("upcomingMatches", roundMatches);
+        model.addAttribute("selectedRound", round);
+
+        return "home/tournaments-detail";
+    }
+
+
+
 }
