@@ -8,55 +8,65 @@
 </head>
 
 <body>
-<div class="container mt-4">
-  <h2 class="text-center mb-4" th:text="${prize.id == null} ? 'Thêm Giải Thưởng' : 'Cập Nhật Giải Thưởng'"></h2>
+<div class="container mt-4" style="max-width: 700px;">
+  <h2 class="text-center mb-4" th:text="${prizeDto.id == null} ? 'Thêm Giải Thưởng' : 'Cập Nhật Giải Thưởng'"></h2>
 
-  <form th:action="@{/prize/save}" th:object="${prize}" method="post">
+  <form th:action="@{/prize/save}" th:object="${prizeDto}" method="post">
 
     <input type="hidden" th:field="*{id}">
 
     <div class="mb-3">
       <label class="form-label">Tên giải</label>
-      <input type="text" th:field="*{name}" class="form-control" required>
+      <input type="text" th:field="*{name}" class="form-control" th:errorclass="is-invalid">
+      <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="invalid-feedback"></div>
     </div>
 
     <div class="mb-3">
       <label class="form-label">Loại giải</label>
-      <input type="text" th:field="*{type}" class="form-control" required>
+      <input type="text" th:field="*{type}" class="form-control" th:errorclass="is-invalid" placeholder="Vd: Cá nhân, Đội...">
+      <div th:if="${#fields.hasErrors('type')}" th:errors="*{type}" class="invalid-feedback"></div>
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Tiền thưởng</label>
-      <input type="number" step="0.01" th:field="*{amount}" class="form-control" required>
+      <label class="form-label">Tiền thưởng (USD)</label>
+      <input type="number" step="100" th:field="*{amount}" class="form-control" th:errorclass="is-invalid">
+      <div th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}" class="invalid-feedback"></div>
     </div>
 
     <div class="mb-3">
       <label class="form-label">Ngày trao</label>
-      <input type="date" th:field="*{awardedDate}" class="form-control" required>
+      <input type="date" th:field="*{awardedDate}" class="form-control" th:errorclass="is-invalid">
+      <div th:if="${#fields.hasErrors('awardedDate')}" th:errors="*{awardedDate}" class="invalid-feedback"></div>
+    </div>
+
+    <hr class="my-4">
+    <p class="text-muted text-center">Giải thưởng này dành cho đội hay cá nhân? (Nếu chọn cá nhân, đội sẽ được tự động gán)</p>
+
+    <div class="mb-3">
+      <label class="form-label">Cầu thủ (Ưu tiên)</label>
+      <select th:field="*{playerId}" class="form-select">
+        <option value="">-- Chọn cầu thủ (giải cá nhân) --</option>
+        <option th:each="pl : ${players}"
+                th:value="${pl.id}"
+                th:text="${pl.name} + ' (' + ${pl.team.shortName} + ')'"></option>
+      </select>
+      <div class="form-text">Nếu chọn cầu thủ, giải thưởng sẽ tự động gán cho đội của cầu thủ đó.</div>
     </div>
 
     <div class="mb-3">
       <label class="form-label">Đội</label>
-      <select th:field="*{team}" class="form-select">
-        <option value="">-- Không chọn --</option>
+      <select th:field="*{teamId}" class="form-select">
+        <option value="">-- Chọn đội (chỉ khi là giải cho đội) --</option>
         <option th:each="t : ${teams}"
-                th:value="${t}"
+                th:value="${t.id}"
                 th:text="${t.name}"></option>
       </select>
+      <div class="form-text">Chỉ chọn mục này nếu đây là giải thưởng cho cả đội (Vd: Fair Play) và KHÔNG chọn cầu thủ ở trên.</div>
     </div>
 
-    <div class="mb-3">
-      <label class="form-label">Cầu thủ</label>
-      <select th:field="*{player}" class="form-select">
-        <option value="">-- Không chọn --</option>
-        <option th:each="pl : ${players}"
-                th:value="${pl}"
-                th:text="${pl.name}"></option>
-      </select>
-    </div>
 
-    <div class="text-center">
-      <button class="btn btn-success">Lưu</button>
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-success">Lưu</button>
       <a th:href="@{/prize}" class="btn btn-secondary">Hủy</a>
     </div>
 

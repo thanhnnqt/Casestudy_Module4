@@ -35,4 +35,5 @@ public class PrizeService implements IPrizeService {
     public void delete(Long id) {
         prizeRepository.deleteById(id);
     }
+
 }
