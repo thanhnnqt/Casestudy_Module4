@@ -1,8 +1,12 @@
 package com.example.premier_league.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "teams")
@@ -49,4 +53,8 @@ public class Team {
     //quan hệ với Account
     @OneToOne(mappedBy = "team")
     private Account admin;
+
+    @JsonIgnore // Dùng @JsonIgnore để tránh lỗi vòng lặp vô hạn khi dùng API
+    @ManyToMany(mappedBy = "teams")
+    private Set<Tournament> tournaments = new HashSet<>();
 }
