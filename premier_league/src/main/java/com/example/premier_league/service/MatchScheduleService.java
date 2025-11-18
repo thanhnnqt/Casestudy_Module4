@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.time.LocalTime;
+import java.util.List;
 
 @Service
 public class MatchScheduleService implements IMatchScheduleService {
@@ -145,5 +147,9 @@ public class MatchScheduleService implements IMatchScheduleService {
         } else if (daysLeft < 2 && daysLeft >= 0) {
             match.setStatus(MatchStatus.SCHEDULED);
         }
+    @Override
+    public List<MatchSchedule> findMatchesByTeamId(Long teamId) {
+        // Sử dụng method đã có sẵn trong repository
+        return matchScheduleRepository.findAllByHomeTeamIdOrAwayTeamIdOrderByMatchDateAscMatchTimeAsc(teamId, teamId);
     }
 }

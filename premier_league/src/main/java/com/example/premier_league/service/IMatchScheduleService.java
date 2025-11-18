@@ -14,6 +14,7 @@ public interface IMatchScheduleService {
     MatchSchedule postponeMatch(Long id);
     MatchSchedule findById(Long id);
     MatchSchedule resumeMatch(Long id);
+    List<MatchSchedule> findMatchesByTeamId(Long teamId); //Thới bổ sung
     public Page<MatchSchedule> searchByTeam(String team, Pageable pageable);
     Page<MatchSchedule> searchByDate(LocalDate date, Pageable pageable);
     Page<MatchSchedule> searchByRound(Integer round, Pageable pageable);
