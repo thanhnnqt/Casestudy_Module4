@@ -21,7 +21,6 @@
             <label class="form-label">Đội bóng</label>
             <select name="team" class="form-select">
                 <option value="">-- Chọn đội bóng --</option>
-
                 <option th:each="t : ${teamsList}"
                         th:value="${t.name}"
                         th:text="${t.name}"
