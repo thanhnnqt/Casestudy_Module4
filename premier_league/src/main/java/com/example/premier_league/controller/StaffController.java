@@ -12,10 +12,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/staff")
+@RequestMapping("/staffs")
 public class StaffController {
 
     private final IStaffService staffService;
@@ -28,9 +31,19 @@ public class StaffController {
     @GetMapping
     public String getAllStaff(Model model) {
         List<Staff> staffList = staffService.findAll();
-        model.addAttribute("staffList", staffList);
+
+        // group theo position, giữ thứ tự xuất hiện
+        Map<String, List<Staff>> staffByPosition = staffList.stream()
+                .collect(Collectors.groupingBy(
+                        Staff::getPosition,
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        model.addAttribute("staffByPosition", staffByPosition);
         return "staff/list";
     }
+
 
     // ==================== TẠO MỚI ====================
     @GetMapping("/create")
@@ -53,7 +66,7 @@ public class StaffController {
         staffService.save(staff);
 
         redirect.addFlashAttribute("message", "Thêm mới nhân viên thành công!");
-        return "redirect:/staff";
+        return "redirect:/staffs";
     }
 
     // ==================== CHI TIẾT ====================
@@ -103,7 +116,7 @@ public class StaffController {
         staffService.update(existingStaff);
 
         redirect.addFlashAttribute("message", "Cập nhật nhân viên thành công!");
-        return "redirect:/staff";
+        return "redirect:/staffs";
     }
 
     // ==================== XÓA ====================
@@ -116,7 +129,7 @@ public class StaffController {
 
         staffService.delete(id);
         redirect.addFlashAttribute("message", "Xóa nhân viên thành công!");
-        return "redirect:/staff";
+        return "redirect:/staffs";
     }
 
 //    // ==================== TÌM KIẾM ====================

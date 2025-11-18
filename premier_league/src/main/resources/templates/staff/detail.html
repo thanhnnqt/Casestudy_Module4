@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout('Chi tiết nhân viên', 'staffs', ~{::content})">
+
+<th:block th:fragment="content">
+
+  <h2 class="mb-4 text-uppercase fw-bold" style="letter-spacing: 1px;">Thông tin chi tiết nhân viên</h2>
+
+  <div class="row">
+    <!-- Avatar -->
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <img class="card-img-top"
+             th:src="${staff.avatarUrl}"
+             alt="avatar"
+             onerror="this.src='https://via.placeholder.com/400x300?text=No+Image';">
+      </div>
+    </div>
+
+    <!-- Thông tin -->
+    <div class="col-md-8">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0" th:text="${staff.fullName}">Tên nhân viên</h3>
+        <div>
+          <a th:href="@{'/staffs/update/' + ${staff.id}}" class="btn btn-sm btn-outline-primary">
+            Sửa
+          </a>
+          <a th:href="@{'/staffs/delete/' + ${staff.id}}"
+             onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?')"
+             class="btn btn-sm btn-outline-danger">
+            Xóa
+          </a>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Ngày sinh: </strong>
+            <span th:text="${staff.dateOfBirth}"></span>
+          </p>
+          <p><strong>Giới tính: </strong>
+            <span th:text="${staff.gender}"></span>
+          </p>
+          <p><strong>Quốc tịch: </strong>
+            <span th:text="${staff.nationality}"></span>
+          </p>
+          <p><strong>Ngày gia nhập: </strong>
+            <span th:text="${staff.joinDate}"></span>
+          </p>
+        </div>
+
+        <div class="col-md-6">
+          <p><strong>Vị trí công tác: </strong>
+            <span th:text="${staff.position}"></span>
+          </p>
+          <p><strong>Vai trò: </strong>
+            <span th:text="${staff.role}"></span>
+          </p>
+          <p><strong>Đội: </strong>
+            <span th:text="${staff.team != null ? staff.team.name : 'Chưa gán đội'}"></span>
+          </p>
+          <p><strong>Trạng thái: </strong>
+            <span th:text="${staff.status}"></span>
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Số điện thoại: </strong>
+            <span th:text="${staff.phoneNumber}"></span>
+          </p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Email: </strong>
+            <span th:text="${staff.email}"></span>
+          </p>
+        </div>
+      </div>
+
+      <a href="/staffs" class="btn btn-secondary mt-2">Quay lại danh sách</a>
+    </div>
+  </div>
+
+</th:block>
+</html>
