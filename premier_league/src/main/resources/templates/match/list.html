@@ -5,6 +5,7 @@
     <title>Lịch Thi Đấu Premier League</title>
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
 </head>
 
 <body>
@@ -13,14 +14,20 @@
 
     <h2 class="mb-4">Danh Sách Lịch Thi Đấu Premier League</h2>
 
-    <!-- ===================== SEARCH FORM ===================== -->
+    <!-- ========================== SEARCH FORM ============================= -->
     <form class="row mb-4" th:action="@{/admin/matches}" method="get">
 
         <div class="col-md-4">
             <label class="form-label">Đội bóng</label>
-            <input type="text" name="team" class="form-control"
-                   placeholder="Nhập tên đội"
-                   th:value="${team}">
+            <select name="team" class="form-select">
+                <option value="">-- Chọn đội bóng --</option>
+
+                <option th:each="t : ${teamsList}"
+                        th:value="${t.name}"
+                        th:text="${t.name}"
+                        th:selected="${team == t.name}">
+                </option>
+            </select>
         </div>
 
         <div class="col-md-3">
@@ -40,14 +47,12 @@
         </div>
 
     </form>
-    <!-- ======================================================== -->
 
-
-    <!-- ===================== TABLE ===================== -->
+    <!-- =============================== TABLE ============================== -->
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
         <tr>
-            <th>#</th>
+            <th>STT</th>
             <th>Tên trận</th>
             <th>Vòng</th>
             <th>Ngày</th>
@@ -63,23 +68,20 @@
         <tbody>
         <tr th:each="match, iterStat : ${matches}">
             <td th:text="${iterStat.count}"></td>
-
             <td th:text="${match.name}"></td>
-
             <td th:text="${match.round}"></td>
-
             <td th:text="${match.matchDate}"></td>
-
             <td th:text="${match.matchTime}"></td>
-
             <td th:text="${match.homeTeam.name}"></td>
-
             <td th:text="${match.awayTeam.name}"></td>
-
             <td th:text="${match.note}"></td>
 
             <td>
                 <span th:switch="${match.status}">
+
+                    <span th:case="${T(com.example.premier_league.entity.MatchStatus).UPCOMING}"
+                          class="badge bg-info text-dark">Lịch đấu</span>
+
                     <span th:case="${T(com.example.premier_league.entity.MatchStatus).SCHEDULED}"
                           class="badge bg-success">Sắp diễn ra</span>
 
@@ -93,85 +95,93 @@
                           class="badge bg-secondary">Đã kết thúc</span>
 
                     <span th:case="*">Không xác định</span>
+
                 </span>
             </td>
 
-            <!-- ===================== ACTIONS ===================== -->
             <td class="d-flex gap-2">
 
-                <!-- Hoãn trận -->
-                <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).SCHEDULED}"
+                <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).UPCOMING}"
+                   th:href="@{'/admin/matches/start/' + ${match.id}}"
+                   class="btn btn-success btn-sm">Bắt đầu</a>
+
+                <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).UPCOMING}"
                    th:href="@{'/admin/matches/postpone/' + ${match.id}}"
                    class="btn btn-warning btn-sm">Hoãn</a>
 
-                <!-- Bắt đầu trận -->
                 <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).SCHEDULED}"
                    th:href="@{'/admin/matches/start/' + ${match.id}}"
                    class="btn btn-success btn-sm">Bắt đầu</a>
 
-                <!-- Dời lịch -->
+                <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).SCHEDULED}"
+                   th:href="@{'/admin/matches/postpone/' + ${match.id}}"
+                   class="btn btn-warning btn-sm">Hoãn</a>
+
                 <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).POSTPONED}"
                    th:href="@{'/admin/matches/reschedule/' + ${match.id}}"
                    class="btn btn-primary btn-sm">Dời lịch</a>
 
-                <!-- Không hoãn nữa -->
                 <form th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).POSTPONED}"
                       th:action="@{'/admin/matches/resume/' + ${match.id}}"
                       method="post">
                     <button class="btn btn-success btn-sm">Không hoãn</button>
                 </form>
 
-                <!-- Xem trận đang diễn ra -->
                 <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).LIVE}"
                    th:href="@{'/admin/matches/live/' + ${match.id}}"
                    class="btn btn-danger btn-sm">Xem trận</a>
 
+                <form th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).LIVE}"
+                      th:action="@{'/admin/matches/finish/' + ${match.id}}"
+                      method="post">
+                    <button class="btn btn-dark btn-sm">Kết thúc</button>
+                </form>
+
             </td>
+
         </tr>
         </tbody>
     </table>
-    <!-- ======================================================== -->
 
+    <!-- ======================== PAGINATION ================================ -->
 
-    <!-- ===================== PAGINATION ===================== -->
     <div class="d-flex justify-content-center mt-3">
-        <nav aria-label="Page navigation">
+        <nav>
             <ul class="pagination">
 
                 <!-- Previous -->
                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                     <a class="page-link"
-                       th:href="@{/admin/matches(
-        page=${currentPage - 1},
-        team=${team != null ? team : ''},
-        date=${date != null ? date : ''},
-        round=${round != null ? round : ''})}">
+                       th:href="@{/admin/matches(page=${currentPage - 1}, team=${team}, date=${date}, round=${round})}">
                         «
                     </a>
                 </li>
 
-                <!-- Page numbers -->
+                <!-- ... trước -->
+                <li class="page-item disabled" th:if="${startPage > 0}">
+                    <span class="page-link">...</span>
+                </li>
+
+                <!-- 1 trang trước | current | 1 trang sau -->
                 <li class="page-item"
-                    th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:each="i : ${#numbers.sequence(startPage, endPage)}"
                     th:classappend="${i == currentPage} ? 'active'">
+
                     <a class="page-link"
                        th:text="${i + 1}"
-                       th:href="@{/admin/matches(
-        page=${i},
-        team=${team != null ? team : ''},
-        date=${date != null ? date : ''},
-        round=${round != null ? round : ''})}">
+                       th:href="@{/admin/matches(page=${i}, team=${team}, date=${date}, round=${round})}">
                     </a>
+                </li>
+
+                <!-- ... sau -->
+                <li class="page-item disabled" th:if="${endPage < totalPages - 1}">
+                    <span class="page-link">...</span>
                 </li>
 
                 <!-- Next -->
                 <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
                     <a class="page-link"
-                       th:href="@{/admin/matches(
-        page=${currentPage + 1},
-        team=${team != null ? team : ''},
-        date=${date != null ? date : ''},
-        round=${round != null ? round : ''})}">
+                       th:href="@{/admin/matches(page=${currentPage + 1}, team=${team}, date=${date}, round=${round})}">
                         »
                     </a>
                 </li>
@@ -179,7 +189,6 @@
             </ul>
         </nav>
     </div>
-    <!-- ======================================================== -->
 
 </div>
 
