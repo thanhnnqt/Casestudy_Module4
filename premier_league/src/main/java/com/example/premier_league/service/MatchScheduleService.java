@@ -104,6 +104,11 @@ public class MatchScheduleService implements IMatchScheduleService {
         return matchScheduleRepository.save(match);
     }
 
+    @Override
+    public List<MatchSchedule> findMatchesByTeamId(Long teamId) {
+        return List.of();
+    }
+
 
 
     /* ================= RESCHEDULE ================= */
@@ -149,9 +154,5 @@ public class MatchScheduleService implements IMatchScheduleService {
         } else if (daysLeft < 2 && daysLeft >= 0) {
             match.setStatus(MatchStatus.SCHEDULED);
         }
-    @Override
-    public List<MatchSchedule> findMatchesByTeamId(Long teamId) {
-        // Sử dụng method đã có sẵn trong repository
-        return matchScheduleRepository.findAllByHomeTeamIdOrAwayTeamIdOrderByMatchDateAscMatchTimeAsc(teamId, teamId);
     }
 }
