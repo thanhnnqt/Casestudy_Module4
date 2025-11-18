@@ -28,4 +28,9 @@ public class PlayerService implements IPlayerService {
     public List<Player> findAllByIds(List<Long> playerIds) {
         return iPlayerRepository.findAllById(playerIds);
     }
+
+    @Override
+    public List<Player> findAll() {
+        return iPlayerRepository.findAll();
+    }
 }

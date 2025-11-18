@@ -2,7 +2,7 @@ package com.example.premier_league.controller;
 
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
-import com.example.premier_league.service.impl.MatchScheduleService;
+import com.example.premier_league.service.IMatchScheduleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,9 +16,9 @@ import java.time.LocalDate;
 @RequestMapping("/admin")
 public class MatchScheduleController {
 
-    private final MatchScheduleService matchScheduleService;
+    private final IMatchScheduleService matchScheduleService;
 
-    public MatchScheduleController(MatchScheduleService matchScheduleService) {
+    public MatchScheduleController(IMatchScheduleService matchScheduleService) {
         this.matchScheduleService = matchScheduleService;
     }
 
