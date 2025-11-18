@@ -2,17 +2,18 @@ package com.example.premier_league.controller;
 
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
-import com.example.premier_league.serivce.MatchScheduleService;
-import lombok.RequiredArgsConstructor;
+import com.example.premier_league.service.MatchScheduleService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Controller
-@RequestMapping("")
+@RequestMapping("/admin")
 public class MatchScheduleController {
 
     private final MatchScheduleService matchScheduleService;
@@ -21,42 +22,97 @@ public class MatchScheduleController {
         this.matchScheduleService = matchScheduleService;
     }
 
+    /* ======================= LIST + SEARCH + PAGINATION ======================= */
+
     @GetMapping("/matches")
-    public String listMatches(Model model) {
-        model.addAttribute("matches", matchScheduleService.getAllMatches());
+    public String listMatches(Model model,
+                              @RequestParam(required = false) String team,
+                              @RequestParam(required = false) LocalDate date,
+                              @RequestParam(required = false) String round,   // IMPORTANT: nhận String để tránh lỗi
+                              @RequestParam(defaultValue = "0") int page) {
+
+        Pageable pageable = PageRequest.of(page, 5); // 5 trận mỗi trang
+        Page<MatchSchedule> matchPage;
+
+        Integer roundValue = null;
+        if (round != null && !round.isEmpty()) {
+            try {
+                roundValue = Integer.parseInt(round);
+                model.addAttribute("round", round);
+            } catch (NumberFormatException e) {
+                model.addAttribute("message", "Vòng đấu phải là số!");
+                roundValue = null;
+            }
+        }
+
+        if (team != null && !team.isEmpty()) {
+            matchPage = matchScheduleService.searchByTeam(team, pageable);
+            model.addAttribute("team", team);
+        }
+        else if (date != null) {
+            matchPage = matchScheduleService.searchByDate(date, pageable);
+            model.addAttribute("date", date);
+        }
+        else if (roundValue != null) {
+            matchPage = matchScheduleService.searchByRound(roundValue, pageable);
+        }
+        else {
+            matchPage = matchScheduleService.getAllMatches(pageable);
+        }
+
+        model.addAttribute("matches", matchPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", matchPage.getTotalPages());
+
         return "match/list";
     }
 
+
+
+    /* ======================= ACTIONS ======================= */
+
     @GetMapping("/matches/postpone/{id}")
     public String postponeMatch(@PathVariable Long id) {
-        MatchSchedule match = matchScheduleService.findById(id);
-        match.setStatus(MatchStatus.POSTPONED);
-        matchScheduleService.save(match);
-        return "redirect:/matches";
+        matchScheduleService.updateStatus(id, MatchStatus.POSTPONED);
+        return "redirect:/admin/matches";
     }
+
+    @PostMapping("/matches/resume/{id}")
+    public String resumeMatch(@PathVariable Long id) {
+        matchScheduleService.updateStatus(id, MatchStatus.SCHEDULED);
+        return "redirect:/admin/matches";
+    }
+
+    @GetMapping("/matches/start/{id}")
+    public String startMatch(@PathVariable Long id) {
+        matchScheduleService.updateStatus(id, MatchStatus.LIVE);
+        return "redirect:/admin/matches/live/" + id;
+    }
+
+    @GetMapping("/matches/live/{id}")
+    public String liveMatch(@PathVariable Long id, Model model) {
+        model.addAttribute("match", matchScheduleService.findById(id));
+        return "match/live";
+    }
+
+    @PostMapping("/matches/finish/{id}")
+    public String finishMatch(@PathVariable Long id) {
+        matchScheduleService.updateStatus(id, MatchStatus.FINISHED);
+        return "redirect:/admin/matches";
+    }
+
     @GetMapping("/matches/reschedule/{id}")
     public String showRescheduleForm(@PathVariable Long id, Model model) {
         model.addAttribute("match", matchScheduleService.findById(id));
         return "match/reschedule";
     }
 
-    // CẬP NHẬT LỊCH MỚI
     @PostMapping("/matches/reschedule/save/{id}")
     public String rescheduleMatch(@PathVariable Long id,
                                   @RequestParam LocalDate newDate,
-                                  @RequestParam LocalTime newTime) {
+                                  @RequestParam String newTime) {
 
-        MatchSchedule match = matchScheduleService.findById(id);
-        match.setMatchDate(newDate);
-        match.setMatchTime(newTime);
-        match.setStatus(MatchStatus.SCHEDULED); // Đặt lại thành sắp diễn ra
-
-        matchScheduleService.save(match);
-        return "redirect:/matches";
-    }
-    @PostMapping("/matches/resume/{id}")
-    public String resumeMatch(@PathVariable Long id) {
-        matchScheduleService.resumeMatch(id);
-        return "redirect:/matches";
+        matchScheduleService.reschedule(id, newDate, newTime);
+        return "redirect:/admin/matches";
     }
 }
