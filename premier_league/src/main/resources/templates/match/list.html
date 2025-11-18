@@ -18,9 +18,15 @@
 
         <div class="col-md-4">
             <label class="form-label">Đội bóng</label>
-            <input type="text" name="team" class="form-control"
-                   placeholder="Nhập tên đội"
-                   th:value="${team}">
+            <select name="team" class="form-select">
+                <option value="">-- Chọn đội bóng --</option>
+
+                <option th:each="t : ${teamsList}"
+                        th:value="${t.name}"
+                        th:text="${t.name}"
+                        th:selected="${team == t.name}">
+                </option>
+            </select>
         </div>
 
         <div class="col-md-3">
@@ -61,7 +67,6 @@
         <tbody>
         <tr th:each="match, iterStat : ${matches}">
             <td th:text="${iterStat.count}"></td>
-
             <td th:text="${match.name}"></td>
             <td th:text="${match.round}"></td>
             <td th:text="${match.matchDate}"></td>
@@ -136,7 +141,6 @@
         </tr>
         </tbody>
     </table>
-
 
     <!-- ======================== PAGINATION ================================ -->
 

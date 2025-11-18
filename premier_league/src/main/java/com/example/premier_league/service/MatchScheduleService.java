@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
 @Service
@@ -110,9 +111,10 @@ public class MatchScheduleService implements IMatchScheduleService {
         MatchSchedule match = findById(id);
 
         match.setMatchDate(newDate);
-        match.setMatchTime(java.time.LocalTime.parse(newTime));
+        match.setMatchTime(LocalTime.parse(newTime));
 
-        autoUpdateStatus(match);
+        // khi dời lịch thì bỏ trạng thái POSTPONED
+        autoUpdateStatus(match);  // cập nhật UPCOMING hoặc SCHEDULED
 
         matchScheduleRepository.save(match);
     }
