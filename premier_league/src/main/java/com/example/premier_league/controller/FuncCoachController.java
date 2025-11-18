@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/coach/team/{teamId}")
 @RequiredArgsConstructor
-public class CoachController {
+public class FuncCoachController {
 
     private final IPlayerService iPlayerService;
     private final IMatchScheduleService iMatchScheduleService;

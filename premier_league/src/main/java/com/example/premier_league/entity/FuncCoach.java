@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Coach {
+public class FuncCoach {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
