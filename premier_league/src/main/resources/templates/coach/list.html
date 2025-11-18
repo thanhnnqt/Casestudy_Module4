@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout('Ban huấn luyện', 'coaches', ~{::content})">
+
+<th:block th:fragment="content">
+
+    <style>
+        .page-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .coach-card {
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .coach-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        }
+
+        .coach-avatar-wrapper {
+            display: block;
+            overflow: hidden;
+        }
+
+        .coach-avatar {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .coach-card:hover .coach-avatar {
+            transform: scale(1.03);
+        }
+
+        .coach-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .coach-position-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            border-left: 4px solid #0d6efd;
+            padding-left: 8px;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            color: #0d6efd;
+        }
+
+        .coach-role {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .coach-meta {
+            font-size: 0.85rem;
+        }
+
+        .badge-status {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 50px;
+        }
+
+        .empty-text {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            margin-top: 40px;
+        }
+
+        .position-block {
+            margin-bottom: 32px;
+        }
+    </style>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title mb-0">Ban huấn luyện</h2>
+        <a href="/coaches/create" class="btn btn-primary">
+            + Thêm huấn luyện viên
+        </a>
+    </div>
+
+    <!-- Thông báo -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <!-- Nếu không có coach -->
+    <div th:if="${#maps.isEmpty(coachesByRole)}" class="empty-text">
+        Chưa có huấn luyện viên nào trong danh sách.
+    </div>
+
+    <!-- Group theo role -->
+    <div th:each="entry : ${coachesByRole}" class="position-block">
+
+        <!-- Tiêu đề chức vụ -->
+        <div class="coach-position-title" th:text="${entry.key}">Head Coach</div>
+
+        <!-- Hàng các thẻ HLV cùng chức vụ -->
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+            <div class="col" th:each="coach : ${entry.value}">
+                <div class="card coach-card h-100 shadow-sm">
+
+                    <!-- Avatar clickable → /coaches/{id} -->
+                    <a th:href="@{'/coaches/' + ${coach.id}}" class="coach-avatar-wrapper">
+                        <img class="coach-avatar"
+                             th:src="${coach.avatarUrl}"
+                             alt="avatar"
+                             onerror="this.src='https://via.placeholder.com/400x300?text=No+Image';">
+                    </a>
+
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-2">
+                            <div class="coach-name" th:text="${coach.fullName}"></div>
+                            <div class="coach-role">
+                                <i class="bi bi-person-badge"></i>
+                                <span th:text="${coach.role}"></span>
+                            </div>
+                        </div>
+
+                        <div class="coach-meta mb-2">
+                            <div>
+                                <strong>Đội: </strong>
+                                <span th:text="${coach.team != null ? coach.team.name : 'Chưa gán đội'}"></span>
+                            </div>
+                            <div>
+                                <strong>Quốc tịch: </strong>
+                                <span th:text="${coach.nationality}"></span>
+                            </div>
+                            <div th:if="${coach.dateOfBirth != null}">
+                                <strong>Ngày sinh: </strong>
+                                <span th:text="${coach.dateOfBirth}"></span>
+                            </div>
+                            <div th:if="${coach.joinDate != null}">
+                                <strong>Ngày gia nhập: </strong>
+                                <span th:text="${coach.joinDate}"></span>
+                            </div>
+                        </div>
+
+                        <div class="coach-meta mt-auto">
+                            <div>
+                                <strong>SĐT: </strong>
+                                <span th:text="${coach.phone}"></span>
+                            </div>
+                            <div>
+                                <strong>Email: </strong>
+                                <span th:text="${coach.email}"></span>
+                            </div>
+                            <div class="mt-2">
+                <span class="badge badge-status bg-success"
+                      th:if="${coach.status == 'Active'}"
+                      th:text="${coach.status}"></span>
+                                <span class="badge badge-status bg-secondary"
+                                      th:if="${coach.status != 'Active'}"
+                                      th:text="${coach.status}"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</th:block>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(pageTitle, activeMenu, content)">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} ?: 'Club Owner Dashboard'">Club Owner Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f4f6fb;
+        }
+
+        /* ====== SIDEBAR & TOPBAR CHUNG ====== */
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: #111827;
+            color: #e5e7eb;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 1rem 1.25rem;
+        }
+
+        .sidebar .brand {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .sidebar .brand span.logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            background: linear-gradient(135deg,#ec4899,#8b5cf6);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: .9rem;
+            color: #fff;
+        }
+
+        .sidebar .nav-link {
+            color: #9ca3af;
+            font-size: 0.95rem;
+            padding: .55rem .75rem;
+            border-radius: .5rem;
+            margin-bottom: .15rem;
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.06);
+            color: #f9fafb;
+        }
+
+        .content-wrapper {
+            margin-left: 250px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            height: 64px;
+            padding: 0 1.75rem;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .search-box-topbar input {
+            border-radius: 999px;
+            padding-left: 2.5rem;
+            font-size: 0.9rem;
+        }
+
+        .search-box-topbar .bi-search {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: .9rem;
+        }
+
+        .owner-info {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+
+        .owner-info img {
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            object-fit: cover;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                display: none;
+            }
+            .content-wrapper {
+                margin-left: 0;
+            }
+        }
+        .pl-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            background: white;
+            padding: 4px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR CHUNG -->
+<aside class="sidebar d-none d-lg-block">
+    <div class="brand">
+        <img src="https://images.seeklogo.com/logo-png/28/1/premier-league-new-logo-png_seeklogo-286461.png"
+             alt="Premier League Logo"
+             class="pl-logo">
+        <span>Premier League</span>
+    </div>
+
+    <nav class="mt-3">
+        <a href="/admin/owner"
+           class="nav-link"
+           th:classappend="${activeMenu} == 'dashboard' ? ' active'">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a href="/players"
+           class="nav-link"
+           th:classappend="${activeMenu} == 'players' ? ' active'">
+            <i class="bi bi-people-fill"></i> Quản lý cầu thủ
+        </a>
+        <a href="/coaches"
+           class="nav-link"
+           th:classappend="${activeMenu} == 'coaches' ? ' active'">
+            <i class="bi bi-person-workspace"></i> Ban huấn luyện
+        </a>
+
+        <a href="/staffs"
+           class="nav-link"
+           th:classappend="${activeMenu} == 'staffs' ? ' active'">
+            <i class="bi bi-people"></i> Nhân viên CLB
+        </a>
+        <a href="/matches"
+           class="nav-link"
+           th:classappend="${activeMenu} == 'matches' ? ' active'">
+            <i class="bi bi-calendar-event"></i> Lịch thi đấu
+        </a>
+        <a href="/reports"
+           class="nav-link"
+           th:classappend="${activeMenu} == 'reports' ? ' active'">
+            <i class="bi bi-bar-chart-line"></i> Thống kê & Báo cáo
+        </a>
+        <a href="/finances"
+           class="nav-link"
+           th:classappend="${activeMenu} == 'finances' ? ' active'">
+            <i class="bi bi-cash-stack"></i> Tài chính CLB
+        </a>
+        <hr class="border-secondary-subtle">
+        <a href="/settings"
+           class="nav-link"
+           th:classappend="${activeMenu} == 'settings' ? ' active'">
+            <i class="bi bi-gear"></i> Cài đặt hệ thống
+        </a>
+    </nav>
+</aside>
+
+<!-- CONTENT -->
+<div class="content-wrapper">
+    <!-- TOPBAR CHUNG -->
+    <header class="topbar">
+        <div class="d-flex align-items-center gap-3">
+            <h5 class="mb-0 fw-semibold d-none d-md-block"
+                th:text="${pageTitle}">Tiêu đề trang</h5>
+
+            <div class="position-relative search-box-topbar d-none d-md-block">
+                <i class="bi bi-search"></i>
+                <input type="text" class="form-control form-control-sm"
+                       placeholder="Tìm cầu thủ, trận đấu, staff...">
+            </div>
+        </div>
+
+        <div class="owner-info">
+      <span class="text-end d-none d-sm-block">
+        <div class="small fw-semibold">Ông chủ Arsenal</div>
+        <div class="small text-muted">Club Owner</div>
+      </span>
+            <img src="https://i.pravatar.cc/100?img=12" alt="owner">
+        </div>
+    </header>
+
+    <!-- VÙNG NHÉT NỘI DUNG TRANG CON -->
+    <main class="p-4">
+        <div th:replace="${content}"></div>
+    </main>
+</div>
+
+</body>
+</html>
