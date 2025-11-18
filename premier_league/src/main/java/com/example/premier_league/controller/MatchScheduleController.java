@@ -80,7 +80,6 @@ public class MatchScheduleController {
         return "match/list";
     }
 
-
     /* ======================== Actions ======================== */
 
     @GetMapping("/matches/postpone/{id}")
