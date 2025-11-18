@@ -8,4 +8,5 @@ public interface IPlayerService {
     List<Player> findByTeamId(Long teamId);
     Player findById(Long playerId);
     List<Player> findAllByIds(List<Long> playerIds);
+    List<Player> findAll();
 }

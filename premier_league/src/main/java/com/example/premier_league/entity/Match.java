@@ -26,9 +26,9 @@ public class Match {
     @JoinColumn(name = "away_team_id", nullable = false)
     private Team awayTeam;
 
-    // Tỉ số
-    private Integer homeScore;
-    private Integer awayScore;
+    // Tỉ số - mặc định = 0
+    private Integer homeScore = 0;
+    private Integer awayScore = 0;
 
     // Thời gian thi đấu
     private LocalDateTime matchDate;
@@ -41,5 +41,5 @@ public class Match {
 
     // Trạng thái trận đấu
     @Enumerated(EnumType.STRING)
-    private MatchStatus status; // SCHEDULED / POSTPONED / LIVE / FINISHED
+    private MatchStatus status = MatchStatus.SCHEDULED; // mặc định SCHEDULED
 }

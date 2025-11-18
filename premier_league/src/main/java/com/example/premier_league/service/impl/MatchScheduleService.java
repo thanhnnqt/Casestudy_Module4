@@ -1,8 +1,9 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
 import com.example.premier_league.repository.IMatchScheduleRepository;
+import com.example.premier_league.service.IMatchScheduleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

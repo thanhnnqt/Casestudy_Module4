@@ -19,14 +19,14 @@ public class Prize {
     private String type;
     private Double amount;
     private LocalDate awardedDate;
-   /* @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "team_id")
-    private Team team;  */
+    private Team team;
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
-  /*  @ManyToOne
+/*    @ManyToOne
     @JoinColumn(name = "season_id")
     private Season season;
-    private String description;    */
+    private String description; */
 }

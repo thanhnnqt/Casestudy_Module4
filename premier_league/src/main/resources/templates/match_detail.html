@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết trận đấu</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#38003c',
+                        secondary: '#00ff85',
+                        homeRed: '#ff2c2c',
+                        awayBlue: '#00a2ff'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+<div th:replace="layout/navbar :: header"></div>
+
+<div class="max-w-5xl mx-auto p-4 mt-6">
+
+    <!-- Header -->
+    <div class="bg-black text-white rounded-2xl p-6 shadow-lg">
+
+        <div class="flex justify-between text-gray-300 text-sm mb-4">
+            <span>Premier League</span>
+            <span th:text="${#temporals.format(match.matchDate, 'E, dd/MM')}">Cn, 9/11</span>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <!-- HOME -->
+            <div class="w-1/3 text-center">
+                <img th:src="${match.homeTeam.logoUrl}" class="w-14 mx-auto mb-2">
+                <h2 class="font-bold text-lg" th:text="${match.homeTeam.name}"></h2>
+            </div>
+
+            <!-- SCORE -->
+            <div class="w-1/3 text-center">
+                <div class="text-6xl font-black">
+                    <span id="homeScore" th:text="${match.homeScore}">0</span>
+                    <span class="mx-4">-</span>
+                    <span id="awayScore" th:text="${match.awayScore}">0</span>
+                </div>
+                <p class="text-gray-400 mt-1" th:text="${match.status}"></p>
+            </div>
+
+            <!-- AWAY -->
+            <div class="w-1/3 text-center">
+                <img th:src="${match.awayTeam.logoUrl}" class="w-14 mx-auto mb-2">
+                <h2 class="font-bold text-lg" th:text="${match.awayTeam.name}"></h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="flex mt-8 border-b">
+        <button id="tabEvents"
+                class="px-6 py-3 border-b-4 border-primary text-primary font-semibold">Diễn biến chính</button>
+
+        <button id="tabStats"
+                class="px-6 py-3 hover:text-primary font-semibold text-gray-600">Thống kê</button>
+    </div>
+
+    <!-- CONTENT WRAPPER -->
+    <div class="mt-6">
+
+        <!-- Diễn biến chính -->
+        <div id="eventsSection" class="bg-white rounded-xl p-6 shadow space-y-4">
+
+            <h3 class="text-xl font-bold mb-4 text-primary">Diễn biến chính</h3>
+
+            <ul id="eventList" class="space-y-3">
+                <li th:each="ev : ${events}"
+                    class="bg-gray-50 p-3 rounded-lg border shadow-sm flex justify-between">
+
+                    <span class="font-semibold" th:text="${ev.minute + `'`}"></span>
+                    <span th:text="${ev.description}"></span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Thống kê -->
+        <div id="statsSection" class="hidden bg-black text-white rounded-2xl p-6 shadow-xl mt-6">
+
+            <h3 class="text-center text-gray-300 mb-6 tracking-wider">THỐNG KÊ ĐỘI TUYỂN</h3>
+
+            <div class="space-y-6">
+
+                <div class="grid grid-cols-3 text-center items-center">
+                    <div class="text-homeRed text-xl font-bold" th:text="${stats.shotsHome}">14</div>
+                    <div class="text-gray-300 text-sm">Số lần sút</div>
+                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.shotsAway}">4</div>
+                </div>
+
+                <div class="grid grid-cols-3 text-center items-center">
+                    <div class="text-homeRed text-xl font-bold" th:text="${stats.shotsOnTargetHome}">8</div>
+                    <div class="text-gray-300 text-sm">Sút trúng đích</div>
+                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.shotsOnTargetAway}">1</div>
+                </div>
+
+                <div class="grid grid-cols-3 text-center items-center">
+                    <div class="text-homeRed text-xl font-bold" th:text="${stats.possessionHome + '%'}"></div>
+                    <div class="text-gray-300 text-sm">Kiểm soát bóng</div>
+                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.possessionAway + '%'}"></div>
+                </div>
+
+                <div class="grid grid-cols-3 text-center items-center">
+                    <div class="text-homeRed text-xl font-bold" th:text="${stats.passesHome}">368</div>
+                    <div class="text-gray-300 text-sm">Chuyền bóng</div>
+                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.passesAway}">414</div>
+                </div>
+
+                <div class="grid grid-cols-3 text-center items-center">
+                    <div class="text-homeRed text-xl font-bold" th:text="${stats.accuracyHome + '%'}">80%</div>
+                    <div class="text-gray-300 text-sm">Chuyền chính xác</div>
+                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.accuracyAway + '%'}">88%</div>
+                </div>
+
+                <div class="grid grid-cols-3 text-center items-center">
+                    <div class="text-homeRed text-xl font-bold" th:text="${stats.foulsHome}">11</div>
+                    <div class="text-gray-300 text-sm">Phạm lỗi</div>
+                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.foulsAway}">12</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div th:replace="layout/footer :: footer" class="mt-auto"></div>
+
+<script>
+    lucide.createIcons();
+
+    const tabEvents = document.getElementById("tabEvents");
+    const tabStats = document.getElementById("tabStats");
+
+    const eventsSection = document.getElementById("eventsSection");
+    const statsSection = document.getElementById("statsSection");
+
+    // switch tab
+    tabEvents.onclick = () => {
+        tabEvents.classList.add("border-primary", "text-primary");
+        tabStats.classList.remove("border-primary", "text-primary");
+
+        eventsSection.classList.remove("hidden");
+        statsSection.classList.add("hidden");
+    };
+
+    tabStats.onclick = () => {
+        tabStats.classList.add("border-primary", "text-primary");
+        tabEvents.classList.remove("border-primary", "text-primary");
+
+        statsSection.classList.remove("hidden");
+        eventsSection.classList.add("hidden");
+    };
+</script>
+
+</body>
+</html>

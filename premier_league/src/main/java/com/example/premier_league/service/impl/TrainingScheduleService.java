@@ -1,7 +1,8 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 import com.example.premier_league.entity.TrainingSchedule;
 import com.example.premier_league.repository.ITrainingScheduleRepository;
+import com.example.premier_league.service.ITrainingScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

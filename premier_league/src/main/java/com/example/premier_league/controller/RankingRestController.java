@@ -3,7 +3,7 @@ package com.example.premier_league.controller;
 
 
 import com.example.premier_league.entity.Team;
-import com.example.premier_league.service.RankingService;
+import com.example.premier_league.service.IRankingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import java.util.List;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class RankingRestController {
-    private final RankingService rankingService;
+    private final IRankingService rankingService;
 
 
     @GetMapping("/rankings")

@@ -1,14 +1,10 @@
 package com.example.premier_league.controller;
 
-import com.example.premier_league.entity.MatchSchedule;
-import com.example.premier_league.service.MatchScheduleService;
+import com.example.premier_league.service.impl.MatchScheduleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
