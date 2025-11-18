@@ -22,6 +22,7 @@ public class CoachController {
     private final ITrainingScheduleService iTrainingScheduleService;
     private final ITeamService iTeamService;
     private final IMatchLineupService iMatchLineupService;
+    private final IFormationService iFormationService; // <-- THÊM MỚI
 
     /**
      * Helper
@@ -38,20 +39,36 @@ public class CoachController {
     }
 
     /**
+     * TRANG CHÍNH (REDIRECT TỚI LỊCH THI ĐẤU)
+     */
+    @GetMapping
+    public String coachHome(@PathVariable Long teamId) {
+        return "redirect:/coach/team/" + teamId + "/schedule";
+    }
+
+    /**
      * Yêu cầu 1: Xem danh sách cầu thủ
      */
     @GetMapping("/players")
     public String getPlayerList(@PathVariable Long teamId, Model model) {
         model.addAttribute("players", iPlayerService.findByTeamId(teamId));
+        // Thêm các thuộc tính cho layout
+        model.addAttribute("pageTitle", "Danh sách cầu thủ");
+        model.addAttribute("activePage", "players");
         return "coach/player_list";
     }
 
     /**
-     * Yêu cầu 2: Xem lịch thi đấu
+     * Yêu cầu 2: Xem lịch thi đấu (ĐÃ CẬP NHẬT)
      */
     @GetMapping("/schedule")
     public String getMatchSchedule(@PathVariable Long teamId, Model model) {
-        model.addAttribute("matches", iMatchScheduleService.findMatchesByTeamId(teamId));
+        // Sử dụng DTO mới để lấy lịch thi đấu KÈM TRẠNG THÁI ĐỘI HÌNH
+        model.addAttribute("matchesDto", iMatchScheduleService.getCoachMatchSchedules(teamId));
+
+        // Thêm các thuộc tính cho layout
+        model.addAttribute("pageTitle", "Lịch thi đấu & Đội hình");
+        model.addAttribute("activePage", "schedule");
         return "coach/match_schedule";
     }
 
@@ -65,6 +82,9 @@ public class CoachController {
     @GetMapping("/training")
     public String listTrainingSchedules(@PathVariable Long teamId, Model model) {
         model.addAttribute("schedules", iTrainingScheduleService.findByTeamId(teamId));
+        // Thêm các thuộc tính cho layout
+        model.addAttribute("pageTitle", "Quản lý Lịch tập");
+        model.addAttribute("activePage", "training");
         return "coach/training_list";
     }
 
@@ -75,6 +95,9 @@ public class CoachController {
     public String showAddTrainingForm(Model model) {
         model.addAttribute("schedule", new TrainingSchedule());
         model.addAttribute("formTitle", "Thêm lịch tập mới");
+        // Thêm các thuộc tính cho layout
+        model.addAttribute("pageTitle", "Thêm Lịch tập");
+        model.addAttribute("activePage", "training");
         return "coach/training_form";
     }
 
@@ -90,6 +113,9 @@ public class CoachController {
         }
         model.addAttribute("schedule", schedule);
         model.addAttribute("formTitle", "Chỉnh sửa lịch tập");
+        // Thêm các thuộc tính cho layout
+        model.addAttribute("pageTitle", "Sửa Lịch tập");
+        model.addAttribute("activePage", "training");
         return "coach/training_form";
     }
 
@@ -127,11 +153,11 @@ public class CoachController {
     }
 
     // =================================================================
-    // Yêu cầu 4: Đăng ký đội hình (Lineup)
+    // Yêu cầu 4 & 5: Đăng ký đội hình (Lineup) - (ĐÃ CẬP NHẬT)
     // =================================================================
 
     /**
-     * (READ / UPDATE - Form) Hiển thị form đăng ký đội hình
+     * (READ / UPDATE - Form) Hiển thị form đăng ký đội hình MỚI
      */
     @GetMapping("/match/{matchId}/lineup")
     public String showLineupForm(@PathVariable Long teamId, @PathVariable Long matchId, Model model) {
@@ -145,12 +171,12 @@ public class CoachController {
         List<MatchLineup> currentLineup = iMatchLineupService.findByMatchAndTeam(matchId, teamId);
 
         List<Player> mainPlayers = currentLineup.stream()
-                .filter(l -> l.getType() == MatchLineup.LineupType.MAIN) // <-- ĐÃ SỬA LỖI Ở ĐÂY
+                .filter(l -> l.getType() == MatchLineup.LineupType.MAIN)
                 .map(MatchLineup::getPlayer)
                 .collect(Collectors.toList());
 
         List<Player> subPlayers = currentLineup.stream()
-                .filter(l -> l.getType() == MatchLineup.LineupType.SUB) // <-- ĐÃ SỬA LỖI Ở ĐÂY
+                .filter(l -> l.getType() == MatchLineup.LineupType.SUB)
                 .map(MatchLineup::getPlayer)
                 .collect(Collectors.toList());
 
@@ -165,11 +191,15 @@ public class CoachController {
         model.addAttribute("mainPlayers", mainPlayers);
         model.addAttribute("subPlayers", subPlayers);
 
+        // === THÊM DỮ LIỆU SƠ ĐỒ ===
+        model.addAttribute("formations", iFormationService.getAllFormations());
+        model.addAttribute("currentFormationName", "4-4-2"); // Mặc định
+
         return "coach/manage_lineup";
     }
 
     /**
-     * (CREATE / UPDATE - Logic) Lưu đội hình
+     * (CREATE / UPDATE - Logic) Lưu đội hình (ĐÃ CẬP NHẬT RÀNG BUỘC)
      */
     @PostMapping("/match/{matchId}/lineup/save")
     public String saveLineup(@PathVariable Long teamId,
@@ -182,10 +212,17 @@ public class CoachController {
         List<Long> mainIds = (mainPlayerIds != null) ? mainPlayerIds : List.of();
         List<Long> subIds = (subPlayerIds != null) ? subPlayerIds : List.of();
 
-        if (mainIds.size() > 11) {
-            redirect.addFlashAttribute("error", "Đội hình chính không được vượt quá 11 cầu thủ!");
+        // === RÀNG BUỘC MỚI ===
+        if (mainIds.size() != 11) {
+            redirect.addFlashAttribute("error", "Đội hình chính phải có ĐÚNG 11 cầu thủ!");
             return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/lineup";
         }
+
+        if (subIds.size() > 9) {
+            redirect.addFlashAttribute("error", "Đội hình dự bị không được vượt quá 9 cầu thủ!");
+            return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/lineup";
+        }
+        // === HẾT RÀNG BUỘC ===
 
         iMatchLineupService.saveLineup(teamId, matchId, mainIds, subIds);
         redirect.addFlashAttribute("message", "Đã lưu đội hình thành công!");
