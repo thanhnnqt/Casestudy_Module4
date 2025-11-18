@@ -7,19 +7,24 @@ import com.example.premier_league.service.IMatchScheduleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
+import com.example.premier_league.dto.CoachMatchScheduleDto;
+import com.example.premier_league.repository.IMatchLineupRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MatchScheduleService implements IMatchScheduleService {
 
     private final IMatchScheduleRepository matchScheduleRepository;
 
-    public MatchScheduleService(IMatchScheduleRepository matchScheduleRepository) {
+    private final IMatchLineupRepository iMatchLineupRepository; //Thới
+
+    public MatchScheduleService(IMatchScheduleRepository matchScheduleRepository, IMatchLineupRepository iMatchLineupRepository) {
         this.matchScheduleRepository = matchScheduleRepository;
+        this.iMatchLineupRepository = iMatchLineupRepository; //THới
     }
 
 
@@ -106,7 +111,14 @@ public class MatchScheduleService implements IMatchScheduleService {
 
     @Override
     public List<MatchSchedule> findMatchesByTeamId(Long teamId) {
-        return List.of();
+        // SỬA 1: Thay vì "return List.of()", hãy gọi repository
+        List<MatchSchedule> matches = matchScheduleRepository
+                .findAllByHomeTeamIdOrAwayTeamIdOrderByMatchDateAscMatchTimeAsc(teamId, teamId);
+
+        // SỬA 2: Thêm autoUpdateStatus cho các trận này
+        matches.forEach(this::autoUpdateStatus);
+
+        return matches;
     }
 
 
@@ -154,5 +166,16 @@ public class MatchScheduleService implements IMatchScheduleService {
         } else if (daysLeft < 2 && daysLeft >= 0) {
             match.setStatus(MatchStatus.SCHEDULED);
         }
+    }
+
+    @Override
+    public List<CoachMatchScheduleDto> getCoachMatchSchedules(Long teamId) {
+        List<MatchSchedule> matches = this.findMatchesByTeamId(teamId);
+
+        return matches.stream().map(match -> {
+            // Kiểm tra xem đã đăng ký đội hình cho trận này chưa
+            boolean isRegistered = iMatchLineupRepository.existsByMatchIdAndTeamId(match.getId(), teamId);
+            return new CoachMatchScheduleDto(match, isRegistered);
+        }).collect(Collectors.toList());
     }
 }

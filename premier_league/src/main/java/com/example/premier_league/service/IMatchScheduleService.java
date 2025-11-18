@@ -1,5 +1,6 @@
 package com.example.premier_league.service;
 
+import com.example.premier_league.dto.CoachMatchScheduleDto;
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
 import org.springframework.data.domain.Page;
@@ -20,4 +21,5 @@ public interface IMatchScheduleService {
     Page<MatchSchedule> searchByRound(Integer round, Pageable pageable);
     void updateStatus(Long id, MatchStatus status);
     void reschedule(Long id, LocalDate newDate, String newTime);
+    List<CoachMatchScheduleDto> getCoachMatchSchedules(Long teamId);//THới
 }
