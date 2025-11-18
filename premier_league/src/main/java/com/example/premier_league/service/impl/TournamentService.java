@@ -1,13 +1,14 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 import com.example.premier_league.entity.Tournament;
 import com.example.premier_league.repository.ITournamentRepository;
+import com.example.premier_league.service.ITournamentService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class TournamentService implements ITournamentService{
+public class TournamentService implements ITournamentService {
 
     private final ITournamentRepository tournamentRepository;
     public TournamentService(ITournamentRepository tournamentRepository){

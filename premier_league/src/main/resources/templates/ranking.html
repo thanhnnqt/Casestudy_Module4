@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng xếp hạng – Premier League</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#38003c",
+                        secondary: "#00ff85"
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+<!-- ✅ Navbar -->
+<div th:replace="~{layout/navbar :: header}"></div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20 flex-1">
+
+    <h1 class="text-4xl font-extrabold text-primary mb-6 text-center">
+        Bảng Xếp Hạng Premier League
+    </h1>
+
+    <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
+        <table class="w-full">
+            <thead class="bg-primary text-white text-sm uppercase">
+            <tr>
+                <th class="py-3 px-4 text-center">#</th>
+                <th class="py-3 px-4 text-left">Đội</th>
+                <th class="py-3 px-4 text-center">Điểm</th>
+                <th class="py-3 px-4 text-center">Thắng</th>
+                <th class="py-3 px-4 text-center">Hòa</th>
+                <th class="py-3 px-4 text-center">Thua</th>
+                <th class="py-3 px-4 text-center">Hiệu số</th>
+            </tr>
+            </thead>
+            <tbody id="rankingBody" class="text-gray-800 text-base"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{layout/footer :: footer}"></div>
+
+<script>
+    const body = document.getElementById("rankingBody");
+
+    async function loadRanking() {
+        const res = await fetch("/api/rankings");
+        const data = await res.json();
+
+        body.innerHTML = "";
+
+        data.forEach((r, index) => {
+            const tr = document.createElement("tr");
+
+            tr.className = "border-b border-gray-100 hover:bg-gray-50 transition";
+
+            tr.innerHTML = `
+                <td class="py-4 px-4 text-center font-semibold text-primary">${index + 1}</td>
+
+                <td class="py-4 px-4">
+                    <div class="flex items-center gap-3">
+                        <img src="${r.logoUrl}" class="w-10 h-10 object-contain" />
+                        <span class="font-bold">${r.teamName}</span>
+                    </div>
+                </td>
+
+                <td class="py-4 px-4 text-center font-bold">${r.points}</td>
+                <td class="py-4 px-4 text-center">${r.wins ?? 0}</td>
+                <td class="py-4 px-4 text-center">${r.draws ?? 0}</td>
+                <td class="py-4 px-4 text-center">${r.losses ?? 0}</td>
+                <td class="py-4 px-4 text-center">${r.goalDifference}</td>
+            `;
+            body.appendChild(tr);
+        });
+    }
+
+    loadRanking();
+
+    // Nếu muốn realtime, chỉ cần bật WebSocket:
+    // stompClient.subscribe("/topic/rankings", msg => loadRanking());
+</script>
+
+<script>
+    lucide.createIcons();
+</script>
+
+</body>
+</html>

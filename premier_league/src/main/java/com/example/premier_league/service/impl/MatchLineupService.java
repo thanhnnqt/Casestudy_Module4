@@ -1,10 +1,11 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 import com.example.premier_league.entity.*;
 import com.example.premier_league.repository.IMatchLineupRepository;
 import com.example.premier_league.repository.IMatchScheduleRepository;
 import com.example.premier_league.repository.IPlayerRepository;
 import com.example.premier_league.repository.ITeamRepository;
+import com.example.premier_league.service.IMatchLineupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

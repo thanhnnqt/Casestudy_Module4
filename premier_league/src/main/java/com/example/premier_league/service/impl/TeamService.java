@@ -1,13 +1,14 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 import com.example.premier_league.entity.Team;
 import com.example.premier_league.repository.ITeamRepository;
+import com.example.premier_league.service.ITeamService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class TeamService implements ITeamService{
+public class TeamService implements ITeamService {
 
     private final ITeamRepository teamRepository;
 
