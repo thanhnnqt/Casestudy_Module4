@@ -2,6 +2,7 @@ package com.example.premier_league.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
 @Entity
 @Table(name = "teams")
@@ -44,4 +45,8 @@ public class Team {
     private int goalDifference; // hiệu số (goalsFor - goalsAgainst)
 
     private int points; // điểm số (3 thắng - 1 hòa - 0 thua)
+
+    //quan hệ với Account
+    @OneToOne(mappedBy = "team")
+    private Account admin;
 }
