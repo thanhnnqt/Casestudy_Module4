@@ -9,4 +9,6 @@ public interface ITournamentService {
     Tournament findById(Long id);
     Tournament save(Tournament t);
     void delete(Long id);
+
+    void updateTeamsForTournament(Long tournamentId, List<Long> teamIds);
 }

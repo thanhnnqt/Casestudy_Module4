@@ -5,14 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9e40aeef-4952-4b67-8261-51729f2f910a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/HomeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/HomeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/MatchScheduleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/MatchScheduleController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/TeamController.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/TeamController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/repository/ITeamRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/repository/ITeamRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/match/list.html" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/resources/templates/match/list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/match/reschedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/resources/templates/match/reschedule.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/service/PlayerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/service/PlayerService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/home/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/resources/templates/home/login.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,6 +41,7 @@
       <list>
         <option value="com.intellij.jpb.JpaEntity" />
         <option value="Enum" />
+        <option value="Interface" />
         <option value="Class" />
         <option value="HTML File" />
       </list>
@@ -77,36 +73,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Gradle.Build premier_league.executor": "Run",
-    "Gradle.E:/codegym/module_4_again/case_study_module_4/Casestudy_Module4/premier_league/build.gradle.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.PremierLeagueApplication.executor": "Run",
-    "deletionFromPopupRequiresConfirmation": "false",
-    "git-widget-placeholder": "Merging thoi",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "E:/codegym/module_4_again/case_study_module_4/Casestudy_Module4",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Gradle.Build premier_league.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.E:/codegym/module_4_again/case_study_module_4/Casestudy_Module4/premier_league/build.gradle.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.PremierLeagueApplication.executor&quot;: &quot;Run&quot;,
+    &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;thoi&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/codegym/module_4_again/case_study_module_4/Casestudy_Module4&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">
@@ -146,6 +142,9 @@
       <workItem from="1762825274711" duration="53000" />
       <workItem from="1762825345530" duration="211000" />
       <workItem from="1763342902467" duration="17965000" />
+      <workItem from="1763429748622" duration="18518000" />
+      <workItem from="1763452007054" duration="51000" />
+      <workItem from="1763452217887" duration="1966000" />
     </task>
     <servers />
   </component>

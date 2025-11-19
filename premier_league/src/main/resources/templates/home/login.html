@@ -10,9 +10,8 @@
             theme: {
                 extend: {
                     colors: {
-                        // Màu chuẩn Premier League
-                        plPurple: "#38003c", // Tím than chủ đạo
-                        plCyan: "#00ff85",   // Xanh neon (điểm nhấn)
+                        plPurple: "#38003c",
+                        plCyan: "#00ff85",
                     }
                 }
             }
@@ -22,7 +21,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* NỀN TRANG: Tím than đậm */
         body {
             background-color: #38003c;
             background-image:
@@ -70,7 +68,7 @@
 <div class="max-w-md w-full space-y-8">
     <div class="text-center">
         <div class="bg-white rounded-full w-28 h-28 flex items-center justify-center mx-auto mb-6 shadow-2xl border-4 border-white/10 overflow-hidden">
-            <img src="img/logoo.png" alt="Logo" class="w-20 h-20 object-contain"/>
+            <img src="images/logoo.png" alt="Logo" class="w-20 h-20 object-contain"/>
         </div>
         <h1 class="text-5xl font-black text-white mb-2 tracking-tight drop-shadow-xl">Premier League</h1>
         <p class="text-gray-300 text-lg font-medium">Giải bóng đá hấp dẫn nhất hành tinh</p>
@@ -127,6 +125,19 @@
                 </div>
             </div>
 
+            <!-- Thêm trường Nhập lại mật khẩu -->
+            <div id="field-confirm-password" class="hidden-field">
+                <label class="block text-sm font-bold text-plPurple mb-1">Nhập lại mật khẩu</label>
+                <div class="relative">
+                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <i data-lucide="lock" class="w-5 h-5"></i>
+                    </div>
+                    <input type="password" name="confirmPassword" id="input-confirm-password"
+                           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg outline-none transition-all input-focus text-gray-900 font-medium"
+                           placeholder="Nhập lại mật khẩu"/>
+                </div>
+            </div>
+
             <div id="login-extras" class="flex items-center justify-between text-sm">
                 <label class="flex items-center text-gray-600 cursor-pointer">
                     <input type="checkbox" class="mr-2 w-4 h-4 text-plPurple focus:ring-plCyan border-gray-300 rounded"/>
@@ -142,6 +153,7 @@
             </button>
         </form>
 
+        <!-- phần còn lại giữ nguyên -->
         <div class="mt-8 relative flex items-center justify-center">
             <div class="border-t border-gray-200 w-full absolute"></div>
             <span class="bg-white px-4 text-sm text-gray-500 font-medium relative z-10">Hoặc tiếp tục với</span>
@@ -150,20 +162,11 @@
         <div class="mt-6 grid grid-cols-2 gap-4">
             <button type="button" onclick="loginWithGoogle()"
                     class="w-full bg-white text-gray-700 py-2.5 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50 hover:border-gray-400 transition font-semibold text-sm shadow-sm">
-                <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
                 Google
             </button>
 
             <button type="button" onclick="loginWithFacebook()"
                     class="w-full bg-[#1877F2] text-white py-2.5 rounded-lg border border-[#1877F2] flex items-center justify-center hover:bg-[#166fe5] transition font-semibold text-sm shadow-sm">
-                <svg class="w-5 h-5 mr-2 fill-current" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
                 Facebook
             </button>
         </div>
@@ -211,17 +214,22 @@
         const fieldName = document.getElementById('field-name');
         const inputName = document.getElementById('input-name');
         const loginExtras = document.getElementById('login-extras');
+        const fieldConfirm = document.getElementById('field-confirm-password');
 
         if (isLogin) {
             fieldName.classList.add('hidden-field');
             inputName.removeAttribute('required');
             loginExtras.classList.remove('hidden-field');
             loginExtras.classList.add('flex');
+            fieldConfirm.classList.add('hidden-field');
+            document.getElementById('input-confirm-password').removeAttribute('required');
         } else {
             fieldName.classList.remove('hidden-field');
             inputName.setAttribute('required', 'true');
             loginExtras.classList.add('hidden-field');
             loginExtras.classList.remove('flex');
+            fieldConfirm.classList.remove('hidden-field');
+            document.getElementById('input-confirm-password').setAttribute('required', 'true');
         }
 
         document.getElementById('footer-text').innerText = isLogin ? 'Chưa có tài khoản? ' : 'Đã có tài khoản? ';
@@ -230,6 +238,16 @@
 
     function handleAuthSubmit(e) {
         e.preventDefault();
+
+        if (!isLogin) {
+            const password = document.querySelector('input[name="password"]').value;
+            const confirm = document.getElementById('input-confirm-password').value;
+            if (password !== confirm) {
+                showToast("Lỗi đăng ký", "Mật khẩu nhập lại không trùng khớp!");
+                return;
+            }
+        }
+
         const title = isLogin ? "Đăng nhập thành công!" : "Đăng ký thành công!";
         const desc = isLogin ? "Chào mừng bạn trở lại với Premier League" : "Tài khoản của bạn đã được tạo";
         showToast(title, desc);
