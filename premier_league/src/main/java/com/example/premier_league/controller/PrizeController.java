@@ -150,6 +150,82 @@ public class PrizeController {
     public String delete(@PathVariable Long id, RedirectAttributes redirect) {
         prizeService.delete(id);
         redirect.addFlashAttribute("message", "Đã xóa giải thưởng!");
+        }
+
+        prizeService.save(prize);
+        redirect.addFlashAttribute("message", "Lưu thông tin giải thưởng thành công!");
+        return "redirect:/prize";
+    }
+
+    // --- API MỚI: LẤY CẦU THỦ THEO ĐỘI (Dùng cho AJAX) ---
+    @GetMapping("/api/players-by-team/{teamId}")
+    @ResponseBody // Quan trọng: Trả về JSON thay vì HTML
+    public ResponseEntity<List<Map<String, Object>>> getPlayersByTeam(@PathVariable Long teamId) {
+        List<Player> players = playerService.findByTeamId(teamId);
+
+        // Chuyển sang list Map đơn giản để tránh lỗi vòng lặp JSON
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Player p : players) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", p.getId());
+            map.put("name", p.getName());
+            map.put("position", p.getPosition());
+            result.add(map);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    // --- CẬP NHẬT: TRAO GIẢI ---
+    @GetMapping("/award/{id}")
+    public String showAwardForm(@PathVariable Long id, Model model) {
+        Prize prize = prizeService.findById(id);
+        if (prize == null) return "redirect:/prize";
+
+        PrizeDto prizeDto = new PrizeDto();
+        BeanUtils.copyProperties(prize, prizeDto);
+
+        if (prizeDto.getAwardedDate() == null) {
+            prizeDto.setAwardedDate(LocalDate.now());
+        }
+
+        model.addAttribute("prizeDto", prizeDto);
+        return "prize/prize-form";
+        model.addAttribute("prizeName", prize.getName());
+        model.addAttribute("teams", teamService.findAll());
+        // Không cần gửi players nữa vì sẽ load bằng Ajax
+
+        return "prize/prize-award";
+    }
+
+    @PostMapping("/award/save")
+    public String saveAward(@ModelAttribute("prizeDto") PrizeDto prizeDto, RedirectAttributes redirect) {
+        Prize prize = prizeService.findById(prizeDto.getId());
+        prize.setAwardedDate(prizeDto.getAwardedDate());
+
+        // Reset người nhận cũ
+        prize.setPlayer(null);
+        prize.setTeam(null);
+
+        // Kiểm tra loại giải dựa trên input hidden 'type' từ form
+        if ("INDIVIDUAL".equals(prizeDto.getType())) {
+            // Logic trao giải cá nhân
+            if (prizeDto.getPlayerId() != null) {
+                Player player = playerService.findById(prizeDto.getPlayerId());
+                if (player != null) {
+                    prize.setPlayer(player);
+                    prize.setTeam(player.getTeam());
+                }
+            }
+        } else {
+            // Logic trao giải tập thể
+            if (prizeDto.getTeamId() != null) {
+                Team team = teamService.findById(prizeDto.getTeamId());
+                prize.setTeam(team);
+            }
+        }
+
+        prizeService.save(prize);
+        redirect.addFlashAttribute("message", "Đã trao giải thành công!");
         return "redirect:/prize";
     }
 }
