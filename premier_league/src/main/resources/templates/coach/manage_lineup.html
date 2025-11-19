@@ -208,7 +208,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h2 class_ ="mb-0">Đăng ký đội hình: <span class="text-primary" th:text="${teamName}"></span></h2>
+            <h2 class_ ="mb-0">SƠ ĐỒ CHIẾN THUẬT: <span class="text-primary" th:text="${teamName}"></span></h2>
             <p class="fs-5 text-muted"
                th:text="'Trận: ' + ${match.homeTeam.name} + ' vs ' + ${match.awayTeam.name}">
                 Trận đấu
@@ -227,7 +227,7 @@
     </div>
 
     <form id="lineup-form"
-          th:action="@{/coach/team/{teamId}/match/{matchId}/lineup/save(teamId=${teamId}, matchId=${match.id})}"
+          th:action="@{/coach/team/{teamId}/match/{matchId}/tactics/save(teamId=${teamId}, matchId=${match.id})}"
           method="post">
 
         <div class="lineup-container">

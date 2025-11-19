@@ -202,4 +202,9 @@ public class FuncCoachController {
         model.addAttribute("formations", iFormationService.getAllFormations());
         model.addAttribute("currentFormationName", "4-4-2");
     }
+
+    @GetMapping("")
+    public String coachHome(@PathVariable Long teamId) {
+        return "redirect:/coach/team/" + teamId + "/schedule";
+    }
 }
