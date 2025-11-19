@@ -21,17 +21,14 @@ public class MatchDetailController {
     private final IMatchEventService eventService;
     private final IMatchStatsService statsService;
 
+    @GetMapping
+    public String formMatchDetail() {
+        return "match_detail";
+    }
+
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
-
-        Match match = matchService.findById(id);
-        List<MatchEvent> events = eventService.getEventsByMatch(id);
-        var stats = statsService.getStats(id);
-
-        model.addAttribute("match", match);
-        model.addAttribute("events", events);
-        model.addAttribute("stats", stats);
-
-        return "match_detail"; // match-detail.html
+    public String viewMatch(@PathVariable Long id, Model model) {
+        model.addAttribute("matchId", id);
+        return "match_detail";   // file match_detail.html realtime
     }
 }
