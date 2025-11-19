@@ -91,6 +91,49 @@
             Chưa có giải đấu nào được tạo.
         </div>
     </div>
+<body>
+<div class="container mt-4">
+    <h2>Danh sách Giải Đấu</h2>
+    <a href="/tournaments/add" class="btn btn-primary mb-3">+ Thêm Giải Đấu</a>
+
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+        <tr>
+            <th>#</th>
+            <th>Tên giải</th>
+            <th>Mùa giải</th>
+            <th>Bắt đầu</th>
+            <th>Kết thúc</th>
+            <th>Mô tả</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+
+
+        <tbody>
+        <tr th:each="t, iter : ${tournaments}">
+            <td th:text="${iter.count}"></td>
+            <td th:text="${t.name}"></td>
+            <td th:text="${t.season}"></td>
+            <td th:text="${t.startDate}"></td>
+            <td th:text="${t.endDate}"></td>
+            <td th:text="${t.description}"></td>
+            <td>
+                <a th:href="@{'/tournaments/delete/' + ${t.id}}" class="btn btn-danger btn-sm">Xóa</a>
+                <a th:href="@{'/tournaments/delete/' + ${t.id}}" class="btn btn-danger btn-sm">Xóa</a>
+
+                <a th:href="@{'/tournaments/' + ${t.id} + '/manage-teams'}" class="btn btn-info btn-sm">
+                    Thêm/Bớt Đội
+                </a>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+
+    <td>
+    </td>
 </div>
 
 <div th:replace="~{layout/footer :: footer}"></div>

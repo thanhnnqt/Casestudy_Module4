@@ -68,7 +68,7 @@
         Đỉnh cao bóng đá xứ sở sương mù. Cập nhật nhanh nhất tỷ số, lịch thi đấu và bảng xếp hạng.
       </p>
       <div class="flex flex-wrap gap-4">
-        <a th:href="@{/tournaments}" class="px-8 py-4 bg-white text-primary font-bold rounded-none hover:bg-secondary hover:text-primary transition-colors flex items-center gap-2 shadow-xl">
+        <a th:href="@{/tournaments-detail}" class="px-8 py-4 bg-white text-primary font-bold rounded-none hover:bg-secondary hover:text-primary transition-colors flex items-center gap-2 shadow-xl">
           LỊCH THI ĐẤU <i data-lucide="arrow-right" class="w-5 h-5"></i>
         </a>
         <a th:href="@{/tickets}" class="px-8 py-4 border-2 border-white text-white font-bold rounded-none hover:bg-white hover:text-primary transition-colors flex items-center gap-2">
@@ -95,12 +95,14 @@
             <i data-lucide="trophy" class="text-primary w-10 h-10"></i>
           </div>
           <h3 class="text-4xl font-black text-gray-900 mb-2" th:text="${teamCount}">20</h3>
+          <h3 class="text-4xl font-black text-gray-900 mb-2">20</h3>
           <p class="text-gray-500 font-medium uppercase tracking-wider text-sm">Câu lạc bộ</p>
         </div>
         <div class="bg-white rounded-2xl p-8 text-center shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-b-4 border-secondary">
           <div class="bg-secondary/20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
             <i data-lucide="calendar" class="text-secondary w-10 h-10"></i> </div>
-          <h3 class="text-4xl font-black text-gray-900 mb-2" th:text="${matchCount}">380</h3>
+<!--          <h3 class="text-4xl font-black text-gray-900 mb-2" th:text="${matchCount}">380</h3>-->
+          <h3 class="text-4xl font-black text-gray-900 mb-2">380</h3>
           <p class="text-gray-500 font-medium uppercase tracking-wider text-sm">Trận đấu</p>
         </div>
         <div class="bg-white rounded-2xl p-8 text-center shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-b-4 border-blue-500">
