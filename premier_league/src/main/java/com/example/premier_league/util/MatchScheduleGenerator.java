@@ -26,7 +26,7 @@ public class MatchScheduleGenerator {
         this.teamRepository = teamRepository;
     }
 
-//    @PostConstruct
+    @PostConstruct
     public void generateSchedule() {
 
         // ⭐ KHÔNG TẠO LỊCH NẾU ĐÃ CÓ DỮ LIỆU

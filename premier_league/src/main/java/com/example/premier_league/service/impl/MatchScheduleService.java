@@ -125,18 +125,18 @@ public class MatchScheduleService implements IMatchScheduleService {
 
     /* ================= RESCHEDULE ================= */
 
-    @Override
-    public void reschedule(Long id, LocalDate newDate, String newTime) {
-        MatchSchedule match = findById(id);
-
-        match.setMatchDate(newDate);
-        match.setMatchTime(LocalTime.parse(newTime));
-
-        // khi dời lịch thì bỏ trạng thái POSTPONED
-        autoUpdateStatus(match);  // cập nhật UPCOMING hoặc SCHEDULED
-
-        matchScheduleRepository.save(match);
-    }
+//    @Override
+//    public void reschedule(Long id, LocalDate newDate, String newTime) {
+//        MatchSchedule match = findById(id);
+//
+//        match.setMatchDate(newDate);
+//        match.setMatchTime(LocalTime.parse(newTime));
+//
+//        // khi dời lịch thì bỏ trạng thái POSTPONED
+//        autoUpdateStatus(match);  // cập nhật UPCOMING hoặc SCHEDULED
+//
+//        matchScheduleRepository.save(match);
+//    }
 
 
 
@@ -177,5 +177,56 @@ public class MatchScheduleService implements IMatchScheduleService {
             boolean isRegistered = iMatchLineupRepository.existsByMatchIdAndTeamId(match.getId(), teamId);
             return new CoachMatchScheduleDto(match, isRegistered);
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void reschedule(Long id, LocalDate newDate, String newTime) {
+        MatchSchedule match = findById(id);
+
+        // Lấy id 2 đội của trận này
+        Long homeTeamId = match.getHomeTeam() != null ? match.getHomeTeam().getId() : null;
+        Long awayTeamId = match.getAwayTeam() != null ? match.getAwayTeam().getId() : null;
+
+        // 1) Nếu không có team id (dữ liệu hỏng) -> ném lỗi
+        if (homeTeamId == null && awayTeamId == null) {
+            throw new IllegalStateException("Trận đấu chưa có đội tham gia, không thể dời lịch.");
+        }
+
+        // 2) Lấy tất cả trận có liên quan tới 2 đội (home OR away)
+        List<MatchSchedule> relatedMatches = matchScheduleRepository
+                .findAllByHomeTeamIdOrAwayTeamIdOrderByMatchDateAscMatchTimeAsc(homeTeamId, awayTeamId);
+
+        // 3) Duyệt và validate (bỏ qua chính trận và các trận đã POSTPONED/FINISHED)
+        for (MatchSchedule m : relatedMatches) {
+            if (m.getId().equals(id)) {
+                continue; // bỏ qua chính trận
+            }
+            if (m.getStatus() == MatchStatus.POSTPONED || m.getStatus() == MatchStatus.FINISHED) {
+                continue; // bỏ qua nếu không còn ràng buộc
+            }
+
+            LocalDate blockStart = m.getMatchDate().minusDays(2);
+            LocalDate blockEnd   = m.getMatchDate().plusDays(2);
+
+            boolean isInsideBlockedRange =
+                    ( !newDate.isBefore(blockStart) ) && ( !newDate.isAfter(blockEnd) );
+
+            if (isInsideBlockedRange) {
+                throw new IllegalArgumentException(
+                        "Ngày mới không hợp lệ! Phải cách trận '" + m.getHomeTeam().getName()
+                                + " vs " + m.getAwayTeam().getName()
+                                + "' diễn ra ngày " + m.getMatchDate()
+                                + " ít nhất 2 ngày."
+                );
+            }
+        }
+
+        // 4) Nếu hợp lệ -> cập nhật
+        match.setMatchDate(newDate);
+        match.setMatchTime(LocalTime.parse(newTime));
+        match.setStatus(MatchStatus.UPCOMING);
+
+        autoUpdateStatus(match);
+        matchScheduleRepository.save(match);
     }
 }

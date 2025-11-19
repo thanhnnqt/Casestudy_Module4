@@ -14,9 +14,9 @@
 
             <div class="hidden md:flex items-center gap-8">
                 <a th:href="@{/}" class="font-medium text-gray-700 hover:text-primary">Trang chủ</a>
-                <a th:href="@{/tournaments}" class="font-medium text-gray-700 hover:text-primary">Giải đấu</a>
-                <a th:href="@{/tickets}" class="font-medium text-gray-700 hover:text-primary">Đặt Vé</a>
-                <a th:href="@{/news}" class="font-medium text-gray-700 hover:text-primary">Tin tức</a>
+                <a th:href="@{/tournament}" class="font-medium text-gray-700 hover:text-primary">Giải đấu</a>
+                <a th:href="@{/ticket}" class="font-medium text-gray-700 hover:text-primary">Đặt Vé</a>
+                <a th:href="@{/new}" class="font-medium text-gray-700 hover:text-primary">Tin tức</a>
 
                 <div sec:authorize="!isAuthenticated()">
                     <a th:href="@{/login}"
