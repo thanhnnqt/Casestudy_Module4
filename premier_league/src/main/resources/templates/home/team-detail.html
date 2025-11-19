@@ -225,7 +225,8 @@
                                         </span>
                                     <span class="uppercase font-bold tracking-wider text-[10px]"
                                           th:classappend="${match.status == 'finished'} ? 'text-gray-400' : 'text-green-600'"
-                                          th:text="${match.status}">STATUS</span>
+                                          th:text="${match.status == 'finished'} ? 'Đã kết thúc' : 'Sắp diễn ra'">STATUS</span>
+
                                 </div>
 
                                 <div class="flex items-center justify-between">

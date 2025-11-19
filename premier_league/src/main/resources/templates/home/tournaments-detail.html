@@ -80,6 +80,7 @@
             </select>
         </form>
 
+        <!-- Lịch đấu -->
         <div class="space-y-4">
             <div th:each="match : ${upcomingMatches}"
                  class="p-4 border rounded-xl bg-gray-50 hover:bg-gray-100 transition shadow-sm">
@@ -104,6 +105,16 @@
                            th:text="${match.homeTeam.stadium}">Stadium</p>
                         <p class="text-sm font-semibold text-gray-600 mt-1"
                            th:text="${match.matchDate + ' – ' + match.matchTime}"></p>
+                        <!-- Trạng thái trận đấu -->
+                        <div class="mt-2 flex items-center justify-center gap-1 text-sm font-semibold">
+                            <i data-lucide="clock" class="w-4 h-4"
+                               th:classappend="${#strings.equalsIgnoreCase(match.status,'finished')} ? 'text-gray-500' : 'text-green-600'"></i>
+                            <span th:text="${#strings.equalsIgnoreCase(match.status,'finished') ? 'Đã kết thúc' : 'Sắp diễn ra'}"
+                                  th:classappend="${#strings.equalsIgnoreCase(match.status,'finished')} ? 'text-gray-500' : 'text-green-600'"></span>
+                        </div>
+
+
+
                     </div>
 
                     <!-- Away -->
@@ -120,6 +131,7 @@
                 </div>
             </div>
         </div>
+
 
     </div>
 
