@@ -23,4 +23,6 @@ public interface IMatchScheduleRepository extends JpaRepository<MatchSchedule, L
 
     Page<MatchSchedule> findByRound(Integer round, Pageable pageable);
 
+    List<MatchSchedule> findByIdNot(Long id);
+
 }

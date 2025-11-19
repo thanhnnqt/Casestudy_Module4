@@ -45,7 +45,7 @@
     </p>
 
     <p class="mb-1">
-      <strong>Trạng thái:</strong>
+      <strong>Trạng thái: Bị hoãn</strong>
       <span th:switch="${match.status}">
                 <span th:case="'SCHEDULED'">Sắp diễn ra</span>
                 <span th:case="'POSTPONED'">Bị hoãn</span>
@@ -55,6 +55,9 @@
   </div>
 
   <!-- Form dời lịch -->
+  <div class="alert alert-danger" th:if="${error}">
+    <span th:text="${error}"></span>
+  </div>
   <form th:action="@{/admin/matches/reschedule/save/{id}(id=${match.id})}" method="post">
 
     <div class="mb-3">

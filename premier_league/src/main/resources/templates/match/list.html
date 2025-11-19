@@ -5,7 +5,51 @@
     <title>Lịch Thi Đấu Premier League</title>
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        /* Giảm font toàn bộ bảng */
+        .match-table {
+            font-size: 13px !important;
+        }
 
+        /* Giảm font header bảng */
+        .match-table thead th {
+            font-size: 13px !important;
+            white-space: nowrap;
+        }
+
+        /* Giảm font nội dung bảng */
+        .match-table td {
+            font-size: 13px !important;
+            white-space: nowrap; /* tránh xuống dòng */
+        }
+
+        /* Nút hành động nhỏ lại */
+        .match-table .btn-sm {
+            padding: 2px 6px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .pagination .page-link {
+            font-size: 12px !important;
+            padding: 4px 8px !important; /* thu nhỏ nút */
+        }
+
+        .pagination .page-item.disabled .page-link {
+            font-size: 12px !important;
+        }
+        .search-form {
+            font-size: 13px !important;
+        }
+        .search-form label {
+            font-size: 13px !important;
+        }
+        .search-form input,
+        .search-form select,
+        .search-form button {
+            font-size: 13px !important;
+            padding: 4px 8px !important; /* thu nhỏ */
+        }
+    </style>
 </head>
 
 <body>
@@ -15,7 +59,7 @@
     <h2 class="mb-4">Danh Sách Lịch Thi Đấu Premier League</h2>
 
     <!-- ========================== SEARCH FORM ============================= -->
-    <form class="row mb-4" th:action="@{/admin/matches}" method="get">
+    <form class="row mb-4 search-form" th:action="@{/admin/matches}" method="get">
 
         <div class="col-md-4">
             <label class="form-label">Đội bóng</label>
@@ -48,7 +92,7 @@
     </form>
 
     <!-- =============================== TABLE ============================== -->
-    <table class="table table-bordered table-striped">
+    <table class="table table-bordered table-striped match-table">
         <thead class="table-dark">
         <tr>
             <th>STT</th>
@@ -148,7 +192,15 @@
         <nav>
             <ul class="pagination">
 
-                <!-- Previous -->
+                <!-- FIRST -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/matches(page=0, team=${team}, date=${date}, round=${round})}">
+                        ««
+                    </a>
+                </li>
+
+                <!-- PREVIOUS -->
                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                     <a class="page-link"
                        th:href="@{/admin/matches(page=${currentPage - 1}, team=${team}, date=${date}, round=${round})}">
@@ -156,28 +208,27 @@
                     </a>
                 </li>
 
-                <!-- ... trước -->
+                <!-- IF THERE ARE PAGES BEFORE -->
                 <li class="page-item disabled" th:if="${startPage > 0}">
                     <span class="page-link">...</span>
                 </li>
 
-                <!-- 1 trang trước | current | 1 trang sau -->
+                <!-- MIDDLE PAGES -->
                 <li class="page-item"
                     th:each="i : ${#numbers.sequence(startPage, endPage)}"
                     th:classappend="${i == currentPage} ? 'active'">
-
                     <a class="page-link"
                        th:text="${i + 1}"
                        th:href="@{/admin/matches(page=${i}, team=${team}, date=${date}, round=${round})}">
                     </a>
                 </li>
 
-                <!-- ... sau -->
+                <!-- IF THERE ARE PAGES AFTER -->
                 <li class="page-item disabled" th:if="${endPage < totalPages - 1}">
                     <span class="page-link">...</span>
                 </li>
 
-                <!-- Next -->
+                <!-- NEXT -->
                 <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
                     <a class="page-link"
                        th:href="@{/admin/matches(page=${currentPage + 1}, team=${team}, date=${date}, round=${round})}">
@@ -185,9 +236,18 @@
                     </a>
                 </li>
 
+                <!-- LAST -->
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/matches(page=${totalPages - 1}, team=${team}, date=${date}, round=${round})}">
+                        »»
+                    </a>
+                </li>
+
             </ul>
         </nav>
     </div>
+
 
 </div>
 
