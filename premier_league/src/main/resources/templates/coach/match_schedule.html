@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Language" content="vi">
     <title>Lịch thi đấu - Premier League</title>
 
     <!-- Tailwind CSS -->
@@ -16,15 +17,15 @@
                         pink: '#ff0050'       // Hồng PL
                     },
                     fontFamily: {
-                        sans: ['Poppins', 'sans-serif']
+                        sans: ['Inter', 'sans-serif']
                     }
                 }
             }
         }
     </script>
 
-    <!-- Font Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Google Font: Inter với latin-ext để hỗ trợ tiếng Việt -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap&subset=latin-ext" rel="stylesheet">
 
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -32,30 +33,81 @@
 
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: #f4f4f4;
         }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #38003c; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Prevent buttons & small badges from breaking to next line */
+        .no-wrap {
+            white-space: nowrap;
+        }
+
+        .actions-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: nowrap; /* keep buttons on one line */
+        }
+
+        /* Make small status badges inline and non-wrapping */
+        .status-badge, .register-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            white-space: nowrap;
+        }
+
+        /* Ensure action buttons keep their inline-flex layout */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        /* Center the "Trận đấu" column content (home / VS / away) */
+        .td-match {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-direction: column; /* keep stadium on new line on small screens */
+        }
+
+        @media (min-width: 768px) {
+            /* On medium+ screens keep match teams in a row */
+            .td-match {
+                flex-direction: row;
+            }
+        }
+
+        /* Group header row style */
+        .group-row {
+            background-color: #faf5ff;
+            color: #38003c;
+            font-weight: 700;
+        }
     </style>
 </head>
 
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-<!-- 1. NAVBAR (Sử dụng chung từ layout/navbar.html) -->
+<!-- NAVBAR -->
 <div th:replace="~{layout/navbarCoach :: header}"></div>
 
-
-<!-- 2. MAIN CONTENT -->
+<!-- MAIN CONTENT -->
 <div class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
 
-    <!-- Breadcrumb / Header -->
+    <!-- Header Card -->
     <div class="mb-8 bg-white rounded-2xl shadow-lg overflow-hidden relative group">
         <div class="absolute inset-0 bg-primary/90 z-10"></div>
-        <!-- Họa tiết nền (Optional) -->
         <div class="absolute inset-0 opacity-20 z-0" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
 
         <div class="relative z-20 p-8 text-white flex justify-between items-center">
@@ -66,13 +118,16 @@
                     </div>
                     <span class="text-secondary font-semibold text-sm uppercase tracking-widest">HLV: <span th:text="${teamName}">Team Name</span></span>
                 </div>
-                <h1 class="text-4xl font-black tracking-tight mb-2">LỊCH THI ĐẤU & ĐỘI HÌNH</h1>
+                <h1 class="text-4xl font-black tracking-tight mb-2 text-white" style="font-family: 'Inter', sans-serif;">
+                    LỊCH THI ĐẤU & ĐỘI HÌNH
+                </h1>
                 <p class="text-gray-300 max-w-2xl">Quản lý lịch trình, sắp xếp chiến thuật và đăng ký danh sách thi đấu cho câu lạc bộ của bạn.</p>
             </div>
             <div class="hidden md:block">
                 <i data-lucide="calendar-days" class="w-24 h-24 text-white/10"></i>
             </div>
         </div>
+
         <!-- Decorative bar -->
         <div class="h-2 bg-gradient-to-r from-secondary via-pink-500 to-purple-600 relative z-30"></div>
     </div>
@@ -87,7 +142,6 @@
         <span class="font-medium" th:text="${error}"></span>
     </div>
 
-
     <!-- DATA TABLE -->
     <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
         <div class="overflow-x-auto">
@@ -96,7 +150,7 @@
                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
                     <th class="p-5 font-bold text-center w-16">Vòng</th>
                     <th class="p-5 font-bold w-40">Thời gian</th>
-                    <th class="p-5 font-bold">Trận đấu</th>
+                    <th class="p-5 font-bold text-center">Trận đấu</th>
                     <th class="p-5 font-bold text-center w-32">Trạng thái</th>
                     <th class="p-5 font-bold text-center w-32">Đăng ký</th>
                     <th class="p-5 font-bold text-center w-48">Hành động</th>
@@ -123,23 +177,25 @@
 
                     <!-- Trận đấu -->
                     <td class="p-5">
-                        <div class="flex items-center gap-4 w-full max-w-md">
+                        <div class="td-match max-w-md text-center mx-auto">
                             <!-- Home -->
-                            <div class="flex-1 text-right font-bold text-gray-900 text-base" th:text="${dto.match.homeTeam.name}">
+                            <div class="flex-1 font-bold text-gray-900 text-base" th:text="${dto.match.homeTeam.name}">
                                 Arsenal
                             </div>
 
                             <!-- VS Badge -->
-                            <div class="px-2 py-1 bg-gray-200 text-gray-600 rounded text-xs font-black tracking-widest">VS</div>
+                            <div class="px-2 py-1 bg-gray-200 text-gray-600 rounded text-xs font-black tracking-widest no-wrap">VS</div>
 
                             <!-- Away -->
-                            <div class="flex-1 text-left font-bold text-gray-900 text-base" th:text="${dto.match.awayTeam.name}">
+                            <div class="flex-1 font-bold text-gray-900 text-base" th:text="${dto.match.awayTeam.name}">
                                 Chelsea
                             </div>
-                        </div>
-                        <div class="text-xs text-gray-400 mt-1 text-center max-w-md">
-                            <i data-lucide="map-pin" class="w-3 h-3 inline mr-1"></i>
-                            <span th:text="${dto.match.homeTeam.stadium}">Sân Emirates</span>
+
+                            <!-- Stadium under the teams on small screens, inline on md+ -->
+                            <div class="text-xs text-gray-400 mt-2 md:mt-1 w-full md:w-auto text-center">
+                                <i data-lucide="map-pin" class="w-3 h-3 inline mr-1"></i>
+                                <span th:text="${dto.match.homeTeam.stadium}">Sân Emirates</span>
+                            </div>
                         </div>
                     </td>
 
@@ -158,28 +214,30 @@
 
                     <!-- Trạng thái Đăng ký đội hình -->
                     <td class="p-5 text-center">
-                        <div th:if="${dto.lineupRegistered}" class="inline-flex items-center gap-1 text-secondary bg-primary/90 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Đã xong
-                        </div>
-                        <div th:unless="${dto.lineupRegistered}" class="inline-flex items-center gap-1 text-gray-400 bg-gray-100 px-3 py-1 rounded-full text-xs font-semibold">
-                            <span class="w-2 h-2 rounded-full bg-gray-400"></span> Chưa ĐK
+                        <div>
+                            <div th:if="${dto.lineupRegistered}" class="status-badge text-white bg-green-600 px-3 py-1 rounded-full text-xs font-bold">
+                                <i data-lucide="check-circle-2" class="w-4 h-4"></i> Đã xong
+                            </div>
+                            <div th:unless="${dto.lineupRegistered}" class="status-badge text-gray-600 bg-gray-100 px-3 py-1 rounded-full text-xs font-semibold">
+                                <span class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span> Chưa ĐK
+                            </div>
                         </div>
                     </td>
 
                     <!-- Hành động -->
                     <td class="p-5 text-center">
-                        <div class="flex justify-center gap-2">
+                        <div class="actions-row">
                             <!-- Nút Sơ đồ (Tactics) -->
                             <a th:href="@{/coach/team/{tid}/match/{mid}/tactics(tid=${teamId}, mid=${dto.match.id})}"
-                               class="group/btn relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800">
-                              <span class="relative px-4 py-2 transition-all ease-in duration-75 bg-white rounded-md group-hover/btn:bg-opacity-0 group-hover/btn:text-white font-bold flex items-center gap-2">
+                               class="action-btn group/btn relative inline-flex items-center justify-center p-0.5 text-sm font-medium rounded-lg bg-gradient-to-br from-purple-600 to-blue-500 shadow-md">
+                              <span class="relative px-4 py-2 bg-white rounded-md group-hover/btn:bg-opacity-0 group-hover/btn:text-white font-bold no-wrap">
                                   <i data-lucide="clipboard-list" class="w-4 h-4"></i> Sơ đồ
                               </span>
                             </a>
 
                             <!-- Nút Đăng ký (Register) -->
                             <a th:href="@{/coach/team/{tid}/match/{mid}/register(tid=${teamId}, mid=${dto.match.id})}"
-                               class="text-primary bg-secondary hover:bg-green-400 focus:ring-4 focus:outline-none focus:ring-green-200 font-bold rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center mr-2 mb-2 shadow-md transition-all hover:scale-105 gap-2">
+                               class="action-btn text-primary bg-secondary hover:bg-green-400 focus:ring-4 focus:outline-none focus:ring-green-200 font-bold rounded-lg text-sm px-4 py-2.5 inline-flex items-center shadow-md no-wrap">
                                 <i data-lucide="pen-tool" class="w-4 h-4"></i>
                                 Đăng ký
                             </a>
@@ -203,7 +261,7 @@
 
 </div>
 
-<!-- 3. FOOTER (Sử dụng chung từ layout/footer.html) -->
+<!-- FOOTER -->
 <div th:replace="~{layout/footer :: footer}"></div>
 
 <script>

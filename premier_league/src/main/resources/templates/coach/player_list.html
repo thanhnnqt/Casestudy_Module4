@@ -22,8 +22,7 @@
         }
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
@@ -55,11 +54,36 @@
             min-width: 60px;
             text-align: center;
         }
-        .badge-pos-GK { background-color: #f59e0b; /* Amber */ }
-        .badge-pos-DF { background-color: #10b981; /* Emerald */ }
-        .badge-pos-MF { background-color: #3b82f6; /* Blue */ }
-        .badge-pos-FW { background-color: #ef4444; /* Red */ }
-        .badge-pos-OTHER { background-color: #6b7280; /* Gray */ }
+        .badge-pos-GK { background-color: #f59e0b; }
+        .badge-pos-DF { background-color: #10b981; }
+        .badge-pos-MF { background-color: #3b82f6; }
+        .badge-pos-FW { background-color: #ef4444; }
+        .badge-pos-OTHER { background-color: #6b7280; }
+
+        /* Phân cách giữa các vị trí */
+        .position-separator {
+            background-color: #f9fafb;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+
+        /* --- LOGIC ĐÁNH SỐ THỨ TỰ LIÊN TỤC (CSS COUNTERS) --- */
+        tbody {
+            /* Khởi tạo bộ đếm tên là 'row-idx' */
+            counter-reset: row-idx;
+        }
+
+        /* Chỉ tăng số đếm ở các dòng có class 'player-row' */
+        tr.player-row {
+            counter-increment: row-idx;
+        }
+
+        /* Hiển thị giá trị bộ đếm vào ô có class 'stt-cell' */
+        .stt-cell::after {
+            content: counter(row-idx);
+        }
     </style>
 </head>
 
@@ -73,11 +97,14 @@
         <div class="relative z-10">
             <div class="flex items-center gap-3 mb-2">
                 <div class="bg-secondary text-primary font-bold px-3 py-1 rounded text-xs uppercase tracking-wider">
-                    Squad List
+                    Danh sách đội hình
                 </div>
                 <span class="text-secondary font-semibold text-sm uppercase tracking-widest">HLV: <span th:text="${teamName}">Team Name</span></span>
             </div>
-            <h1 class="text-4xl font-black tracking-tight mb-2 text-white">DANH SÁCH CẦU THỦ</h1>
+            <h1 class="text-4xl font-black tracking-tight mb-2 text-white" style="font-family: 'Inter', sans-serif;">
+                DANH SÁCH CẦU THỦ
+            </h1>
+
             <p class="text-gray-300 max-w-xl">Quản lý thông tin chi tiết và vị trí của các cầu thủ trong đội.</p>
         </div>
 
@@ -94,74 +121,179 @@
         <span>Đội bóng chưa có cầu thủ nào.</span>
     </div>
 
-    <div th:each="entry : ${playersByPosition}" class="mb-8">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                    <th class="p-4 font-bold text-center w-16">STT</th>
+                    <th class="p-4 font-bold">Tên cầu thủ</th>
+                    <th class="p-4 font-bold w-40">Ngày sinh</th>
+                    <th class="p-4 font-bold text-center w-32">Vị trí</th>
+                    <th class="p-4 font-bold text-center w-32">Kinh nghiệm</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
 
-        <div class="flex items-center gap-3 mb-4 px-2">
-            <div class="w-1.5 h-8 bg-secondary rounded-full"></div>
-            <h3 class="text-2xl font-bold text-primary uppercase"
-                th:text="${entry.key == 'GK' ? 'Thủ môn (Goalkeeper)' :
-                           (entry.key == 'DF' ? 'Hậu vệ (Defender)' :
-                           (entry.key == 'MF' ? 'Tiền vệ (Midfielder)' :
-                           (entry.key == 'FW' ? 'Tiền đạo (Forward)' : 'Khác (' + entry.key + ')')))}">
-                Vị trí
-            </h3>
-        </div>
+                <tr th:if="${playersByPosition.containsKey('FW')}" class="position-separator">
+                    <td colspan="5" class="p-3 pl-5">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-5 bg-red-500 rounded-full"></div>
+                            <span>Tiền đạo</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:each="player : ${playersByPosition['FW']}" class="hover:bg-purple-50/50 transition-colors group player-row">
 
-        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                    <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                        <th class="p-4 font-bold text-center w-16">STT</th>
-                        <th class="p-4 font-bold">Tên cầu thủ</th>
-                        <th class="p-4 font-bold w-40">Ngày sinh</th>
-                        <th class="p-4 font-bold text-center w-32">Vị trí</th>
-                        <th class="p-4 font-bold text-center w-32">Kinh nghiệm</th>
-                    </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+                    <td class="p-4 text-center font-bold text-gray-400 group-hover:text-primary transition-colors stt-cell"></td>
 
-                    <tr th:each="player, iterStat : ${entry.value}" class="hover:bg-purple-50/50 transition-colors group">
-                        <td class="p-4 text-center font-bold text-gray-400 group-hover:text-primary transition-colors"
-                            th:text="${iterStat.count}">1</td>
-
-                        <td class="p-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-primary font-bold border border-gray-200">
-                                    <span th:text="${#strings.substring(player.name,0,1)}">A</span>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-base text-gray-900 group-hover:text-primary transition-colors"
-                                         th:text="${player.name}">Tên</div>
-                                    <div class="text-xs text-gray-400">ID: <span th:text="${player.id}">1</span></div>
-                                </div>
+                    <td class="p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-primary font-bold border border-gray-200">
+                                <span th:text="${#strings.substring(player.name,0,1)}">A</span>
                             </div>
-                        </td>
-
-                        <td class="p-4">
-                            <div class="flex items-center gap-2">
-                                <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
-                                <span class="font-medium" th:text="${#temporals.format(player.dob, 'dd/MM/yyyy')}">01/01/2000</span>
+                            <div>
+                                <div class="font-bold text-base text-gray-900 group-hover:text-primary transition-colors"
+                                     th:text="${player.name}">Tên</div>
                             </div>
-                        </td>
+                        </div>
+                    </td>
 
-                        <td class="p-4 text-center">
-                            <span class="badge-pos shadow-sm"
-                                  th:classappend="${player.position == 'GK' ? 'badge-pos-GK' :
-                                                   (player.position == 'DF' ? 'badge-pos-DF' :
-                                                   (player.position == 'MF' ? 'badge-pos-MF' :
-                                                   (player.position == 'FW' ? 'badge-pos-FW' : 'badge-pos-OTHER')))}"
-                                  th:text="${player.position}">
-                            </span>
-                        </td>
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+                            <span class="font-medium" th:text="${#temporals.format(player.dob, 'dd/MM/yyyy')}">01/01/2000</span>
+                        </div>
+                    </td>
 
-                        <td class="p-4 text-center">
-                            <span class="font-semibold text-gray-600" th:text="${player.experience}">5 năm</span>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+                    <td class="p-4 text-center">
+                        <span class="badge-pos badge-pos-FW shadow-sm" th:text="${player.position}">FW</span>
+                    </td>
+
+                    <td class="p-4 text-center">
+                        <span class="font-semibold text-gray-600" th:text="${player.experience}">5 năm</span>
+                    </td>
+                </tr>
+
+                <tr th:if="${playersByPosition.containsKey('MF')}" class="position-separator">
+                    <td colspan="5" class="p-3 pl-5">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-5 bg-blue-500 rounded-full"></div>
+                            <span>Tiền vệ</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:each="player : ${playersByPosition['MF']}" class="hover:bg-purple-50/50 transition-colors group player-row">
+                    <td class="p-4 text-center font-bold text-gray-400 group-hover:text-primary transition-colors stt-cell"></td>
+
+                    <td class="p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-primary font-bold border border-gray-200">
+                                <span th:text="${#strings.substring(player.name,0,1)}">A</span>
+                            </div>
+                            <div>
+                                <div class="font-bold text-base text-gray-900 group-hover:text-primary transition-colors"
+                                     th:text="${player.name}">Tên</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+                            <span class="font-medium" th:text="${#temporals.format(player.dob, 'dd/MM/yyyy')}">01/01/2000</span>
+                        </div>
+                    </td>
+
+                    <td class="p-4 text-center">
+                        <span class="badge-pos badge-pos-MF shadow-sm" th:text="${player.position}">MF</span>
+                    </td>
+
+                    <td class="p-4 text-center">
+                        <span class="font-semibold text-gray-600" th:text="${player.experience}">5 năm</span>
+                    </td>
+                </tr>
+
+                <tr th:if="${playersByPosition.containsKey('DF')}" class="position-separator">
+                    <td colspan="5" class="p-3 pl-5">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-5 bg-green-500 rounded-full"></div>
+                            <span>Hậu vệ</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:each="player : ${playersByPosition['DF']}" class="hover:bg-purple-50/50 transition-colors group player-row">
+                    <td class="p-4 text-center font-bold text-gray-400 group-hover:text-primary transition-colors stt-cell"></td>
+
+                    <td class="p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-primary font-bold border border-gray-200">
+                                <span th:text="${#strings.substring(player.name,0,1)}">A</span>
+                            </div>
+                            <div>
+                                <div class="font-bold text-base text-gray-900 group-hover:text-primary transition-colors"
+                                     th:text="${player.name}">Tên</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+                            <span class="font-medium" th:text="${#temporals.format(player.dob, 'dd/MM/yyyy')}">01/01/2000</span>
+                        </div>
+                    </td>
+
+                    <td class="p-4 text-center">
+                        <span class="badge-pos badge-pos-DF shadow-sm" th:text="${player.position}">DF</span>
+                    </td>
+
+                    <td class="p-4 text-center">
+                        <span class="font-semibold text-gray-600" th:text="${player.experience}">5 năm</span>
+                    </td>
+                </tr>
+
+                <tr th:if="${playersByPosition.containsKey('GK')}" class="position-separator">
+                    <td colspan="5" class="p-3 pl-5">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-5 bg-amber-500 rounded-full"></div>
+                            <span>Thủ môn</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:each="player : ${playersByPosition['GK']}" class="hover:bg-purple-50/50 transition-colors group player-row">
+                    <td class="p-4 text-center font-bold text-gray-400 group-hover:text-primary transition-colors stt-cell"></td>
+
+                    <td class="p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-primary font-bold border border-gray-200">
+                                <span th:text="${#strings.substring(player.name,0,1)}">A</span>
+                            </div>
+                            <div>
+                                <div class="font-bold text-base text-gray-900 group-hover:text-primary transition-colors"
+                                     th:text="${player.name}">Tên</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+                            <span class="font-medium" th:text="${#temporals.format(player.dob, 'dd/MM/yyyy')}">01/01/2000</span>
+                        </div>
+                    </td>
+
+                    <td class="p-4 text-center">
+                        <span class="badge-pos badge-pos-GK shadow-sm" th:text="${player.position}">GK</span>
+                    </td>
+
+                    <td class="p-4 text-center">
+                        <span class="font-semibold text-gray-600" th:text="${player.experience}">5 năm</span>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
         </div>
     </div>
 
