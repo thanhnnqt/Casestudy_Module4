@@ -29,6 +29,7 @@
             font-size: 12px;
             white-space: nowrap;
         }
+
         .pagination .page-link {
             font-size: 12px !important;
             padding: 4px 8px !important; /* thu nhỏ nút */
@@ -37,12 +38,15 @@
         .pagination .page-item.disabled .page-link {
             font-size: 12px !important;
         }
+
         .search-form {
             font-size: 13px !important;
         }
+
         .search-form label {
             font-size: 13px !important;
         }
+
         .search-form input,
         .search-form select,
         .search-form button {
@@ -145,7 +149,7 @@
             <td class="d-flex gap-2">
 
                 <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).UPCOMING}"
-                   th:href="@{'/admin/event'}"
+                   th:href="@{'/admin/events'}"
                    class="btn btn-success btn-sm">Bắt đầu</a>
 
                 <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).UPCOMING}"

@@ -6,7 +6,6 @@ import com.example.premier_league.entity.MatchStatus;
 import com.example.premier_league.repository.IMatchEventRepository;
 import com.example.premier_league.repository.IMatchRepository;
 import com.example.premier_league.service.IMatchEventService;
-import com.example.premier_league.service.IRankingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;

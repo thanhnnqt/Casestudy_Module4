@@ -21,6 +21,10 @@
 
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- SockJS + STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 
 <body class="bg-gray-50 min-h-screen flex flex-col">
@@ -31,10 +35,7 @@
 <!-- MAIN GRID -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20 grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
 
-    <!-- =========================== -->
-    <!--     CỘT TRÁI — BXH         -->
-    <!-- =========================== -->
-
+    <!-- BXH -->
     <div class="lg:col-span-2">
         <h1 class="text-4xl font-extrabold text-primary mb-6 text-center">
             Bảng Xếp Hạng Premier League
@@ -58,15 +59,11 @@
         </div>
     </div>
 
-    <!-- =========================== -->
-    <!--     CỘT PHẢI — LỊCH ĐẤU     -->
-    <!-- =========================== -->
-
+    <!-- Lịch đấu -->
     <div class="bg-white shadow-xl rounded-2xl p-5 border border-gray-200 h-fit">
 
         <h2 class="text-2xl font-bold text-primary mb-4">📅 Lịch Thi Đấu</h2>
 
-        <!-- Chọn vòng -->
         <form method="get" action="/tournaments-detail" class="mb-4">
             <label class="font-semibold mb-2 block">Chọn vòng:</label>
 
@@ -83,10 +80,7 @@
             </select>
         </form>
 
-
-        <!-- Danh sách trận -->
         <div class="space-y-4">
-
             <div th:each="match : ${upcomingMatches}"
                  class="p-4 border rounded-xl bg-gray-50 hover:bg-gray-100 transition shadow-sm">
 
@@ -125,7 +119,6 @@
 
                 </div>
             </div>
-
         </div>
 
     </div>
@@ -135,7 +128,6 @@
 <!-- Footer -->
 <div th:replace="~{layout/footer :: footer}"></div>
 
-
 <!-- =========================== -->
 <!--       SCRIPT BXH           -->
 <!-- =========================== -->
@@ -143,7 +135,7 @@
     const body = document.getElementById("rankingBody");
 
     async function loadRanking() {
-        const res = await fetch("/api/rankings/v1"); // sửa URL
+        const res = await fetch("/api/rankings/v1");
         const data = await res.json();
 
         body.innerHTML = "";
@@ -173,9 +165,26 @@
         });
     }
 
+    // Load bảng khi mở trang
     loadRanking();
 </script>
 
+<!-- =========================== -->
+<!--     REALTIME WEBSOCKET     -->
+<!-- =========================== -->
+<script>
+    const socket = new SockJS('/ws');
+    const stomp = Stomp.over(socket);
+
+    stomp.connect({}, () => {
+        console.log("✔ Connected WebSocket");
+
+        stomp.subscribe('/topic/ranking-updated', () => {
+            console.log("🔄 Ranking updated – reload table");
+            loadRanking();
+        });
+    });
+</script>
 
 <script>
     lucide.createIcons();
