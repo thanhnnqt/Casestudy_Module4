@@ -12,9 +12,9 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#38003c',   // Tím than PL
-                        secondary: '#00ff85', // Xanh neon PL
-                        pink: '#ff0050'       // Hồng PL
+                        primary: '#38003c',
+                        secondary: '#00ff85',
+                        pink: '#ff0050'
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif']
@@ -56,14 +56,6 @@
             flex-wrap: nowrap; /* keep buttons on one line */
         }
 
-        /* Make small status badges inline and non-wrapping */
-        .status-badge, .register-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            white-space: nowrap;
-        }
-
         /* Ensure action buttons keep their inline-flex layout */
         .action-btn {
             display: inline-flex;
@@ -72,20 +64,55 @@
             white-space: nowrap;
         }
 
-        /* Center the "Trận đấu" column content (home / VS / away) */
-        .td-match {
+        /* Center the "Trận đấu" area and ensure VS is centered between teams */
+        .match-row {
+            display: flex;
+            align-items: center;       /* vertical center */
+            justify-content: center;   /* center whole block */
+            gap: 0.75rem;
+        }
+
+        /* Two team blocks take remaining space and align text to two edges */
+        .team {
+            flex: 1 1 0;
+            min-width: 0;              /* prevent overflow */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .team-left { text-align: right; padding-right: 0.5rem; }
+        .team-right{ text-align: left;  padding-left: 0.5rem; }
+
+        /* VS badge fixed size, always centered between two teams */
+        .vs-badge{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 52px;
+            height: 32px;
+            line-height: 32px;
+            padding: 0 8px;
+            border-radius: 8px;
+            background: #e6e9ee;
+            color: #6b7280;
+            font-weight: 700;
+            white-space: nowrap;
+            margin: 0;
+        }
+
+        /* Stadium line under the teams */
+        .stadium-line {
+            text-align: center;
+            margin-top: 0.5rem;
+            color: #9ca3af;
+            font-size: 0.875rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 1rem;
-            flex-direction: column; /* keep stadium on new line on small screens */
-        }
-
-        @media (min-width: 768px) {
-            /* On medium+ screens keep match teams in a row */
-            .td-match {
-                flex-direction: row;
-            }
+            gap: 0.35rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* Group header row style */
@@ -93,6 +120,17 @@
             background-color: #faf5ff;
             color: #38003c;
             font-weight: 700;
+        }
+
+        /* Responsive: on very small screens, allow teams to wrap onto two lines but keep VS centered */
+        @media (max-width: 480px) {
+            .match-row {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .team { text-align: center !important; padding: 0 !important; }
+            .vs-badge { min-width: 44px; }
+            .actions-row { gap: 0.25rem; }
         }
     </style>
 </head>
@@ -175,27 +213,23 @@
                         </div>
                     </td>
 
-                    <!-- Trận đấu -->
+                    <!-- Trận đấu (home - VS - away) -->
                     <td class="p-5">
-                        <div class="td-match max-w-md text-center mx-auto">
-                            <!-- Home -->
-                            <div class="flex-1 font-bold text-gray-900 text-base" th:text="${dto.match.homeTeam.name}">
-                                Arsenal
-                            </div>
+                        <div class="match-row max-w-2xl mx-auto">
+                            <!-- Home (right-aligned inside its flex box) -->
+                            <div class="team team-left" th:text="${dto.match.homeTeam.name}">Liverpool</div>
 
-                            <!-- VS Badge -->
-                            <div class="px-2 py-1 bg-gray-200 text-gray-600 rounded text-xs font-black tracking-widest no-wrap">VS</div>
+                            <!-- VS badge cố định ở giữa -->
+                            <div class="vs-badge" aria-hidden="true">VS</div>
 
-                            <!-- Away -->
-                            <div class="flex-1 font-bold text-gray-900 text-base" th:text="${dto.match.awayTeam.name}">
-                                Chelsea
-                            </div>
+                            <!-- Away (left-aligned inside its flex box) -->
+                            <div class="team team-right" th:text="${dto.match.awayTeam.name}">Arsenal</div>
+                        </div>
 
-                            <!-- Stadium under the teams on small screens, inline on md+ -->
-                            <div class="text-xs text-gray-400 mt-2 md:mt-1 w-full md:w-auto text-center">
-                                <i data-lucide="map-pin" class="w-3 h-3 inline mr-1"></i>
-                                <span th:text="${dto.match.homeTeam.stadium}">Sân Emirates</span>
-                            </div>
+                        <!-- Stadium (dưới, luôn căn giữa) -->
+                        <div class="stadium-line" th:if="${dto.match.homeTeam.stadium != null}">
+                            <i data-lucide="map-pin" class="w-3 h-3"></i>
+                            <span th:text="${dto.match.homeTeam.stadium}">Anfield</span>
                         </div>
                     </td>
 
@@ -215,10 +249,10 @@
                     <!-- Trạng thái Đăng ký đội hình -->
                     <td class="p-5 text-center">
                         <div>
-                            <div th:if="${dto.lineupRegistered}" class="status-badge text-white bg-green-600 px-3 py-1 rounded-full text-xs font-bold">
+                            <div th:if="${dto.lineupRegistered}" class="inline-flex items-center gap-1 text-white bg-green-600 px-3 py-1 rounded-full text-xs font-bold">
                                 <i data-lucide="check-circle-2" class="w-4 h-4"></i> Đã xong
                             </div>
-                            <div th:unless="${dto.lineupRegistered}" class="status-badge text-gray-600 bg-gray-100 px-3 py-1 rounded-full text-xs font-semibold">
+                            <div th:unless="${dto.lineupRegistered}" class="inline-flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full text-xs font-semibold">
                                 <span class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span> Chưa ĐK
                             </div>
                         </div>
@@ -227,19 +261,20 @@
                     <!-- Hành động -->
                     <td class="p-5 text-center">
                         <div class="actions-row">
-                            <!-- Nút Sơ đồ (Tactics) -->
+                            <!-- Nút Sơ đồ (Tactics) — icon + text trên 1 dòng -->
                             <a th:href="@{/coach/team/{tid}/match/{mid}/tactics(tid=${teamId}, mid=${dto.match.id})}"
                                class="action-btn group/btn relative inline-flex items-center justify-center p-0.5 text-sm font-medium rounded-lg bg-gradient-to-br from-purple-600 to-blue-500 shadow-md">
-                              <span class="relative px-4 py-2 bg-white rounded-md group-hover/btn:bg-opacity-0 group-hover/btn:text-white font-bold no-wrap">
-                                  <i data-lucide="clipboard-list" class="w-4 h-4"></i> Sơ đồ
-                              </span>
+                                <span class="relative px-4 py-2 bg-white rounded-md group-hover/btn:bg-opacity-0 group-hover/btn:text-white font-bold no-wrap inline-flex items-center gap-2">
+                                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                                    <span>Sơ đồ</span>
+                                </span>
                             </a>
 
                             <!-- Nút Đăng ký (Register) -->
                             <a th:href="@{/coach/team/{tid}/match/{mid}/register(tid=${teamId}, mid=${dto.match.id})}"
                                class="action-btn text-primary bg-secondary hover:bg-green-400 focus:ring-4 focus:outline-none focus:ring-green-200 font-bold rounded-lg text-sm px-4 py-2.5 inline-flex items-center shadow-md no-wrap">
                                 <i data-lucide="pen-tool" class="w-4 h-4"></i>
-                                Đăng ký
+                                <span>Đăng ký</span>
                             </a>
                         </div>
                     </td>
