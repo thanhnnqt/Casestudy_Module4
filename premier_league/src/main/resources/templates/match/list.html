@@ -113,7 +113,7 @@
             <td th:text="${iterStat.count}"></td>
             <td th:text="${match.name}"></td>
             <td th:text="${match.round}"></td>
-            <td th:text="${match.matchDate}"></td>
+            <td th:text="${#temporals.format(match.matchDate, 'dd/MM/yyyy')}"></td>
             <td th:text="${match.matchTime}"></td>
             <td th:text="${match.homeTeam.name}"></td>
             <td th:text="${match.awayTeam.name}"></td>
