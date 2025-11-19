@@ -1,53 +1,117 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Danh sách giải thưởng</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#38003c',
+            secondary: '#00ff85',
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-<body>
-<div class="container mt-4">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
-  <h2 class="text-center mb-4">Danh sách Giải Thưởng</h2>
+<div th:replace="~{layout/navbar :: header}"></div>
 
-  <div class="mb-3 text-end">
-    <a th:href="@{/prize/create}" class="btn btn-primary">+ Thêm Giải Thưởng</a>
+<div class="flex-grow container mx-auto px-4 py-12 max-w-7xl">
+
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-primary">Danh sách Giải Thưởng</h1>
+      <p class="text-gray-600 mt-1">Quản lý và trao giải thưởng mùa giải</p>
+    </div>
+    <a th:href="@{/prize/create}" class="bg-primary hover:bg-[#500055] text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all flex items-center gap-2">
+      <i data-lucide="plus-circle" class="w-5 h-5"></i> Tạo Giải Thưởng
+    </a>
   </div>
 
-  <table class="table table-bordered table-hover text-center">
-    <thead class="table-dark">
-    <tr>
-      <th>ID</th>
-      <th>Tên</th>
-      <th>Loại</th>
-      <th>Tiền thưởng</th>
-      <th>Ngày trao</th>
-      <th>Đội</th>
-      <th>Cầu thủ</th>
-      <th>Hành động</th>
-    </tr>
-    </thead>
+  <div th:if="${message}" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow-sm" role="alert">
+    <p th:text="${message}"></p>
+  </div>
 
-    <tbody>
-    <tr th:each="p : ${prizes}">
-      <td th:text="${p.id}"></td>
-      <td th:text="${p.name}"></td>
-      <td th:text="${p.type}"></td>
-      <td th:text="${p.amount} + ' USD'"></td>
-      <td th:text="${p.awardedDate}"></td>
-      <td th:text="${p.team?.name}"></td>
-      <td th:text="${p.player?.name}"></td>
+  <div class="bg-white rounded-xl shadow-md overflow-hidden">
+    <table class="w-full text-left border-collapse">
+      <thead class="bg-primary text-white">
+      <tr>
+        <th class="p-4 font-semibold text-sm uppercase tracking-wider">ID</th>
+        <th class="p-4 font-semibold text-sm uppercase tracking-wider">Tên giải</th>
+        <th class="p-4 font-semibold text-sm uppercase tracking-wider">Loại</th>
+        <th class="p-4 font-semibold text-sm uppercase tracking-wider">Giá trị</th>
+        <th class="p-4 font-semibold text-sm uppercase tracking-wider">Người/Đội nhận</th>
+        <th class="p-4 font-semibold text-sm uppercase tracking-wider">Ngày trao</th>
+        <th class="p-4 font-semibold text-sm uppercase tracking-wider text-center">Hành động</th>
+      </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+      <tr th:each="p : ${prizes}" class="hover:bg-gray-50 transition-colors">
+        <td class="p-4 text-gray-700 font-medium" th:text="${p.id}">1</td>
+        <td class="p-4 text-gray-900 font-bold" th:text="${p.name}">Tên giải</td>
+        <td class="p-4">
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-primary" th:text="${p.type}">Cá nhân</span>
+        </td>
+        <td class="p-4 text-gray-700 font-medium" th:text="${#numbers.formatDecimal(p.amount, 0, 'COMMA', 2, 'POINT')} + ' $'">1000 $</td>
 
-      <td>
-        <a th:href="@{'/prize/edit/' + ${p.id}}" class="btn btn-warning btn-sm">Sửa</a>
-        <a th:href="@{'/prize/delete/' + ${p.id}}"
-           onclick="return confirm('Xóa giải thưởng này?')"
-           class="btn btn-danger btn-sm">Xóa</a>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+        <td class="p-4">
+          <div th:if="${p.player != null}" class="flex items-center gap-2">
+            <i data-lucide="user" class="w-4 h-4 text-primary"></i>
+            <div>
+              <span class="font-bold text-gray-900" th:text="${p.player.name}"></span>
+              <span class="text-xs text-gray-500 block" th:text="${p.team?.shortName}"></span>
+            </div>
+          </div>
+          <div th:if="${p.player == null and p.team != null}" class="flex items-center gap-2">
+            <i data-lucide="shield" class="w-4 h-4 text-green-600"></i>
+            <span class="font-bold text-gray-900" th:text="${p.team.name}"></span>
+          </div>
+          <span th:if="${p.player == null and p.team == null}" class="text-gray-400 italic text-sm">-- Chưa trao --</span>
+        </td>
+
+        <td class="p-4 text-gray-700">
+          <div th:if="${p.awardedDate != null}" class="flex items-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+            <span th:text="${#temporals.format(p.awardedDate, 'dd/MM/yyyy')}"></span>
+          </div>
+          <span th:if="${p.awardedDate == null}">-</span>
+        </td>
+
+        <td class="p-4">
+          <div class="flex justify-center gap-2">
+            <a th:href="@{'/prize/award/' + ${p.id}}" class="bg-secondary/20 hover:bg-secondary text-green-800 hover:text-white p-2 rounded-lg transition-colors" title="Trao giải">
+              <i data-lucide="trophy" class="w-4 h-4"></i>
+            </a>
+
+            <a th:href="@{'/prize/create'}" class="bg-blue-50 hover:bg-blue-500 text-blue-600 hover:text-white p-2 rounded-lg transition-colors" title="Sửa thông tin">
+              <i data-lucide="edit-2" class="w-4 h-4"></i>
+            </a>
+
+            <a th:href="@{'/prize/delete/' + ${p.id}}"
+               onclick="return confirm('Bạn có chắc chắn muốn xóa giải thưởng này?')"
+               class="bg-red-50 hover:bg-red-500 text-red-600 hover:text-white p-2 rounded-lg transition-colors" title="Xóa">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </a>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<div th:replace="~{layout/footer :: footer}"></div>
+
+<script>
+  lucide.createIcons();
+</script>
 </body>
 </html>

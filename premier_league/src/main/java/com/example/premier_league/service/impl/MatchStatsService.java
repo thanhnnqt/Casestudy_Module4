@@ -1,95 +1,53 @@
 package com.example.premier_league.service.impl;
 
 import com.example.premier_league.dto.MatchStatsDto;
-import com.example.premier_league.entity.Match;
-import com.example.premier_league.entity.MatchEvent;
-import com.example.premier_league.repository.IMatchEventRepository;
-import com.example.premier_league.repository.IMatchRepository;
+import com.example.premier_league.entity.MatchStats;
+import com.example.premier_league.repository.IMatchStatsRepository;
 import com.example.premier_league.service.IMatchStatsService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MatchStatsService implements IMatchStatsService {
 
-    private final IMatchEventRepository eventRepo;
-    private final IMatchRepository matchRepo;
+    private final IMatchStatsRepository repo;
 
     @Override
-    public MatchStatsDto getStats(Long matchId) {
+    public MatchStats getStats(Long matchId) {
+        return repo.findByMatchId(matchId)
+                .orElseGet(() -> repo.save(
+                        MatchStats.builder()
+                                .matchId(matchId)
+                                .build()
+                ));
+    }
 
-        Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Match not found: " + matchId));
+    @Override
+    @Transactional
+    public MatchStats updateStats(Long matchId, MatchStatsDto dto) {
 
-        Long homeId = match.getHomeTeam().getId();
-        Long awayId = match.getAwayTeam().getId();
+        MatchStats stats = getStats(matchId);
 
-        List<MatchEvent> events = eventRepo.findByMatchIdOrderByMinuteAsc(matchId);
+        stats.setShotsHome(dto.getShotsHome());
+        stats.setShotsAway(dto.getShotsAway());
 
-        int shotsHome = 0, shotsAway = 0;
-        int shotsOnTargetHome = 0, shotsOnTargetAway = 0;
-        int foulsHome = 0, foulsAway = 0;
+        stats.setShotsOnTargetHome(dto.getShotsOnTargetHome());
+        stats.setShotsOnTargetAway(dto.getShotsOnTargetAway());
 
-        int possessionHome = 0, possessionAway = 0;
+        stats.setPossessionHome(dto.getPossessionHome());
+        stats.setPossessionAway(dto.getPossessionAway());
 
-        for (MatchEvent ev : events) {
+        stats.setPassesHome(dto.getPassesHome());
+        stats.setPassesAway(dto.getPassesAway());
 
-            Long teamId = ev.getTeamId();
+        stats.setAccuracyHome(dto.getAccuracyHome());
+        stats.setAccuracyAway(dto.getAccuracyAway());
 
-            boolean isHome = teamId != null && teamId.equals(homeId);
-            boolean isAway = teamId != null && teamId.equals(awayId);
+        stats.setFoulsHome(dto.getFoulsHome());
+        stats.setFoulsAway(dto.getFoulsAway());
 
-            String type = ev.getType();
-
-            switch (type) {
-
-                case "GOAL":
-                case "SHOT":
-                    if (isHome) shotsHome++;
-                    else if (isAway) shotsAway++;
-                    break;
-
-                case "SHOT_ON_TARGET":
-                case "PENALTY":
-                    if (isHome) shotsOnTargetHome++;
-                    else if (isAway) shotsOnTargetAway++;
-                    break;
-
-                case "YELLOW_CARD":
-                case "RED_CARD":
-                case "FOUL":
-                    if (isHome) foulsHome++;
-                    else if (isAway) foulsAway++;
-                    break;
-
-                default:
-                    break;
-            }
-
-            // tính kiểm soát bóng
-            if (teamId != null) {
-                if (isHome) possessionHome++;
-                if (isAway) possessionAway++;
-            }
-        }
-
-        // Phần trăm kiểm soát
-        int total = possessionHome + possessionAway;
-        int homePercent = (total == 0 ? 50 : possessionHome * 100 / total);
-        int awayPercent = 100 - homePercent;
-
-        return MatchStatsDto.builder()
-                .shotsHome(shotsHome)
-                .shotsAway(shotsAway)
-                .shotsOnTargetHome(shotsOnTargetHome)
-                .shotsOnTargetAway(shotsOnTargetAway)
-                .foulsHome(foulsHome)
-                .foulsAway(foulsAway)
-                .possessionHome(homePercent)
-                .possessionAway(awayPercent)
-                .build();
+        return repo.save(stats);
     }
 }

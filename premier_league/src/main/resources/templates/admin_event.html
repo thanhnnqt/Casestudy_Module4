@@ -91,15 +91,34 @@
     lucide.createIcons();
 
     document.getElementById('send').addEventListener('click', () => {
-        const payload = {
-            teamId: document.getElementById('teamId').value || null,
-            minute: document.getElementById('minute').value || null,
-            type: document.getElementById('type').value,
-            description: document.getElementById('desc').value
-        };
 
         const matchId = +document.getElementById('matchId').value;
+        const minute = document.getElementById('minute').value;
+        const type = document.getElementById('type').value;
+        const desc = document.getElementById('desc').value;
+        const teamId = document.getElementById('teamId').value;
 
+        /* ============================
+         * VALIDATE INPUT
+         * ============================ */
+        if (!matchId) return alert("⛔ Phải nhập Match ID!");
+        if (!minute) return alert("⛔ Phải nhập phút xảy ra!");
+        if (!type) return alert("⛔ Chưa chọn loại sự kiện!");
+
+        if (type === "GOAL" && !teamId) {
+            return alert("⛔ Ghi bàn thì phải có Team ID!");
+        }
+
+        const payload = {
+            teamId: teamId || null,
+            minute: minute,
+            type: type,
+            description: desc
+        };
+
+        /* ============================
+         * GỬI API
+         * ============================ */
         fetch(`/api/matches/${matchId}/events`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -107,12 +126,25 @@
         })
             .then(async resp => {
                 const text = await resp.text();
-                if (!resp.ok) alert("❌ Lỗi: " + text);
-                else alert("✅ Thành công!");
+
+                if (!resp.ok) {
+                    alert("❌ Lỗi: " + text);
+                } else {
+                    alert("✅ Thành công!");
+
+                    /* ============================
+                     * RESET FORM
+                     * ============================ */
+                    document.getElementById('teamId').value = "";
+                    document.getElementById('minute').value = "";
+                    document.getElementById('desc').value = "";
+                    document.getElementById('type').value = "GOAL";
+                }
             })
             .catch(() => alert("❌ Network error!"));
     });
 </script>
+
 
 </body>
 </html>
