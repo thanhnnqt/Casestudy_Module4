@@ -152,4 +152,23 @@ public class PrizeController {
         redirect.addFlashAttribute("message", "Đã xóa giải thưởng!");
         return "redirect:/prize";
     }
+
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        Prize prize = prizeService.findById(id);
+        if (prize == null) {
+            return "redirect:/prize";
+        }
+        PrizeDto prizeDto = new PrizeDto();
+        BeanUtils.copyProperties(prize, prizeDto);
+        if (prize.getTeam() != null) {
+            prizeDto.setTeamId(prize.getTeam().getId());
+        }
+        if (prize.getPlayer() != null) {
+            prizeDto.setPlayerId(prize.getPlayer().getId());
+        }
+
+        model.addAttribute("prizeDto", prizeDto);
+        return "prize/prize-form";
+    }
 }
