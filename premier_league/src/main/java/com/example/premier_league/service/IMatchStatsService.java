@@ -1,8 +1,9 @@
 package com.example.premier_league.service;
 
 import com.example.premier_league.dto.MatchStatsDto;
-import org.springframework.stereotype.Service;
+import com.example.premier_league.entity.MatchStats;
+
 
 public interface IMatchStatsService {
-    MatchStatsDto getStats(Long matchId);
-}
+    MatchStats getStats(Long matchId);
+    MatchStats updateStats(Long matchId, MatchStatsDto dto);}

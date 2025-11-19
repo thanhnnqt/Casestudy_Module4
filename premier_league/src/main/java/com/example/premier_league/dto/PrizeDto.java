@@ -21,17 +21,15 @@ public class PrizeDto {
     private String name;
 
     @NotBlank(message = "Loại giải thưởng không được để trống")
-    private String type; // Ví dụ: "Đội", "Cá nhân"
+    private String type;
 
     @NotNull(message = "Tiền thưởng không được để trống")
     @DecimalMin(value = "0.0", inclusive = false, message = "Tiền thưởng phải là số dương")
     private Double amount;
 
-    @NotNull(message = "Ngày trao giải không được để trống")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate awardedDate;
 
     private Long teamId;
-
     private Long playerId;
 }
