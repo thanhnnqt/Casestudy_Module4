@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{coach/dashboard :: coachLayout(
-                    pageTitle='Lịch thi đấu',
-                    activePage='schedule',
-                    content=~{::.main-content-child}
+                      pageTitle='Lịch thi đấu',
+                      activePage='schedule',
+                      content=~{::.main-content-child}
                   )}">
 <head>
     <meta charset="UTF-8">
@@ -12,43 +12,52 @@
 <body>
 
 <div class="main-content-child">
-    <h1 class="mb-4">Lịch thi đấu & Đăng ký đội hình</h1>
+    <h1 class="mb-4">Lịch thi đấu & Quản lý đội</h1>
 
     <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <table class="table table-striped table-hover table-bordered bg-white">
-        <thead class="table-dark">
+    <table class="table table-striped table-hover table-bordered bg-white align-middle">
+        <thead class="table-dark text-center">
         <tr>
             <th>Vòng</th>
-            <th>Ngày</th>
-            <th>Giờ</th>
-            <th>Đội nhà</th>
-            <th>Đội khách</th>
-            <th>Trạng thái (Trận đấu)</th>
-            <th>Trạng thái (Đội hình)</th>
-            <th>Hành động</th>
-        </tr>
+            <th>Thời gian</th>
+            <th>Cặp đấu</th>
+            <th>Trận đấu</th>
+            <th>Đội hình</th> <th>Chiến thuật</th> <th>Đăng ký</th> </tr>
         </thead>
         <tbody>
-        <tr th:if="${#lists.isEmpty(matchesDto)}">
-            <td colspan="8" class="text-center">Chưa có lịch thi đấu.</td>
-        </tr>
         <tr th:each="dto : ${matchesDto}">
-            <td th:text="${dto.match.round}"></td>
-            <td th:text="${dto.match.matchDate}"></td>
-            <td th:text="${dto.match.matchTime}"></td>
-            <td th:text="${dto.match.homeTeam.name}"></td>
-            <td th:text="${dto.match.awayTeam.name}"></td>
-            <td th:text="${dto.match.status}"></td>
+            <td class="text-center" th:text="${dto.match.round}"></td>
             <td>
-                <span th:if="${dto.lineupRegistered}" class="badge bg-success">Đã đăng ký</span>
-                <span th:unless="${dto.lineupRegistered}" class="badge bg-danger">Chưa đăng ký</span>
+                <div class="fw-bold" th:text="${dto.match.matchDate}"></div>
+                <div class="small text-muted" th:text="${dto.match.matchTime}"></div>
             </td>
             <td>
-                <a th:href="@{/coach/team/{teamId}/match/{matchId}/lineup(teamId=${teamId}, matchId=${dto.match.id})}"
-                   class="btn btn-primary btn-sm">
-                    Quản lý đội hình
+                <span class="fw-bold text-primary" th:text="${dto.match.homeTeam.name}"></span>
+                vs
+                <span class="fw-bold text-primary" th:text="${dto.match.awayTeam.name}"></span>
+            </td>
+            <td class="text-center">
+                <span class="badge bg-secondary text-dark" th:if="${dto.match.status.name() == 'UPCOMING'}">Sắp tới</span>
+                <span class="badge bg-primary" th:if="${dto.match.status.name() == 'SCHEDULED'}">Đã lên lịch</span>
+                <span class="badge bg-danger" th:if="${dto.match.status.name() == 'LIVE'}">Đang đá</span>
+                <span class="badge bg-dark" th:if="${dto.match.status.name() == 'FINISHED'}">Kết thúc</span>
+            </td>
+            <td class="text-center">
+                <span th:if="${dto.lineupRegistered}" class="badge bg-success"><i class="bi bi-check-circle"></i> Đã đăng ký</span>
+                <span th:unless="${dto.lineupRegistered}" class="badge bg-warning text-dark"><i class="bi bi-exclamation-circle"></i> Chưa đăng ký</span>
+            </td>
+            <td class="text-center">
+                <a th:href="@{/coach/team/{teamId}/match/{matchId}/tactics(teamId=${teamId}, matchId=${dto.match.id})}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-clipboard-data"></i> Sơ đồ
+                </a>
+            </td>
+            <td class="text-center">
+                <a th:href="@{/coach/team/{teamId}/match/{matchId}/register(teamId=${teamId}, matchId=${dto.match.id})}"
+                   class="btn btn-success btn-sm">
+                    <i class="bi bi-pen"></i> Đăng ký
                 </a>
             </td>
         </tr>

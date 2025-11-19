@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 @Entity
 @Table(name = "players")
@@ -32,6 +33,18 @@ public class Player {
     @Column(name = "avatar", length = 500)
     private String avatar;
 
+    @Transient // Không lưu vào DB, chỉ dùng để hiển thị trên giao diện
+    private int yellowCards = 0;
+
+    @Transient
+    private int redCards = 0;
+
+    // Hàm tính tuổi (Sửa lỗi Property 'age' not found)
+    public int getAge() {
+        if (this.dob == null) return 0;
+        return Period.between(this.dob, LocalDate.now()).getYears();
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id", nullable = true)
     private Card card;
@@ -39,4 +52,6 @@ public class Player {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = true)
     private Team team;
+
+
 }
