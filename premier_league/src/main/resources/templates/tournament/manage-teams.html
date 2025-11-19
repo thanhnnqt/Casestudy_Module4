@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Quản lý Đội bóng - Giải đấu</title>
+  <title>Quản lý Đội bóng cho Giải đấu</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -54,11 +54,11 @@
         <div class="relative">
           <select id="teamIds" name="teamIds" multiple
                   class="w-full h-96 p-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm shadow-inner bg-gray-50">
+
             <option th:each="team : ${allTeams}"
                     th:value="${team.id}"
                     th:text="${team.name} + ' (' + ${team.stadium} + ')'"
-                    th:selected="${tournamentTeamIds.contains(team.id)}"
-                    class="p-3 border-b border-gray-200 hover:bg-purple-100 cursor-pointer rounded transition-colors checked:bg-primary checked:text-white">
+                    th:selected="${tournamentTeamIds != null and #lists.contains(tournamentTeamIds, team.id)}">
             </option>
           </select>
         </div>
