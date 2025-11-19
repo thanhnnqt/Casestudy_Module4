@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đặt vé</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#38003c', // Tím than
+                        secondary: '#00ff85', // Xanh neon
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/home-css.css}" />
+    <style>
+        :root {
+            --bg-deep: #070512;
+            --bg-card: #140b2a;
+            --bg-card-soft: #1c1237;
+            --purple-main: #4c1d95;
+            --purple-accent: #6d28d9;
+            --purple-soft: #a78bfa;
+            --purple-border: #c4b5fd;
+            --text-main: #f5f3ff;
+            --text-sub: #c4b5fd;
+            --text-muted: #9ca3af;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #2e1065 0, #070512 50%, #020013 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 12px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text-main);
+        }
+
+        .booking-card {
+            max-width: 1100px;
+            width: 100%;
+            background: rgba(20, 11, 42, 0.96);
+            border-radius: 24px;
+            box-shadow: 0 24px 60px rgba(76, 29, 149, 0.7);
+            border: 1px solid rgba(165, 180, 252, 0.35);
+            padding: 28px 28px 32px;
+            color: var(--text-main);
+        }
+
+        .booking-title {
+            font-size: 1.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--purple-soft);
+            margin-bottom: 6px;
+        }
+
+        .booking-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 22px;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--purple-soft);
+            margin-bottom: 4px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(76, 29, 149, 0.3), rgba(15, 12, 34, 0.95));
+            border-radius: 12px;
+            padding: 10px 14px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        select,
+        input[type="number"] {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.8);
+            background: rgba(15, 12, 32, 0.9);
+            color: var(--text-main);
+            padding: 8px 10px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        select:focus,
+        input[type="number"]:focus {
+            border-color: var(--purple-soft);
+            box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.7);
+        }
+
+        .small-help {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        /* ====== SƠ ĐỒ SÂN & TƯƠNG TÁC TRỰC TIẾP ====== */
+
+        .stadium-wrapper {
+            margin-top: 22px;
+            display: grid;
+            grid-template-columns: 1.6fr 1.2fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        /* Sân bóng: nền xanh, hiệu ứng cỏ */
+        .pitch {
+            background: radial-gradient(circle at top, #166534 0, #065f46 40%, #064e3b 75%, #022c22 100%);
+            border-radius: 20px;
+            padding: 18px;
+            position: relative;
+            min-height: 260px;
+            box-shadow: 0 18px 45px rgba(22, 163, 74, 0.7);
+        }
+
+        .pitch-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            border: 2px solid rgba(248, 250, 252, 0.95);
+            position: relative;
+            overflow: hidden;
+            background-image: repeating-linear-gradient(
+                    90deg,
+                    rgba(255, 255, 255, 0.08) 0,
+                    rgba(255, 255, 255, 0.08) 1px,
+                    transparent 1px,
+                    transparent 18px
+            );
+            background-blend-mode: soft-light;
+        }
+
+        /* Vạch giữa sân */
+        .pitch-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: rgba(248, 250, 252, 0.9);
+            transform: translateX(-50%);
+        }
+
+        /* Vòng tròn giữa sân */
+        .pitch-center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(248, 250, 252, 0.9);
+            border-radius: 999px;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Chấm giữa sân */
+        .center-spot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: rgba(248, 250, 252, 0.95);
+            border-radius: 999px;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Vùng cấm & khung thành trên */
+        .penalty-box-top {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 60%;
+            height: 22%;
+            border: 2px solid rgba(248, 250, 252, 0.9);
+            border-bottom: none;
+            transform: translateX(-50%);
+        }
+
+        .goal-box-top {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 32%;
+            height: 10%;
+            border: 2px solid rgba(248, 250, 252, 0.9);
+            border-bottom: none;
+            transform: translateX(-50%);
+        }
+
+        .penalty-spot-top {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: rgba(248, 250, 252, 0.95);
+            border-radius: 999px;
+            transform: translateX(-50%);
+        }
+
+        /* Vùng cấm & khung thành dưới */
+        .penalty-box-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 60%;
+            height: 22%;
+            border: 2px solid rgba(248, 250, 252, 0.9);
+            border-top: none;
+            transform: translateX(-50%);
+        }
+
+        .goal-box-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 32%;
+            height: 10%;
+            border: 2px solid rgba(248, 250, 252, 0.9);
+            border-top: none;
+            transform: translateX(-50%);
+        }
+
+        .penalty-spot-bottom {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: rgba(248, 250, 252, 0.95);
+            border-radius: 999px;
+            transform: translateX(-50%);
+        }
+
+        /* Góc sân */
+        .corner-arc {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 2px solid rgba(248, 250, 252, 0.9);
+            border-radius: 50%;
+        }
+
+        .corner-top-left {
+            top: -5px;
+            left: -5px;
+            clip-path: polygon(0 0, 100% 0, 0 100%);
+        }
+
+        .corner-top-right {
+            top: -5px;
+            right: -5px;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+        }
+
+        .corner-bottom-left {
+            bottom: -5px;
+            left: -5px;
+            clip-path: polygon(0 0, 0 100%, 100% 100%);
+        }
+
+        .corner-bottom-right {
+            bottom: -5px;
+            right: -5px;
+            clip-path: polygon(100% 0, 100% 100%, 0 100%);
+        }
+
+        /* Các vùng khán đài trên sân (click trực tiếp) */
+        .pitch-zone {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(248, 250, 252, 0.85);
+            color: #f9fafb;
+            background: rgba(15, 23, 42, 0.78);
+            cursor: pointer;
+            transition: all 0.18s ease-out;
+            pointer-events: auto;
+            white-space: nowrap;
+            backdrop-filter: blur(3px);
+        }
+
+        .pitch-zone:hover {
+            background: rgba(167, 139, 250, 0.4);
+            box-shadow: 0 0 8px rgba(167, 139, 250, 0.9);
+        }
+
+        .pitch-zone.active {
+            background: linear-gradient(135deg, var(--purple-accent), var(--purple-main));
+            color: #ffffff;
+            border-color: var(--purple-soft);
+            box-shadow: 0 0 12px rgba(167, 139, 250, 0.9);
+        }
+
+        /* Đặt 4 zone cố định: trên, dưới, trái, phải */
+        .zone-0 { /* Bắc / trên */
+            top: 6%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .zone-1 { /* Phải / Đông */
+            top: 50%;
+            right: 3%;
+            transform: translateY(-50%);
+        }
+
+        .zone-2 { /* Nam / dưới */
+            bottom: 6%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .zone-3 { /* Trái / Tây */
+            top: 50%;
+            left: 3%;
+            transform: translateY(-50%);
+        }
+
+        /* Panel thông tin bên phải sân */
+        .stand-info-panel {
+            background: linear-gradient(145deg, #18122f, #120c25);
+            border-radius: 18px;
+            padding: 14px 16px;
+            border: 1px solid rgba(167, 139, 250, 0.45);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.9);
+        }
+
+        .stand-info-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.14em;
+            color: var(--purple-soft);
+            margin-bottom: 4px;
+        }
+
+        .stand-info-sub {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+        }
+
+        .stand-info-current {
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .stand-info-current span {
+            font-weight: 600;
+            color: var(--purple-soft);
+        }
+
+        .seat-summary {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        /* ====== LIST GHẾ THEO KHU (PHÍA DƯỚI) ====== */
+
+        .stand-block {
+            margin-top: 16px;
+            margin-bottom: 10px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: radial-gradient(circle at top, rgba(88, 28, 135, 0.45), rgba(15, 23, 42, 0.95));
+            border: 1px solid rgba(167, 139, 250, 0.4);
+        }
+
+        .stand-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-size: 0.95rem;
+            color: var(--purple-soft);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stand-title::before,
+        .stand-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(167, 139, 250, 0.7), transparent);
+        }
+
+        .row-block {
+            margin-top: 8px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: rgba(17, 24, 39, 0.8);
+        }
+
+        .row-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+        }
+
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+            gap: 6px;
+        }
+
+        .seat-btn {
+            border-radius: 999px;
+            border: 1px solid rgba(167, 139, 250, 0.5);
+            background: rgba(31, 22, 55, 0.9);
+            color: #e5e7eb;
+            font-size: 0.75rem;
+            padding: 6px 0;
+            cursor: pointer;
+            transition: all 0.18s ease-out;
+        }
+
+        .seat-btn:hover:not(.disabled-seat):not(.selected) {
+            transform: translateY(-1px);
+            box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.7);
+            background: rgba(88, 28, 135, 0.85);
+        }
+
+        .seat-btn.selected {
+            background: linear-gradient(135deg, var(--purple-accent), var(--purple-main));
+            border-color: var(--purple-soft);
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(167, 139, 250, 0.8);
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 18px;
+            padding: 12px 18px;
+            border-radius: 999px;
+            border: none;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            background: linear-gradient(135deg, var(--purple-accent), var(--purple-main));
+            color: #fdfcff;
+            box-shadow: 0 20px 35px rgba(109, 40, 217, 0.6);
+            transition: all 0.18s ease-out;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 26px 45px rgba(109, 40, 217, 0.8);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 10px 25px rgba(76, 29, 149, 0.8);
+        }
+
+        .notice-box {
+            max-width: 520px;
+            width: 100%;
+            background: #fdf2ff;
+            border-radius: 18px;
+            padding: 16px 18px;
+            border: 1px solid #e9d5ff;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            color: #4a044e;
+        }
+
+        .notice-icon {
+            font-size: 1.8rem;
+            margin-right: 10px;
+        }
+
+        .btn-back {
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .booking-card {
+                padding: 20px 16px 24px;
+            }
+
+            .stadium-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- FORM ĐẶT VÉ -->
+<div class="booking-card" th:if="${ticketDto != null}">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <div class="booking-title">Đặt vé</div>
+            <div class="booking-subtitle">Chọn loại vé & tương tác trực tiếp trên sơ đồ sân</div>
+        </div>
+    </div>
+
+    <form action="/tickets/saveCreate" th:object="${ticketDto}" method="post"
+          onsubmit="return validateBeforeSubmit()">
+
+        <!-- Thông tin trận đấu -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-label">Đội nhà: </div>
+                <p class="info-box" th:text="${ticketDto.homeTeam}"></p>
+                <input type="hidden" th:field="*{homeTeam}">
+            </div>
+            <div class="col-md-6">
+                <div class="info-label">Đội khách: </div>
+                <p class="info-box" th:text="${ticketDto.awayTeam}"></p>
+                <input type="hidden" th:field="*{awayTeam}">
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <div class="info-label">Sân vân động: </div>
+                <p class="info-box" th:text="${ticketDto.stadium}"></p>
+                <input type="hidden" th:field="*{stadium}">
+            </div>
+            <div class="col-md-6">
+                <div class="info-label">Địa chỉ: </div>
+                <p class="info-box" th:text="${ticketDto.address}"></p>
+                <input type="hidden" th:field="*{address}">
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <div class="info-label">Ngày diễn ra trận đấu: </div>
+                <p class="info-box" th:text="${ticketDto.dateMatch}"></p>
+                <input type="hidden" th:field="*{dateMatch}">
+            </div>
+            <div class="col-md-6">
+                <div class="info-label">Thời gian diễn ra trận đấu: </div>
+                <p class="info-box" th:text="${ticketDto.timeMatch}"></p>
+                <input type="hidden" th:field="*{timeMatch}">
+            </div>
+        </div>
+
+        <!-- Loại vé & Số lượng -->
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label class="info-label">Loại vé: </label>
+                <select th:field="*{ticketType}" id="ticketType">
+                    <option value="">-- Chọn loại vé --</option>
+                    <option th:each="ticketTypeItem : ${ticketTypeList}"
+                            th:text="${ticketTypeItem.typeTicket}"
+                            th:value="${ticketTypeItem.id}"></option>
+                </select>
+                <div class="small-help mt-1">
+                    Giá sẽ nhân với số ghế bạn chọn.
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="info-label">Số luợng vé: </label>
+                <input th:field="*{quantity}" type="number" min="1" id="quantityInput" readonly>
+                <div class="small-help mt-1">
+                    Hệ thống tự cập nhật theo số ghế bạn chọn.
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden lưu danh sách ghế -->
+        <input type="hidden" th:field="*{seatNumber}" id="seatNumber">
+        <input type="hidden" th:field="*{standSession}" id="standSession">
+
+        <div class="mt-4">
+            <p class="small-help mb-1">
+                1. Bấm trực tiếp vào <strong>khu khán đài</strong> trên sơ đồ sân.<br>
+                2. Ghế của khu đó sẽ hiện bên dưới, bấm vào ghế để chọn / bỏ chọn.
+            </p>
+            <div class="small-help">
+                Các ghế đã được đặt trước đó sẽ <strong>không hiển thị</strong> trong sơ đồ.
+            </div>
+        </div>
+
+        <!-- SƠ ĐỒ SÂN + PANEL THÔNG TIN -->
+        <div class="stadium-wrapper">
+            <!-- Sân bóng, có các khu khán đài clickable -->
+            <div class="pitch">
+                <div class="pitch-inner">
+                    <!-- Đường sân -->
+                    <div class="pitch-line"></div>
+                    <div class="pitch-center-circle"></div>
+                    <div class="center-spot"></div>
+
+                    <div class="penalty-box-top"></div>
+                    <div class="goal-box-top"></div>
+                    <div class="penalty-spot-top"></div>
+
+                    <div class="penalty-box-bottom"></div>
+                    <div class="goal-box-bottom"></div>
+                    <div class="penalty-spot-bottom"></div>
+
+                    <div class="corner-arc corner-top-left"></div>
+                    <div class="corner-arc corner-top-right"></div>
+                    <div class="corner-arc corner-bottom-left"></div>
+                    <div class="corner-arc corner-bottom-right"></div>
+
+                    <!-- 4 zone khán đài: gắn lần lượt các session (0..3) -->
+                    <div th:each="sessionItem, iter : ${sessionList}"
+                         class="pitch-zone"
+                         th:attr="data-session-id=${sessionItem.id},
+                                  data-session-name=${sessionItem.name}"
+                         th:text="${sessionItem.name}"
+                         th:classappend="' zone-' + ${iter.index}"
+                         onclick="selectStandFromZone(this)">
+                        Stand
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel thông tin -->
+            <div class="stand-info-panel">
+                <div class="stand-info-title">Sơ đồ khán đài</div>
+                <div class="stand-info-sub">
+                    Chạm vào từng khu trên mặt sân để xem & chọn ghế tương ứng.
+                </div>
+                <div class="stand-info-current">
+                    Khu đang chọn:
+                    <span id="current-stand-label">Chưa chọn</span>
+                </div>
+                <div class="seat-summary">
+                    Tổng ghế đã chọn: <span id="seat-count-label">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- DANH SÁCH GHẾ (THEO KHU, ẨN/HIỆN BẰNG JS) -->
+        <div id="stands-container" class="mt-3">
+            <div class="stand-block"
+                 th:each="sessionItem : ${sessionList}"
+                 th:attr="data-session-id=${sessionItem.id}">
+                <div class="stand-title" th:text="${sessionItem.name}">Stand Name</div>
+
+                <div th:each="row : ${sessionItem.rowList}" class="row-block">
+                    <div class="row-title" th:text="'Dãy ' + ${row.stadiumRow}">Dãy A</div>
+
+                    <div class="seat-grid">
+                        <!-- CHỈ RENDER GHẾ CHƯA OCCUPIED -->
+                        <th:block th:each="seat : ${row.seatList}">
+                            <button type="button"
+                                    th:if="${!seat.occupied}"
+                                    class="seat-btn"
+                                    th:text="${seat.seat}"
+                                    th:attr="data-stand=${sessionItem.name},
+                                             data-row=${row.stadiumRow},
+                                             data-seat=${seat.seat}"
+                                    onclick="toggleSeat(this)">
+                            </button>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Xác nhận đặt vé</button>
+    </form>
+</div>
+
+<!-- Thông báo nếu chưa mở bán vé -->
+<div th:if="${mess}" class="notice-box mt-3">
+    <div class="d-flex align-items-center">
+        <span class="notice-icon">⚠</span>
+        <span th:text="${mess}"></span>
+    </div>
+    <a href="/" class="btn btn-warning btn-back mt-2">
+        Quay về trang chủ
+    </a>
+</div>
+
+<script>
+    let selectedSeats = [];
+
+    function selectStandById(sessionId) {
+        // active zone trên sân
+        document.querySelectorAll('.pitch-zone').forEach(zone => {
+            const id = zone.getAttribute('data-session-id');
+            zone.classList.toggle('active', id === sessionId);
+        });
+
+        // hiển thị block ghế tương ứng
+        document.querySelectorAll('#stands-container .stand-block').forEach(block => {
+            const id = block.getAttribute('data-session-id');
+            block.style.display = (id === sessionId) ? 'block' : 'none';
+        });
+
+        // label khu đang chọn
+        const labelEl = document.getElementById('current-stand-label');
+        if (labelEl) {
+            const activeZone = document.querySelector('.pitch-zone.active');
+            labelEl.textContent = activeZone
+                ? activeZone.getAttribute('data-session-name')
+                : 'Chưa chọn';
+        }
+    }
+
+    function selectStandFromZone(el) {
+        const sessionId = el.getAttribute('data-session-id');
+        selectStandById(sessionId);
+    }
+
+    function toggleSeat(button) {
+        const stand = button.getAttribute('data-stand');
+        const row = button.getAttribute('data-row');
+        const seat = button.getAttribute('data-seat');
+        const standLabel = stand + ' - Dãy ' + row;
+
+        const index = selectedSeats.findIndex(s =>
+            s.stand === stand && s.row === row && s.seat === seat
+        );
+
+        if (index >= 0) {
+            selectedSeats.splice(index, 1);
+            button.classList.remove('selected');
+        } else {
+            selectedSeats.push({stand, row, seat, standLabel});
+            button.classList.add('selected');
+        }
+
+        updateHiddenFields();
+    }
+
+    function updateHiddenFields() {
+        const seatNumberInput = document.getElementById('seatNumber');
+        const standSessionInput = document.getElementById('standSession');
+        const quantityInput = document.getElementById('quantityInput');
+        const seatCountLabel = document.getElementById('seat-count-label');
+
+        const seatNumbers = selectedSeats.map(s => s.seat);
+        const standLabels = [...new Set(selectedSeats.map(s => s.standLabel))];
+
+        seatNumberInput.value = seatNumbers.join(',');
+        standSessionInput.value = standLabels.join(',');
+        quantityInput.value = selectedSeats.length || 1;
+
+        if (seatCountLabel) {
+            seatCountLabel.innerText = selectedSeats.length.toString();
+        }
+    }
+
+    function validateBeforeSubmit() {
+        const ticketTypeSelect = document.getElementById('ticketType');
+        const seatNumberInput = document.getElementById('seatNumber');
+
+        if (!ticketTypeSelect || !ticketTypeSelect.value) {
+            alert("Vui lòng chọn loại vé.");
+            return false;
+        }
+
+        if (!seatNumberInput.value || seatNumberInput.value.trim() === "") {
+            alert("Vui lòng chọn ít nhất một ghế.");
+            return false;
+        }
+
+        return true;
+    }
+
+    // Auto chọn khu đầu tiên khi load trang (nếu có)
+    window.addEventListener('DOMContentLoaded', () => {
+        const firstZone = document.querySelector('.pitch-zone');
+        if (firstZone) {
+            selectStandFromZone(firstZone);
+        }
+    });
+</script>
+
+</body>
+</html>
