@@ -12,40 +12,59 @@
 <body>
 
 <div class="main-content-child">
-    <h2 th:text="${formTitle}">Form Lịch tập</h2>
+    <h2 class="mb-4" th:text="${formTitle}">Form Lịch tập</h2>
 
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong th:text="${error}"></strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <form th:action="@{/coach/team/{teamId}/training/save(teamId=${teamId})}"
           th:object="${schedule}"
           method="post"
-          class="card p-4 bg-white mt-4" style="max-width: 800px;">
+          class="card p-4 bg-white shadow-sm border-0"
+          style="max-width: 800px;">
 
         <input type="hidden" th:field="*{id}" />
 
         <div class="mb-3">
-            <label for="title" class="form-label">Tiêu đề</label>
-            <input type="text" id="title" th:field="*{title}" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="location" class="form-label">Địa điểm</label>
-            <input type="text" id="location" th:field="*{location}" class="form-control" required>
-        </div>
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="startTime" class="form-label">Thời gian bắt đầu</label>
-                <input type="datetime-local" id="startTime" th:field="*{startTime}" class="form-control" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="endTime" class="form-label">Thời gian kết thúc</label>
-                <input type="datetime-local" id="endTime" th:field="*{endTime}" class="form-control" required>
-            </div>
-        </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Mô tả (Nội dung tập)</label>
-            <textarea id="description" th:field="*{description}" class="form-control" rows="4"></textarea>
+            <label for="title" class="form-label fw-bold">Tiêu đề <span class="text-danger">*</span></label>
+            <input type="text" id="title" th:field="*{title}" class="form-control" placeholder="Ví dụ: Tập chiến thuật, Tập thể lực..." required>
         </div>
 
-        <button type="submit" class="btn btn-success">Lưu lịch tập</button>
-        <a th:href="@{/coach/team/{teamId}/training(teamId=${teamId})}" class="btn btn-secondary">Hủy</a>
+        <div class="mb-3">
+            <label for="location" class="form-label fw-bold">Địa điểm <span class="text-danger">*</span></label>
+            <input type="text" id="location" th:field="*{location}" class="form-control" placeholder="Sân tập A, Phòng Gym..." required>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="startTime" class="form-label fw-bold">Thời gian bắt đầu <span class="text-danger">*</span></label>
+                <input type="datetime-local" id="startTime" th:field="*{startTime}" class="form-control" required>
+                <div class="form-text text-muted small">Phải lớn hơn thời gian hiện tại.</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="endTime" class="form-label fw-bold">Thời gian kết thúc <span class="text-danger">*</span></label>
+                <input type="datetime-local" id="endTime" th:field="*{endTime}" class="form-control" required>
+                <div class="form-text text-muted small">Phải sau thời gian bắt đầu ít nhất 30 phút.</div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label fw-bold">Mô tả (Nội dung tập)</label>
+            <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Chi tiết bài tập..."></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <a th:href="@{/coach/team/{teamId}/training(teamId=${teamId})}" class="btn btn-secondary">Hủy bỏ</a>
+            <button type="submit" class="btn btn-success px-4"><i class="bi bi-save"></i> Lưu lịch tập</button>
+        </div>
     </form>
 </div>
 
