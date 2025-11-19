@@ -145,7 +145,7 @@
             <td class="d-flex gap-2">
 
                 <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).UPCOMING}"
-                   th:href="@{'/admin/matches/start/' + ${match.id}}"
+                   th:href="@{'/admin/event'}"
                    class="btn btn-success btn-sm">Bắt đầu</a>
 
                 <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).UPCOMING}"
