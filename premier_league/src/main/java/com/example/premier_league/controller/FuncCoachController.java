@@ -151,27 +151,35 @@ public class FuncCoachController {
                                    @RequestParam(value = "captainId", required = false) Long captainId,
                                    RedirectAttributes redirect) {
 
-        List<Long> mainIds = (mainPlayerIds != null) ? mainPlayerIds : List.of();
+        // 1. Xử lý NULL an toàn: Nếu null thì tạo list rỗng để tránh lỗi NullPointerException
+        List<Long> mainIds = (mainPlayerIds != null) ? mainPlayerIds : new ArrayList<>();
+        List<Long> subIds = (subPlayerIds != null) ? subPlayerIds : new ArrayList<>();
 
-        // Validate: Phải đủ 11 người
+        // 2. Validate (Kiểm tra) số lượng cầu thủ chính (Đủ 11)
         if (mainIds.size() != 11) {
-            redirect.addFlashAttribute("error", "Đăng ký thất bại: Đội hình chính phải có ĐỦ 11 cầu thủ!");
+            redirect.addFlashAttribute("error", "Đăng ký thất bại: Phải chọn ĐỦ 11 cầu thủ đá chính!");
             return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/register";
         }
 
-        // Validate: Phải có captain
+        // 3. Validate (Kiểm tra) số lượng cầu thủ dự bị (Tối thiểu 1) <--- THÊM MỚI
+        if (subIds.isEmpty()) {
+            redirect.addFlashAttribute("error", "Đăng ký thất bại: Phải có tối thiểu 1 cầu thủ dự bị!");
+            return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/register";
+        }
+
+        // 4. Validate Đội trưởng
         if (captainId == null) {
             redirect.addFlashAttribute("error", "Đăng ký thất bại: Chưa chọn Đội trưởng!");
             return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/register";
         }
-
-        // Validate: Captain phải đá chính
         if (!mainIds.contains(captainId)) {
             redirect.addFlashAttribute("error", "Đăng ký thất bại: Đội trưởng phải nằm trong danh sách đá chính!");
             return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/register";
         }
 
-        iMatchLineupService.saveLineup(teamId, matchId, mainPlayerIds, subPlayerIds, captainId);
+        // 5. Gọi Service để lưu (Service không cần sửa nếu Controller đã xử lý null)
+        iMatchLineupService.saveLineup(teamId, matchId, mainIds, subIds, captainId);
+
         redirect.addFlashAttribute("message", "Đăng ký đội hình thành công!");
         return "redirect:/coach/team/" + teamId + "/schedule";
     }

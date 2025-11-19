@@ -270,36 +270,42 @@
     }
 
     function validateAndSubmit() {
-        const mainDivs = document.querySelectorAll('#mainSquad .player-draggable');
+        const mainDivs = document.querySelectorAll('#mainSquad .player-draggable'); // ✅ Sửa selector
+        const subDivs = document.querySelectorAll('#subSquad .player-draggable'); // ✅ Sửa selector
 
+        // 1. Check main count
         if (mainDivs.length !== 11) {
             alert(`Bạn mới chọn ${mainDivs.length} cầu thủ đá chính. Cần ĐỦ 11 người!`);
             return;
         }
 
-        const captain = document.querySelector('input[name="captainGroup"]:checked');
-        if (!captain) {
+        // 2. Check sub count
+        if (subDivs.length < 1) {
+            alert("Phải chọn tối thiểu 1 cầu thủ dự bị!");
+            return;
+        }
+
+        // 3. Check captain
+        const captainRadio = document.querySelector('input[name="captainGroup"]:checked'); // ✅ Sửa name
+        if (!captainRadio) {
             alert("Vui lòng chọn Đội trưởng (©) trong danh sách đá chính!");
             return;
         }
 
-        const hiddenContainer = document.getElementById('hiddenInputs');
-        hiddenContainer.innerHTML = '';
+        // 4. Prepare Data & Submit
+        const container = document.getElementById('hiddenInputs'); // ✅ Sửa ID
+        container.innerHTML = '';
 
-        mainDivs.forEach(div => {
-            const input = document.createElement('input');
-            input.type = 'hidden'; input.name = 'mainPlayerIds'; input.value = div.getAttribute('data-id');
-            hiddenContainer.appendChild(input);
+        mainDivs.forEach(el => {
+            container.innerHTML += `<input type="hidden" name="mainPlayerIds" value="${el.dataset.id}">`;
         });
 
-        document.querySelectorAll('#subSquad .player-draggable').forEach(div => {
-            const input = document.createElement('input');
-            input.type = 'hidden'; input.name = 'subPlayerIds'; input.value = div.getAttribute('data-id');
-            hiddenContainer.appendChild(input);
+        subDivs.forEach(el => {
+            container.innerHTML += `<input type="hidden" name="subPlayerIds" value="${el.dataset.id}">`;
         });
 
-        document.getElementById('captainIdInput').value = captain.value;
-        document.getElementById('submitForm').submit();
+        document.getElementById('captainIdInput').value = captainRadio.value;
+        document.getElementById('submitForm').submit(); // ✅ Sửa ID
     }
 </script>
 
