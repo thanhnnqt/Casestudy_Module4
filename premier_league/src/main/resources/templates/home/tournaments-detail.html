@@ -143,14 +143,13 @@
     const body = document.getElementById("rankingBody");
 
     async function loadRanking() {
-        const res = await fetch("/api/rankings");
+        const res = await fetch("/api/rankings/v1"); // sửa URL
         const data = await res.json();
 
         body.innerHTML = "";
 
         data.forEach((r, index) => {
             const tr = document.createElement("tr");
-
             tr.className = "border-b border-gray-100 hover:bg-gray-50 transition";
 
             tr.innerHTML = `
@@ -159,22 +158,24 @@
                 <td class="py-4 px-4">
                     <div class="flex items-center gap-3">
                         <img src="${r.logoUrl}" class="w-10 h-10 object-contain" />
-                        <span class="font-bold">${r.teamName}</span>
+                        <a href="/team/${r.id}" class="font-bold hover:text-secondary transition">${r.name}</a>
                     </div>
                 </td>
 
                 <td class="py-4 px-4 text-center font-bold">${r.points}</td>
-                <td class="py-4 px-4 text-center">${r.wins ?? 0}</td>
-                <td class="py-4 px-4 text-center">${r.draws ?? 0}</td>
-                <td class="py-4 px-4 text-center">${r.losses ?? 0}</td>
+                <td class="py-4 px-4 text-center">${r.winCount ?? 0}</td>
+                <td class="py-4 px-4 text-center">${r.drawCount ?? 0}</td>
+                <td class="py-4 px-4 text-center">${r.loseCount ?? 0}</td>
                 <td class="py-4 px-4 text-center">${r.goalDifference}</td>
             `;
+
             body.appendChild(tr);
         });
     }
 
     loadRanking();
 </script>
+
 
 <script>
     lucide.createIcons();
