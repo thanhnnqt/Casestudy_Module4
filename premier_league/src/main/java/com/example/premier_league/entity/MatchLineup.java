@@ -11,7 +11,6 @@ import lombok.*;
 @Builder
 public class MatchLineup {
 
-
     public enum LineupType {
         MAIN,
         SUB
@@ -34,5 +33,8 @@ public class MatchLineup {
     private Team team;
 
     @Enumerated(EnumType.STRING)
-    private LineupType type; // Bây giờ trình biên dịch sẽ thấy
+    private LineupType type;
+
+    // Thêm trường xác định đội trưởng
+    private boolean isCaptain = false;
 }

@@ -5,9 +5,44 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9e40aeef-4952-4b67-8261-51729f2f910a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/register_lineup.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/FuncCoachController.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/controller/FuncCoachController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/player_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/player_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/entity/MatchLineup.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/entity/MatchLineup.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/entity/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/entity/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/service/IMatchLineupService.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/service/IMatchLineupService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/service/impl/MatchLineupService.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/service/impl/MatchLineupService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/service/impl/TrainingScheduleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/service/impl/TrainingScheduleService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/util/MatchScheduleGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/java/com/example/premier_league/util/MatchScheduleGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/match_schedule.html" beforeDir="false" afterPath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/match_schedule.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/CoachService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/FormationService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/ICoachService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/IFormationService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/IMatchEventService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/IMatchLineupService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/IMatchScheduleService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/IMatchService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/IMatchStatsService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/IPlayerService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/IPrizeService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/IRankingService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/IStaffService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/ITeamService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/ITournamentService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/ITrainingScheduleService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/PlayerService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/PrizeService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/impl/MatchEventService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/impl/MatchLineupService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/impl/MatchScheduleService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/impl/MatchService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/impl/MatchStatsService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/impl/RankingService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/impl/StaffService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/impl/TeamService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/impl/TournamentService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/premier_league/src/main/resources/templates/coach/service/impl/TrainingScheduleService.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -146,7 +181,7 @@
       <workItem from="1763452007054" duration="51000" />
       <workItem from="1763452217887" duration="5852000" />
       <workItem from="1763515779970" duration="1033000" />
-      <workItem from="1763516968765" duration="2331000" />
+      <workItem from="1763516968765" duration="6605000" />
     </task>
     <servers />
   </component>

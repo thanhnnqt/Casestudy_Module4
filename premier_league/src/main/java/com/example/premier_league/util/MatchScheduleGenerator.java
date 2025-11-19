@@ -26,7 +26,7 @@ public class MatchScheduleGenerator {
         this.teamRepository = teamRepository;
     }
 
-//@PostConstruct
+@PostConstruct
     public void generateSchedule() {
 
         // ⭐ KHÔNG TẠO LỊCH NẾU ĐÃ CÓ DỮ LIỆU
@@ -39,7 +39,7 @@ public class MatchScheduleGenerator {
 
         List<Team> teams = teamRepository.findAll();
 
-        if (teams.size() != 10) {
+        if (teams.size() != 20) {
             System.out.println("❌ Không đủ 10 đội — không thể tạo lịch.");
             return;
         }

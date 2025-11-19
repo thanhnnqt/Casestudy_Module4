@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký đội hình thi đấu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        .container-fluid { max-width: 1400px; }
+
+        .card-custom {
+            border: none; border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            background: white; height: 85vh;
+            display: flex; flex-direction: column;
+        }
+        .card-header-custom {
+            background: #fff; border-bottom: 1px solid #eee;
+            padding: 15px 20px; font-weight: 700;
+            border-radius: 12px 12px 0 0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .scrollable-content { flex: 1; overflow-y: auto; padding: 10px; }
+
+        /* Player Row */
+        .player-draggable {
+            background: #fff; border: 1px solid #e0e0e0;
+            border-radius: 8px; padding: 10px; margin-bottom: 8px;
+            cursor: grab; display: flex; align-items: center; justify-content: space-between;
+            transition: all 0.2s;
+        }
+        .player-draggable:hover { background: #f8f9fa; border-color: #0d6efd; transform: translateX(2px); }
+        .player-draggable.dragging { opacity: 0.5; border: 2px dashed #999; }
+
+        /* Badges */
+        .pos-badge {
+            width: 35px; height: 35px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; font-weight: bold; font-size: 0.75rem; color: white;
+            margin-right: 10px;
+        }
+        .pos-GK { background: #f0ad4e; } .pos-DF { background: #5cb85c; }
+        .pos-MF { background: #0d6efd; } .pos-FW { background: #d9534f; }
+
+        .card-icon { font-size: 0.8rem; margin-left: 5px; }
+        .card-yellow { color: #ffc107; }
+        .card-red { color: #dc3545; }
+
+        /* Drop Zones */
+        .drop-zone {
+            min-height: 100px; border: 2px dashed #dee2e6;
+            border-radius: 8px; padding: 10px; background: #fafafa;
+            transition: background 0.2s;
+        }
+        .drop-zone.drag-over { background: #e9ecef; border-color: #0d6efd; }
+
+        /* Captain Radio */
+        .captain-select { transform: scale(1.3); cursor: pointer; accent-color: #ffc107; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary mb-0">Đăng ký đội hình thi đấu</h2>
+            <div class="text-muted">Trận: <span th:text="${match.homeTeam.name} + ' vs ' + ${match.awayTeam.name}"></span></div>
+        </div>
+        <div>
+            <form id="submitForm" method="post" th:action="@{/coach/team/{teamId}/match/{matchId}/register/save(teamId=${teamId}, matchId=${match.id})}">
+                <div id="hiddenInputs"></div>
+                <input type="hidden" name="captainId" id="captainIdInput">
+
+                <a th:href="@{/coach/team/{teamId}/schedule(teamId=${teamId})}" class="btn btn-light border me-2">Hủy</a>
+                <button type="button" onclick="validateAndSubmit()" class="btn btn-success btn-lg px-4">
+                    <i class="bi bi-check-lg"></i> Xác nhận đăng ký
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-4">
+            <div class="card-custom">
+                <div class="card-header-custom text-primary">
+                    <span><i class="bi bi-people-fill"></i> Danh sách cầu thủ</span>
+                    <span class="badge bg-light text-dark border" id="poolCount">0</span>
+                </div>
+                <div class="p-2 border-bottom">
+                    <input type="text" class="form-control form-control-sm" id="searchPlayer" placeholder="Tìm kiếm tên cầu thủ...">
+                </div>
+                <div class="scrollable-content drop-zone" id="playerPool">
+                    <div th:each="p : ${allPlayersForTable}"
+                         class="player-draggable"
+                         draggable="true"
+                         th:data-id="${p.id}"
+                         th:data-name="${p.name}">
+
+                        <div class="d-flex align-items-center">
+                            <div class="pos-badge" th:classappend="'pos-' + ${p.position}" th:text="${p.position}"></div>
+                            <div>
+                                <div class="fw-bold" th:text="${p.name}"></div>
+                                <div class="small text-muted">
+                                    <span th:text="${p.age} + ' tuổi'"></span> | Exp: <span th:text="${p.experience}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-end">
+                            <div th:if="${p.yellowCards > 0}" class="card-icon card-yellow" title="Thẻ vàng"><i class="bi bi-square-fill"></i> <span th:text="${p.yellowCards}"></span></div>
+                            <div th:if="${p.redCards > 0}" class="card-icon card-red" title="Thẻ đỏ"><i class="bi bi-square-fill"></i> <span th:text="${p.redCards}"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card-custom border-success">
+                <div class="card-header-custom text-success bg-success-subtle">
+                    <span><i class="bi bi-shield-fill-check"></i> Đá chính (11)</span>
+                    <span class="badge bg-success" id="mainCount">0/11</span>
+                </div>
+                <div class="p-2 bg-light small text-center text-muted fst-italic">
+                    Kéo cầu thủ vào đây. Chọn 1 Đội trưởng (©).
+                </div>
+                <div class="scrollable-content drop-zone" id="mainSquad"></div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card-custom border-warning">
+                <div class="card-header-custom text-warning-emphasis bg-warning-subtle">
+                    <span><i class="bi bi-person-plus-fill"></i> Dự bị (Max 9)</span>
+                    <span class="badge bg-warning text-dark" id="subCount">0/9</span>
+                </div>
+                <div class="scrollable-content drop-zone" id="subSquad"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const savedMainIds = /*[[${mainPlayers.![id]}]]*/ [];
+    const savedSubIds = /*[[${subPlayers.![id]}]]*/ [];
+    const savedCaptainId = /*[[${currentCaptainId}]]*/ null;
+    /*]]>*/
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const draggables = document.querySelectorAll('.player-draggable');
+        const dropZones = document.querySelectorAll('.drop-zone');
+        const pool = document.getElementById('playerPool');
+        const main = document.getElementById('mainSquad');
+        const sub = document.getElementById('subSquad');
+
+        restoreState(); // Khôi phục đội hình đã lưu
+
+        draggables.forEach(draggable => {
+            draggable.addEventListener('dragstart', () => draggable.classList.add('dragging'));
+            draggable.addEventListener('dragend', () => {
+                draggable.classList.remove('dragging');
+                updateUI();
+            });
+        });
+
+        dropZones.forEach(zone => {
+            zone.addEventListener('dragover', e => {
+                e.preventDefault();
+                zone.classList.add('drag-over');
+            });
+            zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                const draggable = document.querySelector('.dragging');
+
+                // Validate limits
+                if (zone.id === 'mainSquad' && main.children.length >= 11 && !main.contains(draggable)) {
+                    alert("Đội hình chính chỉ được tối đa 11 người!");
+                    return;
+                }
+                if (zone.id === 'subSquad' && sub.children.length >= 9 && !sub.contains(draggable)) {
+                    alert("Danh sách dự bị chỉ được tối đa 9 người!");
+                    return;
+                }
+
+                zone.appendChild(draggable);
+
+                // Xử lý nút Captain
+                if (zone.id === 'mainSquad') {
+                    addCaptainRadio(draggable);
+                } else {
+                    // Nếu kéo ra khỏi Main, xóa nút Captain
+                    const radioWrapper = draggable.querySelector('.captain-wrapper');
+                    if (radioWrapper) radioWrapper.remove();
+                }
+
+                updateUI();
+            });
+        });
+
+        // Search
+        document.getElementById('searchPlayer').addEventListener('keyup', function() {
+            const val = this.value.toLowerCase();
+            pool.querySelectorAll('.player-draggable').forEach(item => {
+                const name = item.getAttribute('data-name').toLowerCase();
+                item.style.display = name.includes(val) ? 'flex' : 'none';
+            });
+        });
+
+        updateUI();
+    });
+
+    function addCaptainRadio(playerEl) {
+        if (playerEl.querySelector('.captain-wrapper')) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'captain-wrapper ms-3 border-start ps-3';
+
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'captainGroup';
+        radio.className = 'form-check-input captain-select';
+        radio.value = playerEl.getAttribute('data-id');
+
+        if (savedCaptainId && radio.value == savedCaptainId) radio.checked = true;
+
+        const label = document.createElement('label');
+        label.className = 'd-block small fw-bold text-warning';
+        label.innerText = '©';
+
+        wrapper.appendChild(radio);
+        wrapper.appendChild(label);
+        playerEl.appendChild(wrapper);
+    }
+
+    function restoreState() {
+        const pool = document.getElementById('playerPool');
+        const main = document.getElementById('mainSquad');
+        const sub = document.getElementById('subSquad');
+
+        savedMainIds.forEach(id => {
+            const el = pool.querySelector(`.player-draggable[data-id="${id}"]`);
+            if (el) { main.appendChild(el); addCaptainRadio(el); }
+        });
+        savedSubIds.forEach(id => {
+            const el = pool.querySelector(`.player-draggable[data-id="${id}"]`);
+            if (el) sub.appendChild(el);
+        });
+    }
+
+    function updateUI() {
+        const mainCount = document.getElementById('mainSquad').children.length;
+        document.getElementById('mainCount').innerText = `${mainCount}/11`;
+        document.getElementById('subCount').innerText = `${document.getElementById('subSquad').children.length}/9`;
+        document.getElementById('poolCount').innerText = document.getElementById('playerPool').children.length;
+
+        const badge = document.getElementById('mainCount');
+        badge.className = mainCount === 11 ? 'badge bg-success' : 'badge bg-danger';
+    }
+
+    function validateAndSubmit() {
+        const mainDivs = document.querySelectorAll('#mainSquad .player-draggable');
+
+        if (mainDivs.length !== 11) {
+            alert(`Bạn mới chọn ${mainDivs.length} cầu thủ đá chính. Cần ĐỦ 11 người!`);
+            return;
+        }
+
+        const captain = document.querySelector('input[name="captainGroup"]:checked');
+        if (!captain) {
+            alert("Vui lòng chọn Đội trưởng (©) trong danh sách đá chính!");
+            return;
+        }
+
+        const hiddenContainer = document.getElementById('hiddenInputs');
+        hiddenContainer.innerHTML = '';
+
+        mainDivs.forEach(div => {
+            const input = document.createElement('input');
+            input.type = 'hidden'; input.name = 'mainPlayerIds'; input.value = div.getAttribute('data-id');
+            hiddenContainer.appendChild(input);
+        });
+
+        document.querySelectorAll('#subSquad .player-draggable').forEach(div => {
+            const input = document.createElement('input');
+            input.type = 'hidden'; input.name = 'subPlayerIds'; input.value = div.getAttribute('data-id');
+            hiddenContainer.appendChild(input);
+        });
+
+        document.getElementById('captainIdInput').value = captain.value;
+        document.getElementById('submitForm').submit();
+    }
+</script>
+
+</body>
+</html>

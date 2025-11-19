@@ -1,10 +1,7 @@
 package com.example.premier_league.service.impl;
 
 import com.example.premier_league.entity.*;
-import com.example.premier_league.repository.IMatchLineupRepository;
-import com.example.premier_league.repository.IMatchScheduleRepository;
-import com.example.premier_league.repository.IPlayerRepository;
-import com.example.premier_league.repository.ITeamRepository;
+import com.example.premier_league.repository.*;
 import com.example.premier_league.service.IMatchLineupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,41 +26,39 @@ public class MatchLineupService implements IMatchLineupService {
 
     @Override
     @Transactional
-    public void saveLineup(Long teamId, Long matchId, List<Long> mainPlayerIds, List<Long> subPlayerIds) {
-        // 1. Xóa đội hình cũ của đội này cho trận này
+    public void saveLineup(Long teamId, Long matchId, List<Long> mainPlayerIds, List<Long> subPlayerIds, Long captainId) {
+        // 1. Xóa đội hình cũ
         iMatchLineupRepository.deleteByMatchIdAndTeamId(matchId, teamId);
 
-        // 2. Lấy các đối tượng tham chiếu (để tránh query N+1)
         Team team = iTeamRepository.getReferenceById(teamId);
         MatchSchedule match = iMatchScheduleRepository.getReferenceById(matchId);
-
         List<MatchLineup> newLineups = new ArrayList<>();
 
-        // 3. Tạo đội hình chính
+        // 2. Lưu cầu thủ chính (kèm check đội trưởng)
         for (Long playerId : mainPlayerIds) {
             Player player = iPlayerRepository.getReferenceById(playerId);
-            MatchLineup lineup = MatchLineup.builder()
+            boolean isCap = (captainId != null && captainId.equals(playerId)); // Check captain
+
+            newLineups.add(MatchLineup.builder()
                     .match(match)
                     .team(team)
                     .player(player)
-                    .type(MatchLineup.LineupType.MAIN) // <-- Đã sửa ở đây
-                    .build();
-            newLineups.add(lineup);
+                    .type(MatchLineup.LineupType.MAIN)
+                    .isCaptain(isCap) // Lưu captain
+                    .build());
         }
 
-        // 4. Tạo đội hình dự bị
+        // 3. Lưu cầu thủ dự bị
         for (Long playerId : subPlayerIds) {
             Player player = iPlayerRepository.getReferenceById(playerId);
-            MatchLineup lineup = MatchLineup.builder()
+            newLineups.add(MatchLineup.builder()
                     .match(match)
                     .team(team)
                     .player(player)
-                    .type(MatchLineup.LineupType.SUB) // <-- Đã sửa ở đây
-                    .build();
-            newLineups.add(lineup);
+                    .type(MatchLineup.LineupType.SUB)
+                    .isCaptain(false)
+                    .build());
         }
-
-        // 5. Lưu tất cả
         iMatchLineupRepository.saveAll(newLineups);
     }
 }
