@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Trao Giải Thưởng</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#38003c',
+            secondary: '#00ff85',
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Custom style for selected card */
+    .award-option.active {
+      border-color: #38003c;
+      background-color: #f9f5fa;
+      box-shadow: 0 4px 6px -1px rgba(56, 0, 60, 0.1), 0 2px 4px -1px rgba(56, 0, 60, 0.06);
+    }
+    .award-option.active .icon-box {
+      background-color: #38003c;
+      color: white;
+    }
+    .award-option.active h5 {
+      color: #38003c;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+<div th:replace="~{layout/navbar :: header}"></div>
+
+<div class="flex-grow container mx-auto px-4 py-12 flex justify-center items-start">
+  <div class="w-full max-w-2xl">
+
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-bold text-gray-900 mb-2">Trao Giải Thưởng</h2>
+      <div class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200">
+        <i data-lucide="trophy" class="w-5 h-5 text-yellow-500"></i>
+        <span class="font-bold text-primary text-lg" th:text="${prizeName}">Tên giải</span>
+      </div>
+    </div>
+
+    <form th:action="@{/prize/award/save}" th:object="${prizeDto}" method="post" class="bg-white rounded-2xl shadow-xl p-8">
+      <input type="hidden" th:field="*{id}">
+      <input type="hidden" id="awardType" name="type" value="INDIVIDUAL">
+
+      <div class="mb-8">
+        <label class="block text-sm font-bold text-gray-700 mb-2">Ngày trao giải</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i data-lucide="calendar-days" class="w-5 h-5 text-gray-400"></i>
+          </div>
+          <input type="date" th:field="*{awardedDate}" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" required>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-100 my-6"></div>
+
+      <label class="block text-sm font-bold text-gray-700 mb-4">Chọn đối tượng nhận giải:</label>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div class="award-option active cursor-pointer border-2 border-gray-200 rounded-xl p-6 transition-all duration-200 hover:border-primary/50" onclick="selectType('INDIVIDUAL', this)">
+          <div class="flex flex-col items-center text-center">
+            <div class="icon-box w-12 h-12 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center mb-3 transition-colors">
+              <i data-lucide="user" class="w-6 h-6"></i>
+            </div>
+            <h5 class="font-bold text-gray-700 text-lg">Cá nhân</h5>
+            <p class="text-xs text-gray-500 mt-1">Trao cho một cầu thủ cụ thể</p>
+          </div>
+        </div>
+
+        <div class="award-option cursor-pointer border-2 border-gray-200 rounded-xl p-6 transition-all duration-200 hover:border-primary/50" onclick="selectType('TEAM', this)">
+          <div class="flex flex-col items-center text-center">
+            <div class="icon-box w-12 h-12 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center mb-3 transition-colors">
+              <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+            <h5 class="font-bold text-gray-700 text-lg">Tập thể</h5>
+            <p class="text-xs text-gray-500 mt-1">Trao cho toàn đội bóng</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="individual-section" class="animate-fade-in">
+        <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Bước 1: Chọn Đội Bóng</label>
+            <select id="teamSelectForPlayer" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" onchange="loadPlayers()">
+              <option value="">-- Chọn đội để lọc cầu thủ --</option>
+              <option th:each="t : ${teams}" th:value="${t.id}" th:text="${t.name}"></option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Bước 2: Chọn Cầu Thủ</label>
+            <select th:field="*{playerId}" id="playerSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-100 cursor-not-allowed" disabled>
+              <option value="">-- Vui lòng chọn đội trước --</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="team-section" class="hidden animate-fade-in">
+        <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Chọn Đội Bóng Nhận Giải</label>
+          <select th:field="*{teamId}" id="teamSelectMain" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" disabled>
+            <option value="">-- Chọn đội bóng --</option>
+            <option th:each="t : ${teams}" th:value="${t.id}" th:text="${t.name}"></option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex gap-4 mt-8">
+        <button type="submit" class="flex-1 bg-secondary hover:bg-green-400 text-primary font-bold py-3 rounded-lg shadow-md transition-colors">
+          Xác nhận Trao giải
+        </button>
+        <a th:href="@{/prize}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg shadow-sm text-center transition-colors">
+          Hủy
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div th:replace="~{layout/footer :: footer}"></div>
+
+<script>
+  lucide.createIcons();
+
+  function selectType(type, element) {
+    document.getElementById('awardType').value = type;
+
+    // Update UI
+    document.querySelectorAll('.award-option').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+
+    const individualSection = document.getElementById('individual-section');
+    const teamSection = document.getElementById('team-section');
+    const playerSelect = document.getElementById('playerSelect');
+    const teamSelectMain = document.getElementById('teamSelectMain');
+
+    if (type === 'INDIVIDUAL') {
+      individualSection.classList.remove('hidden');
+      teamSection.classList.add('hidden');
+
+      // Enable/Disable fields
+      // Note: playerSelect enable logic depends on loadPlayers
+      teamSelectMain.disabled = true;
+      if(document.getElementById('teamSelectForPlayer').value) {
+        playerSelect.disabled = false;
+        playerSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+      }
+    } else {
+      individualSection.classList.add('hidden');
+      teamSection.classList.remove('hidden');
+
+      playerSelect.disabled = true;
+      teamSelectMain.disabled = false;
+    }
+  }
+
+  function loadPlayers() {
+    const teamId = document.getElementById('teamSelectForPlayer').value;
+    const playerSelect = document.getElementById('playerSelect');
+
+    // Reset state
+    playerSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
+    playerSelect.disabled = true;
+    playerSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
+
+    if (!teamId) {
+      playerSelect.innerHTML = '<option value="">-- Vui lòng chọn đội trước --</option>';
+      return;
+    }
+
+    // Call API
+    fetch(`/prize/api/players-by-team/${teamId}`)
+            .then(response => response.json())
+            .then(data => {
+              playerSelect.innerHTML = '<option value="">-- Chọn cầu thủ --</option>';
+
+              if (data.length === 0) {
+                playerSelect.innerHTML += '<option value="" disabled>Đội này chưa có cầu thủ</option>';
+              }
+
+              data.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.id;
+                option.text = `${player.name} (${player.position})`;
+                playerSelect.add(option);
+              });
+
+              playerSelect.disabled = false;
+              playerSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              playerSelect.innerHTML = '<option value="">Lỗi khi tải danh sách</option>';
+            });
+  }
+</script>
+
+</body>
+</html>

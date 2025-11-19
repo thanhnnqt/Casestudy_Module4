@@ -35,6 +35,11 @@
             <td th:text="${t.description}"></td>
             <td>
                 <a th:href="@{'/tournaments/delete/' + ${t.id}}" class="btn btn-danger btn-sm">Xóa</a>
+                <a th:href="@{'/tournaments/delete/' + ${t.id}}" class="btn btn-danger btn-sm">Xóa</a>
+
+                <a th:href="@{'/tournaments/' + ${t.id} + '/manage-teams'}" class="btn btn-info btn-sm">
+                    Thêm/Bớt Đội
+                </a>
             </td>
         </tr>
         </tbody>
@@ -42,11 +47,6 @@
     </table>
 
     <td>
-        <a th:href="@{'/tournaments/delete/' + ${t.id}}" class="btn btn-danger btn-sm">Xóa</a>
-
-        <a th:href="@{'/tournaments/' + ${t.id} + '/manage-teams'}" class="btn btn-info btn-sm">
-            Thêm/Bớt Đội
-        </a>
     </td>
 </div>
 </body>
