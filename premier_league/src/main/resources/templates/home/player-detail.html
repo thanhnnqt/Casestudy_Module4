@@ -5,7 +5,6 @@
     <title th:text="${player != null ? player.name + ' - Thông tin cầu thủ' : 'Không tìm thấy cầu thủ'}">Chi tiết cầu thủ</title>
 
     <link rel="stylesheet" th:href="@{/css/application.css}" />
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -26,20 +25,22 @@
             }
         }
     </script>
-
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" th:href="@{/css/home-css.css}" />
 </head>
+
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
-<div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{layout/navbar.html :: header}"></div>
 
 <div class="min-h-screen bg-gray-50 py-12">
 
+    <!-- Không tìm thấy cầu thủ -->
     <div th:if="${player == null}" class="min-h-screen flex items-center justify-center">
         <p class="text-xl text-gray-600">Không tìm thấy cầu thủ</p>
     </div>
 
+    <!-- Có dữ liệu cầu thủ -->
     <div th:if="${player != null}" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <a th:href="@{/team/{id}(id=${team.id})}"
@@ -51,78 +52,56 @@
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <div class="md:flex">
 
+                <!-- Ảnh cầu thủ (FIXED) -->
                 <div class="md:w-1/3">
-                    <img th:src="${player.image}"
+                    <img th:src="${player.avatar != null ? player.avatar : '/images/default-player.png'}"
                          th:alt="${player.name}"
                          class="w-full h-full object-cover" />
                 </div>
 
+                <!-- Thông tin -->
                 <div class="md:w-2/3 p-8">
+
                     <div class="flex items-start justify-between mb-6">
                         <div>
                             <h1 class="text-4xl font-bold mb-2" th:text="${player.name}">Player Name</h1>
                             <p class="text-xl text-gray-600" th:text="${team.name}">Team Name</p>
                         </div>
-                        <div class="text-right">
-                            <div class="text-5xl font-bold text-primary" th:text="'#' + ${player.number}">#10</div>
-                            <div class="text-lg text-gray-600 mt-1" th:text="${player.position}">Forward</div>
-                        </div>
                     </div>
 
+                    <!-- Ngày sinh – Tuổi – Kinh nghiệm -->
                     <div class="grid grid-cols-2 gap-6 mb-8">
+
+                        <!-- Ngày sinh -->
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">Ngày sinh</p>
+                            <p class="text-xl font-semibold"
+                               th:text="${#temporals.format(player.dob, 'dd/MM/yyyy')}">01/01/1990</p>
+                        </div>
+
+                        <!-- Tuổi -->
                         <div>
                             <p class="text-sm text-gray-600 mb-1">Tuổi</p>
-                            <p class="text-xl font-semibold" th:text="${player.age}">25</p>
+                            <p class="text-xl font-semibold" th:text="${age} + ' tuổi'">28 tuổi</p>
                         </div>
+
+                        <!-- Kinh nghiệm -->
                         <div>
-                            <p class="text-sm text-gray-600 mb-1">Quốc tịch</p>
-                            <p class="text-xl font-semibold" th:text="${player.nationality}">Vietnam</p>
+                            <p class="text-sm text-gray-600 mb-1">Kinh nghiệm</p>
+                            <p class="text-xl font-semibold" th:text="${player.experience}">10 năm</p>
                         </div>
+
+                        <!-- Quốc tịch (nếu có) -->
+
                     </div>
 
-                    <div class="border-t pt-6">
-                        <h2 className="text-2xl font-bold mb-4">Thống kê mùa giải</h2>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="bg-green-50 rounded-lg p-4 text-center">
-                                <div class="flex justify-center mb-2">
-                                    <i data-lucide="trophy" class="text-primary w-8 h-8"></i>
-                                </div>
-                                <div class="text-3xl font-bold text-primary" th:text="${player.goals}">0</div>
-                                <div class="text-sm text-gray-600">Bàn thắng</div>
-                            </div>
-
-                            <div class="bg-blue-50 rounded-lg p-4 text-center">
-                                <div class="flex justify-center mb-2">
-                                    <i data-lucide="target" class="text-blue-600 w-8 h-8"></i>
-                                </div>
-                                <div class="text-3xl font-bold text-blue-600" th:text="${player.assists}">0</div>
-                                <div class="text-sm text-gray-600">Kiến tạo</div>
-                            </div>
-
-                            <div class="bg-yellow-50 rounded-lg p-4 text-center">
-                                <div class="flex justify-center mb-2">
-                                    <i data-lucide="credit-card" class="text-yellow-600 w-8 h-8"></i>
-                                </div>
-                                <div class="text-3xl font-bold text-yellow-600" th:text="${player.yellowCards}">0</div>
-                                <div class="text-sm text-gray-600">Thẻ vàng</div>
-                            </div>
-
-                            <div class="bg-red-50 rounded-lg p-4 text-center">
-                                <div class="flex justify-center mb-2">
-                                    <i data-lucide="credit-card" class="text-red-600 w-8 h-8"></i>
-                                </div>
-                                <div class="text-3xl font-bold text-red-600" th:text="${player.redCards}">0</div>
-                                <div class="text-sm text-gray-600">Thẻ đỏ</div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{layout/footer :: footer}"></div>
 
 <script>
     lucide.createIcons();

@@ -1,9 +1,7 @@
-package com.example.premier_league.entity;
+package com.example.premier_league.dto;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.premier_league.entity.TicketType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,12 +10,11 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Entity
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ticket {
+public class TicketDto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +22,12 @@ public class Ticket {
     private String homeTeam;
     private String awayTeam;
     private String address;
-    private String quantity;
+    private Integer quantity;
     private LocalDate dateMatch;
     private LocalTime timeMatch;
+    private String seatNumber;
+    private String standSession;
+    @ManyToOne
+    @JoinColumn(name = "price")
+    private TicketType ticketType;
 }
