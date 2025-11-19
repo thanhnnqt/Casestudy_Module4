@@ -14,5 +14,5 @@ public interface IMatchLineupService {
      * @param mainPlayerIds Danh sách ID cầu thủ đá chính
      * @param subPlayerIds Danh sách ID cầu thủ dự bị
      */
-    void saveLineup(Long teamId, Long matchId, List<Long> mainPlayerIds, List<Long> subPlayerIds);
+    void saveLineup(Long teamId, Long matchId, List<Long> mainPlayerIds, List<Long> subPlayerIds, Long captainId);
 }
