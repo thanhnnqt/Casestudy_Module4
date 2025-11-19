@@ -69,7 +69,7 @@ public class TournamentController {
                         .collect(Collectors.toSet())
         );
 
-        return "tournament/manager-teams";
+        return "tournament/manage-teams";
     }
 
     // --- (PHẦN MỚI) LƯU CÁC ĐỘI ĐÃ CHỌN ---
