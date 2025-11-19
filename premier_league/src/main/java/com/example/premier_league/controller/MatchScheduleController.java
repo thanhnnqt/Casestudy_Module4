@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 @Controller
 @RequestMapping("/admin")
@@ -80,7 +81,6 @@ public class MatchScheduleController {
         return "match/list";
     }
 
-
     /* ======================== Actions ======================== */
 
     @GetMapping("/matches/postpone/{id}")
@@ -119,11 +119,33 @@ public class MatchScheduleController {
         return "match/reschedule";
     }
 
-    @PostMapping("/matches/reschedule/save/{id}")
-    public String saveReschedule(@PathVariable Long id,
-                                 @RequestParam LocalDate newDate,
-                                 @RequestParam String newTime) {
+//    @PostMapping("/matches/reschedule/save/{id}")
+//    public String saveReschedule(@PathVariable Long id,
+//                                 @RequestParam LocalDate newDate,
+//                                 @RequestParam String newTime) {
+//        matchScheduleService.reschedule(id, newDate, newTime);
+//        return "redirect:/admin/matches";
+//    }
+@PostMapping("/matches/reschedule/save/{id}")
+public String saveReschedule(
+        @PathVariable Long id,
+        @RequestParam("newDate") String newDateStr,
+        @RequestParam("newTime") String newTime,
+        Model model) {
+
+    try {
+        LocalDate newDate = LocalDate.parse(newDateStr); // expects yyyy-MM-dd
         matchScheduleService.reschedule(id, newDate, newTime);
-        return "redirect:/admin/matches";
+    } catch (DateTimeParseException e) {
+        model.addAttribute("match", matchScheduleService.findById(id));
+        model.addAttribute("error", "Định dạng ngày không hợp lệ");
+        return "match/reschedule";
+    } catch (IllegalArgumentException ex) {
+        model.addAttribute("match", matchScheduleService.findById(id));
+        model.addAttribute("error", ex.getMessage());
+        return "match/reschedule";
     }
+
+    return "redirect:/admin/matches";
+}
 }
