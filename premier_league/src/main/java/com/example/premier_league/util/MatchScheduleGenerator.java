@@ -39,8 +39,8 @@ public class MatchScheduleGenerator {
 
         List<Team> teams = teamRepository.findAll();
 
-        if (teams.size() != 10) {
-            System.out.println("❌ Không đủ 10 đội — không thể tạo lịch.");
+        if (teams.size() != 20) {
+            System.out.println("❌ Không đủ 20 đội — không thể tạo lịch.");
             return;
         }
 
