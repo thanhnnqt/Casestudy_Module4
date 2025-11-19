@@ -57,4 +57,7 @@ public class Team {
     @JsonIgnore // Dùng @JsonIgnore để tránh lỗi vòng lặp vô hạn khi dùng API
     @ManyToMany(mappedBy = "teams")
     private Set<Tournament> tournaments = new HashSet<>();
+    @OneToMany(mappedBy = "team")
+    private List<Coach> coaches;
+
 }

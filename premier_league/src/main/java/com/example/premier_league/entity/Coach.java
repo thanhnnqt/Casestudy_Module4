@@ -64,4 +64,5 @@ public class Coach {
     @JoinColumn(name = "team_id")
     private Team team;
 
+
 }
