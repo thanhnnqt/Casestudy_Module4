@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/tournaments")
 public class TournamentController {
     private final ITournamentService tournamentService;
     private final ITeamService teamService;
@@ -45,13 +44,13 @@ public class TournamentController {
     }
 
 
-    @GetMapping("/delete/{id}")
+    @GetMapping("/tournaments/delete/{id}")
     public String delete(@PathVariable Long id) {
         tournamentService.delete(id);
         return "redirect:/tournaments";
     }
 
-    @GetMapping("/{id}/manage-teams")
+    @GetMapping("/tournaments/{id}/manage-teams")
     public String showManageTeamsForm(@PathVariable Long id, Model model) {
         Tournament tournament = tournamentService.findById(id);
         if (tournament == null) {
@@ -70,11 +69,11 @@ public class TournamentController {
                         .collect(Collectors.toSet())
         );
 
-        return "tournament/manage-teams";
+        return "tournament/manager-teams";
     }
 
     // --- (PHẦN MỚI) LƯU CÁC ĐỘI ĐÃ CHỌN ---
-    @PostMapping("/save-teams")
+    @PostMapping("/tournaments/save-teams")
     public String saveTeamsForTournament(@RequestParam("tournamentId") Long tournamentId,
                                          @RequestParam(value = "teamIds", required = false) List<Long> teamIds,
                                          RedirectAttributes redirect) {
