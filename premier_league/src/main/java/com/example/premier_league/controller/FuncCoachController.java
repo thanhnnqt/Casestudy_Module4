@@ -8,7 +8,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Comparator; // <-- THÊM IMPORT
+import java.util.LinkedHashMap; // <-- THÊM IMPORT
 import java.util.List;
+import java.util.Map; // <-- THÊM IMPORT
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -22,7 +25,7 @@ public class FuncCoachController {
     private final ITrainingScheduleService iTrainingScheduleService;
     private final ITeamService iTeamService;
     private final IMatchLineupService iMatchLineupService;
-    private final IFormationService iFormationService; // <-- THÊM MỚI
+    private final IFormationService iFormationService;
 
     /**
      * Helper
@@ -48,10 +51,36 @@ public class FuncCoachController {
 
     /**
      * Yêu cầu 1: Xem danh sách cầu thủ
+     * === ĐÃ CẬP NHẬT LOGIC GROUPING ===
      */
     @GetMapping("/players")
     public String getPlayerList(@PathVariable Long teamId, Model model) {
-        model.addAttribute("players", iPlayerService.findByTeamId(teamId));
+        List<Player> players = iPlayerService.findByTeamId(teamId);
+
+        // 1. Định nghĩa thứ tự ưu tiên của vị trí
+        Comparator<String> positionComparator = (p1, p2) -> {
+            Map<String, Integer> order = Map.of("GK", 1, "DF", 2, "MF", 3, "FW", 4);
+            // Vị trí lạ sẽ bị đẩy xuống cuối (99)
+            return order.getOrDefault(p1, 99) - order.getOrDefault(p2, 99);
+        };
+
+        // 2. Group (nhóm) các cầu thủ theo vị trí
+        // 3. Sort (sắp xếp) các nhóm theo thứ tự đã định nghĩa (GK -> DF -> MF -> FW)
+        // 4. Thu thập kết quả vào một LinkedHashMap để giữ nguyên thứ tự đã sắp xếp
+        Map<String, List<Player>> playersByPosition = players.stream()
+                .collect(Collectors.groupingBy(Player::getPosition)) // Nhóm theo vị trí
+                .entrySet().stream() // Chuyển sang Stream để sắp xếp Map
+                .sorted(Map.Entry.comparingByKey(positionComparator)) // Sắp xếp Key (vị trí)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new // Sử dụng LinkedHashMap để duy trì thứ tự
+                ));
+
+        // 5. Gửi Map (thay vì List) sang view
+        model.addAttribute("playersByPosition", playersByPosition);
+
         // Thêm các thuộc tính cho layout
         model.addAttribute("pageTitle", "Danh sách cầu thủ");
         model.addAttribute("activePage", "players");
