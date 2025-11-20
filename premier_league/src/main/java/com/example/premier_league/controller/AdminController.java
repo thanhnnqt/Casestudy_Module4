@@ -17,41 +17,33 @@ import java.util.List;
 @Controller
 public class AdminController {
 
-    private final MatchScheduleService matchScheduleService;
-
-    // Inject Service qua Constructor
     @Autowired
-    public AdminController(MatchScheduleService matchScheduleService) {
-        this.matchScheduleService = matchScheduleService;
-    }
-
-    // Trang đăng nhập admin
+    private MatchScheduleService matchScheduleService;
     @GetMapping("/admin/login")
     public String adminLogin() {
         return "admin/admin-login";
     }
-
-    // Trang Dashboard (Tổng quan + Lịch thi đấu)
     @GetMapping("/admin/home")
     public String adminDashboard(
             @RequestParam(value = "round", required = false, defaultValue = "1") Integer round,
             Model model
     ) {
-        // 1. Lấy dữ liệu trận đấu (Logic từ tournamentsDetail chuyển sang)
-        Pageable pageable = PageRequest.of(0, 100); // Lấy 100 trận (hoặc chỉnh số lớn hơn để lấy hết)
+        // 1. Lấy toàn bộ trận đấu (Lấy max 380 trận cho cả mùa giải)
+        Pageable pageable = PageRequest.of(0, 380);
         Page<MatchSchedule> matchPage = matchScheduleService.getAllMatches(pageable);
 
-        // 2. Lọc theo vòng đấu (Logic Java của bạn)
+        // 2. Lọc danh sách theo vòng (round)
         List<MatchSchedule> roundMatches = new ArrayList<>();
         if (matchPage != null && matchPage.hasContent()) {
             for (MatchSchedule m : matchPage.getContent()) {
+                // Kiểm tra null an toàn
                 if (m != null && m.getRound() != null && m.getRound().equals(round)) {
                     roundMatches.add(m);
                 }
             }
         }
 
-        // 3. Đẩy dữ liệu ra View (admin/admin-home.html)
+        // 3. Đẩy dữ liệu ra View
         model.addAttribute("upcomingMatches", roundMatches);
         model.addAttribute("selectedRound", round);
 
