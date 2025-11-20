@@ -48,7 +48,7 @@ public class MatchScheduleController {
             @RequestParam(defaultValue = "0") int page
     ) {
 
-        Pageable pageable = PageRequest.of(page, 5);
+        Pageable pageable = PageRequest.of(page, 10);
         Page<MatchSchedule> matchPage;
 
         // parse vòng đấu nếu có
