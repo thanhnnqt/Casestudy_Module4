@@ -28,14 +28,16 @@ import java.util.stream.Collectors;
 public class WebSecurityConfig {
 
     @Autowired
+    private CustomAccessDeniedHandler accessDeniedHandler; // Custom 403 Handler
+
+    @Autowired
     private CustomAuthFailureHandler customAuthFailureHandler;
 
-    // 1. TIÊM HANDLER TÙY CHỈNH VÀO ĐÂY
     @Autowired
-    private CustomLoginSuccessHandler customLoginSuccessHandler;
+    private CustomLoginSuccessHandler customLoginSuccessHandler; // Custom Success Handler
 
     @Autowired
-    private IAccountRepository accountRepository;
+    private IAccountRepository accountRepository; // Interface IAccountRepository
 
     @Bean
     public SpringSecurityDialect springSecurityDialect() {
@@ -54,6 +56,7 @@ public class WebSecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
+        // Trích xuất quyền hạn từ DB (Role Name không cần thêm tiền tố "ROLE_" vì đã có sẵn)
         return username -> {
             Account account = accountRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
@@ -76,7 +79,7 @@ public class WebSecurityConfig {
     }
 
     // ==================================================================
-    // CẤU HÌNH 1: DÀNH RIÊNG CHO ADMIN (Giữ nguyên)
+    // CẤU HÌNH 1: DÀNH RIÊNG CHO ADMIN (Order 1)
     // ==================================================================
     @Bean
     @Order(1)
@@ -86,15 +89,16 @@ public class WebSecurityConfig {
         http.authenticationProvider(authProvider);
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin/login", "/admin/process-login", "/admin/logout").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                // Cho phép truy cập /403 trong admin chain
+                .requestMatchers("/admin/login", "/admin/process-login", "/admin/logout", "/403").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN") // Chỉ ROLE_ADMIN được vào
                 .anyRequest().authenticated()
         );
 
         http.formLogin(form -> form
                 .loginPage("/admin/login")
                 .loginProcessingUrl("/admin/process-login")
-                .defaultSuccessUrl("/admin/home", true) // Admin login ở trang admin thì về home admin
+                .defaultSuccessUrl("/admin/home", true)
                 .failureUrl("/admin/login?error")
                 .usernameParameter("username")
                 .passwordParameter("password")
@@ -108,11 +112,14 @@ public class WebSecurityConfig {
                 .permitAll()
         );
 
+        // SỬA: Áp dụng Custom Access Denied Handler
+        http.exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler));
+
         return http.build();
     }
 
     // ==================================================================
-    // CẤU HÌNH 2: DÀNH CHO USER, COACH, OWNER (Sửa đổi ở đây)
+    // CẤU HÌNH 2: DÀNH CHO USER, COACH, OWNER (Order 2)
     // ==================================================================
     @Bean
     @Order(2)
@@ -121,16 +128,23 @@ public class WebSecurityConfig {
         http.authenticationProvider(authProvider);
 
         http.authorizeHttpRequests(auth -> auth
+                // PUBLIC ACCESS
                 .requestMatchers(
-                        "/", "/home", "/login", "/logout", "/register",
+                        "/", "/home", "/login", "/logout", "/register", "/403",
                         "/css/**", "/js/**", "/images/**", "/webjars/**",
-                        "/tournament/**", "/player/**", "/coach/**", "/team/**",
+                        "/tournament/**", "/player/**", "/team/**",
                         "/stadium/**", "/matches/**", "/blogs/**", "/news/**", "/layout/**","/tournaments-detail",
                         "/oauth2/**"
                 ).permitAll()
-                .requestMatchers("/coach/**").hasRole("COACH")
-                .requestMatchers("/owner/**").hasAnyRole("ADMIN", "OWNER")
-                .requestMatchers("/ticket").authenticated()
+
+                // AUTHORIZATION RULES
+                .requestMatchers("/coach/**").hasRole("COACH") // Chỉ COACH
+                .requestMatchers("/owner/**").hasAnyRole("ADMIN", "OWNER") // Chỉ ADMIN hoặc OWNER
+
+                // AUTHENTICATION REQUIRED
+                .requestMatchers("/ticket").authenticated() // Chỉ cần đăng nhập
+
+                // CATCH ALL (Mặc định cho phép)
                 .anyRequest().permitAll()
         );
 
@@ -138,11 +152,7 @@ public class WebSecurityConfig {
         http.formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/process-login")
-
-                // 2. THAY THẾ defaultSuccessUrl BẰNG successHandler
-                // .defaultSuccessUrl("/?success", true)  <-- XÓA DÒNG NÀY
-                .successHandler(customLoginSuccessHandler) // <-- THÊM DÒNG NÀY
-
+                .successHandler(customLoginSuccessHandler) // Dynamic Redirect
                 .failureHandler(customAuthFailureHandler)
                 .usernameParameter("username")
                 .passwordParameter("password")
@@ -162,7 +172,9 @@ public class WebSecurityConfig {
                 .permitAll()
         );
 
-        http.exceptionHandling(ex -> ex.accessDeniedPage("/403"));
+        // SỬA: Áp dụng Custom Access Denied Handler
+        http.exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler));
+
 
         return http.build();
     }
