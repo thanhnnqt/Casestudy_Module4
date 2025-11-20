@@ -192,4 +192,6 @@ public class HomeController {
 
         return "home/tournaments-detail";
     }
+
+
 }
