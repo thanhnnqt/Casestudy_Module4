@@ -1,12 +1,12 @@
 package com.example.premier_league.service.impl;
 
-
 import com.example.premier_league.entity.Staff;
 import com.example.premier_league.repository.IStaffRepository;
 import com.example.premier_league.service.IStaffService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class StaffService implements IStaffService {
 
@@ -33,20 +33,16 @@ public class StaffService implements IStaffService {
 
     @Override
     public List<Staff> findByName(String name) {
-        return List.of();
+        return staffRepository.findByFullNameContainingIgnoreCase(name);
     }
 
     @Override
     public void update(Staff staff) {
-        if (staffRepository.existsById(staff.getId())) {
-            staffRepository.save(staff);
-        }
+        staffRepository.save(staff);
     }
 
     @Override
     public void delete(int id) {
-        if (staffRepository.existsById(id)) {
-            staffRepository.deleteById(id);
-        }
+        staffRepository.deleteById(id);
     }
 }

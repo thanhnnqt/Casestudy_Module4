@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
@@ -17,8 +18,9 @@ public class StaffDto {
     @NotBlank(message = "Tên không được để trống")
     private String fullName;
 
+    // 2. Thêm dòng này cho Ngày sinh
     @NotNull(message = "Ngày sinh không được để trống")
-    @Past(message = "Ngày sinh phải nhỏ hơn ngày hiện tại")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 
     @NotBlank(message = "Vui lòng chọn giới tính")
@@ -34,6 +36,7 @@ public class StaffDto {
     private String role;
 
     @NotNull(message = "Ngày gia nhập không được để trống")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate joinDate;
 
     @Pattern(
@@ -53,7 +56,7 @@ public class StaffDto {
     private String avatarUrl;
 
     // Không truyền Team mà truyền teamId
-    @NotNull(message = "Vui lòng chọn đội bóng")
-    private Integer teamId;
+//    @NotNull(message = "Vui lòng chọn đội bóng")
+    private Long teamId;
 
 }
