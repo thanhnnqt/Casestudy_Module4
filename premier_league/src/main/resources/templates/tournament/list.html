@@ -21,7 +21,7 @@
             <h1 class="text-3xl font-bold text-primary">Quản lý Mùa Giải</h1>
             <p class="text-gray-600 mt-1">Danh sách các mùa giải Premier League</p>
         </div>
-        <a th:href="@{/tournaments/add}" class="bg-primary hover:bg-[#500055] text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all flex items-center gap-2">
+        <a th:href="@{/admin/tournaments/add}" class="bg-primary hover:bg-[#500055] text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all flex items-center gap-2">
             <i data-lucide="plus-circle" class="w-5 h-5"></i> Thêm Mùa Giải Mới
         </a>
     </div>
@@ -75,13 +75,13 @@
 
                 <td class="p-4">
                     <div class="flex justify-center gap-2">
-                        <a th:href="@{'/tournaments/' + ${t.id} + '/manage-teams'}"
+                        <a th:href="@{'/admin/tournaments/' + ${t.id} + '/manage-teams'}"
                            class="bg-blue-50 hover:bg-blue-100 text-blue-700 p-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-semibold whitespace-nowrap"
                            title="Quản lý danh sách đội">
                             <i data-lucide="users" class="w-4 h-4"></i> <span class="hidden xl:inline">Quản lý Đội</span>
                         </a>
 
-                        <a th:href="@{'/tournaments/delete/' + ${t.id}}"
+                        <a th:href="@{'/admin/tournaments/delete/' + ${t.id}}"
                            onclick="return confirm('Bạn có chắc chắn muốn xóa mùa giải này?')"
                            class="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition-colors"
                            title="Xóa giải đấu">
@@ -102,20 +102,10 @@
 <div th:replace="~{layout/footer :: footer}"></div>
 
 <style>
-    /* Tùy chỉnh thanh cuộn cho đẹp */
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #ccc;
-        border-radius: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #aaa;
-    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #aaa; }
 </style>
 
 <script>
