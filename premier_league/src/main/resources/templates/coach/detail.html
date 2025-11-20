@@ -7,10 +7,11 @@
     <div class="row">
         <div class="col-md-4">
             <div class="card mb-3">
-                <img class="card-img-top"
+                <img class="coach-avatar"
                      th:src="${coach.avatarUrl}"
                      alt="avatar"
-                     onerror="this.src='https://via.placeholder.com/400x300?text=No+Image';">
+                     onerror="this.onerror=null; this.src='/images/no-image.png';">
+
             </div>
         </div>
 
@@ -18,10 +19,10 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="mb-0" th:text="${coach.fullName}">Tên HLV</h3>
                 <div>
-                    <a th:href="@{'/coaches/' + ${coach.id} + '/edit'}" class="btn btn-sm btn-outline-primary">
+                    <a th:href="@{'/admin/coaches/' + ${coach.id} + '/edit'}" class="btn btn-sm btn-outline-primary">
                         Sửa
                     </a>
-                    <form th:action="@{'/coaches/' + ${coach.id} + '/delete'}"
+                    <form th:action="@{'/admin/coaches/' + ${coach.id} + '/delete'}"
                           method="post" class="d-inline"
                           onsubmit="return confirm('Xóa huấn luyện viên này?');">
                         <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
@@ -47,7 +48,15 @@
                 </div>
                 <div class="col-md-6">
                     <p><strong>Kinh nghiệm:</strong> <span th:text="${coach.experienceYears}">0</span> năm</p>
-                    <p><strong>Chứng chỉ:</strong> <span th:text="${coach.licenseLevel}"></span></p>
+                    <p>
+                        <strong>Chứng chỉ huấn luyện: </strong>
+                        <span th:if="${#lists.isEmpty(coach.licenseLevels)}">Chưa cập nhật</span>
+                        <span th:each="lic : ${coach.licenseLevels}"
+                              class="badge bg-primary me-1"
+                              th:text="${lic}">
+    </span>
+                    </p>
+
                     <p><strong>Trạng thái:</strong> <span th:text="${coach.status}"></span></p>
                     <p><strong>SĐT:</strong> <span th:text="${coach.phone}"></span></p>
                     <p><strong>Email:</strong> <span th:text="${coach.email}"></span></p>
@@ -59,7 +68,7 @@
             <h6>Ghi chú</h6>
             <p th:text="${coach.note}">Không có ghi chú.</p>
 
-            <a href="/coaches" class="btn btn-secondary mt-2">Quay lại danh sách</a>
+            <a href="/admin/coaches" class="btn btn-secondary mt-2">Quay lại danh sách</a>
         </div>
     </div>
 

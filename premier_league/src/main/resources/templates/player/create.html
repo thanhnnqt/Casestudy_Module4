@@ -9,7 +9,7 @@
 
 <h2 class="text-center mb-4">Thêm mới cầu thủ</h2>
 
-<form th:action="@{/players/create}" th:object="${playerDto}" method="post">
+<form th:action="@{/admin/players/create}" th:object="${playerDto}" method="post">
 
     <!-- Tên -->
     <div class="mb-3">
@@ -57,7 +57,7 @@
     </div>
 
     <button class="btn btn-success">Thêm</button>
-    <a href="/players" class="btn btn-secondary">Quay lại</a>
+    <a href="/admin/players" class="btn btn-secondary">Quay lại</a>
 
 </form>
 
