@@ -81,8 +81,9 @@
         </form>
 
         <div class="space-y-4">
-            <div th:each="match : ${upcomingMatches}"
-                 class="p-4 border rounded-xl bg-gray-50 hover:bg-gray-100 transition shadow-sm">
+            <a th:each="match : ${upcomingMatches}"
+               th:href="@{'/live_matches/' + ${match.id}}"
+               class="block p-4 border rounded-xl bg-gray-50 hover:bg-gray-100 transition shadow-sm">
 
                 <div class="flex items-center justify-between">
 
@@ -118,8 +119,9 @@
                     </div>
 
                 </div>
-            </div>
+            </a>
         </div>
+
 
     </div>
 
