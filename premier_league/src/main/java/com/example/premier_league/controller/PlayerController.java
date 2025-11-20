@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/players")
+@RequestMapping("/admin/players")
 public class PlayerController {
 
     private final IPlayerService playerService;
@@ -61,7 +61,7 @@ public class PlayerController {
         playerService.save(player);
 
         redirect.addFlashAttribute("message", "Thêm cầu thủ thành công!");
-        return "redirect:/players";
+        return "redirect:/admin/players";
     }
 
     // ====== DETAIL ======
@@ -117,7 +117,7 @@ public class PlayerController {
         playerService.update(existing);
 
         redirect.addFlashAttribute("message", "Cập nhật cầu thủ thành công!");
-        return "redirect:/players";
+        return "redirect:/admin/players";
     }
 
     // ====== DELETE ======
@@ -130,7 +130,7 @@ public class PlayerController {
 
         playerService.delete(id);
         redirect.addFlashAttribute("message", "Xóa cầu thủ thành công!");
-        return "redirect:/players";
+        return "redirect:/admin/players";
     }
 
     // ====== SEARCH ======

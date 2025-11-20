@@ -1,29 +1,32 @@
 package com.example.premier_league.dto;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 public class MatchStatsDto {
+    // home
+    public Integer shotsHome;
+    public Integer shotsOnTargetHome;
+    public Integer possessionHome;
+    public Integer passesHome;
+    public Integer accuracyHome;
+    public Integer foulsHome;
+    public Integer yellowCardsHome;
+    public Integer redCardsHome;
+    public Integer offsidesHome;
+    public Integer cornersHome;
 
-    private int shotsHome;
-    private int shotsAway;
-
-    private int shotsOnTargetHome;
-    private int shotsOnTargetAway;
-
-    private int possessionHome;
-    private int possessionAway;
-
-    private int passesHome;
-    private int passesAway;
-
-    private int accuracyHome;
-    private int accuracyAway;
-
-    private int foulsHome;
-    private int foulsAway;
+    // away
+    public Integer shotsAway;
+    public Integer shotsOnTargetAway;
+    public Integer possessionAway;
+    public Integer passesAway;
+    public Integer accuracyAway;
+    public Integer foulsAway;
+    public Integer yellowCardsAway;
+    public Integer redCardsAway;
+    public Integer offsidesAway;
+    public Integer cornersAway;
 }

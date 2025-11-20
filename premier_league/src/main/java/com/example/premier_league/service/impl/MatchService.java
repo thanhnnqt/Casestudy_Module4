@@ -7,6 +7,7 @@ import com.example.premier_league.entity.Team;
 import com.example.premier_league.repository.IMatchRepository;
 import com.example.premier_league.repository.ITeamRepository;
 import com.example.premier_league.service.IMatchService;
+import com.example.premier_league.service.IRankingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class MatchService implements IMatchService {
     private final IMatchRepository matchRepository;
     private final ITeamRepository teamRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final RankingService rankingService;
+    private final IRankingsService rankingService;
 
 
     public Match createMatch(Match m) {
