@@ -1,7 +1,7 @@
 package com.example.premier_league.controller;
 
 import com.example.premier_league.dto.MatchEventDto;
-import com.example.premier_league.entity.MatchEvent;
+import com.example.premier_league.dto.MatchEventResponse;
 import com.example.premier_league.service.IMatchEventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class MatchEventRestController {
     }
 
     @GetMapping("/{matchId}/events")
-    public ResponseEntity<List<MatchEvent>> list(@PathVariable Long matchId) {
+    public ResponseEntity<List<MatchEventResponse>> list(@PathVariable Long matchId) {
         return ResponseEntity.ok(eventService.getEventsByMatch(matchId));
     }
 
@@ -37,4 +37,3 @@ public class MatchEventRestController {
         return ResponseEntity.ok(m);
     }
 }
-

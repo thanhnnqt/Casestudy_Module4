@@ -11,4 +11,7 @@ public interface ITournamentService {
     void delete(Long id);
 
     void updateTeamsForTournament(Long tournamentId, List<Long> teamIds);
+    boolean isTournamentStarted(Long tournamentId);
+    void copyTeamsFromTournament(Long targetTournamentId, Long sourceTournamentId);
+    boolean existsBySeason(String season);
 }

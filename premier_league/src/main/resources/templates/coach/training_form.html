@@ -1,72 +1,191 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{coach/dashboard :: coachLayout(
-                    pageTitle=${formTitle},
-                    activePage='training',
-                    content=~{::.main-content-child}
-                  )}">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Form Lịch tập</title>
+    <title>Form Lịch tập - Premier League</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#38003c',   // Tím than PL
+                        secondary: '#00ff85', // Xanh neon PL
+                        pink: '#ff0050'       // Hồng PL
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap&subset=latin-ext" rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        /* Header Card Style */
+        .pl-header-card {
+            background-color: #38003c;
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+            color: white;
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(56, 0, 60, 0.2);
+        }
+
+        /* Form Input Styles */
+        .pl-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            transition: all 0.2s;
+        }
+        .pl-input:focus {
+            outline: none;
+            border-color: #00ff85;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 255, 133, 0.2);
+        }
+        .pl-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        .pl-label span.required {
+            color: #ff0050;
+        }
+    </style>
 </head>
-<body>
 
-<div class="main-content-child">
-    <h2 class="mb-4" th:text="${formTitle}">Form Lịch tập</h2>
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <strong th:text="${error}"></strong>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div th:replace="~{layout/navbarCoach :: header}"></div>
+
+<div class="flex-grow container mx-auto px-4 py-8 max-w-4xl">
+
+    <div class="pl-header-card mb-8 p-8 flex items-center justify-between">
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="bg-secondary text-primary font-bold px-3 py-1 rounded text-xs uppercase tracking-wider">
+                    Training Session
+                </div>
+                <span class="text-white/80 font-semibold text-sm uppercase tracking-widest">Quản lý lịch trình</span>
+            </div>
+            <h1 class="text-4xl font-black tracking-tight mb-2 text-white" style="font-family: 'Inter', sans-serif;">
+                THÊM MỚI LỊCH TẬP
+            </h1>
+        </div>
+        <div class="relative z-10 hidden md:block text-secondary/20">
+            <i data-lucide="calendar-plus" class="w-24 h-24"></i>
+        </div>
+        <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-pink/20 to-transparent pointer-events-none"></div>
     </div>
 
-    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
+    <div th:if="${error}" class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-6 h-6 flex-shrink-0 mt-0.5"></i>
+        <div>
+            <strong class="block font-bold">Đã xảy ra lỗi!</strong>
+            <span th:text="${error}"></span>
+        </div>
+        <button type="button" class="ml-auto text-red-400 hover:text-red-600" onclick="this.parentElement.remove()">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+    </div>
+
+    <div th:if="${message}" class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow-sm flex items-center gap-3">
+        <i data-lucide="check-circle" class="w-6 h-6 flex-shrink-0"></i>
         <span th:text="${message}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <form th:action="@{/coach/team/{teamId}/training/save(teamId=${teamId})}"
-          th:object="${schedule}"
-          method="post"
-          class="card p-4 bg-white shadow-sm border-0"
-          style="max-width: 800px;">
 
-        <input type="hidden" th:field="*{id}" />
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="p-8">
+            <form th:action="@{/coach/team/{teamId}/training/save(teamId=${teamId})}"
+                  th:object="${schedule}"
+                  method="post"
+                  class="space-y-6">
 
-        <div class="mb-3">
-            <label for="title" class="form-label fw-bold">Tiêu đề <span class="text-danger">*</span></label>
-            <input type="text" id="title" th:field="*{title}" class="form-control" placeholder="Ví dụ: Tập chiến thuật, Tập thể lực..." required>
+                <input type="hidden" th:field="*{id}" />
+
+                <div>
+                    <label for="title" class="pl-label">Tiêu đề <span class="required">*</span></label>
+                    <input type="text" id="title" th:field="*{title}"
+                           class="pl-input text-lg font-semibold text-primary placeholder-gray-400"
+                           placeholder="Ví dụ: Tập chiến thuật, Rèn thể lực..." required>
+                </div>
+
+                <div>
+                    <label for="location" class="pl-label">Địa điểm <span class="required">*</span></label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <input type="text" id="location" th:field="*{location}"
+                               class="pl-input pl-10"
+                               placeholder="Sân tập A, Phòng Gym..." required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="startTime" class="pl-label">Bắt đầu <span class="required">*</span></label>
+                        <input type="datetime-local" id="startTime" th:field="*{startTime}"
+                               class="pl-input" required>
+                        <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                            <i data-lucide="info" class="w-3 h-3"></i> Phải lớn hơn thời gian hiện tại
+                        </p>
+                    </div>
+                    <div>
+                        <label for="endTime" class="pl-label">Kết thúc <span class="required">*</span></label>
+                        <input type="datetime-local" id="endTime" th:field="*{endTime}"
+                               class="pl-input" required>
+                        <p class="mt-1 text-xs text-gray-500 flex items-center gap-1">
+                            <i data-lucide="info" class="w-3 h-3"></i> Tối thiểu 30 phút sau giờ bắt đầu
+                        </p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="description" class="pl-label">Nội dung chi tiết</label>
+                    <textarea id="description" th:field="*{description}"
+                              class="pl-input" rows="5"
+                              placeholder="Nhập chi tiết các bài tập, ghi chú cho cầu thủ..."></textarea>
+                </div>
+
+                <div class="pt-6 border-t border-gray-100 flex items-center justify-end gap-4">
+                    <a th:href="@{/coach/team/{teamId}/training(teamId=${teamId})}"
+                       class="px-6 py-3 rounded-lg font-bold text-gray-600 hover:bg-gray-100 transition-colors">
+                        Hủy bỏ
+                    </a>
+                    <button type="submit"
+                            class="px-8 py-3 rounded-lg bg-secondary hover:bg-[#00d670] text-primary font-black shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center gap-2">
+                        <i data-lucide="save" class="w-5 h-5"></i>
+                        LƯU LỊCH TẬP
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <div class="mb-3">
-            <label for="location" class="form-label fw-bold">Địa điểm <span class="text-danger">*</span></label>
-            <input type="text" id="location" th:field="*{location}" class="form-control" placeholder="Sân tập A, Phòng Gym..." required>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="startTime" class="form-label fw-bold">Thời gian bắt đầu <span class="text-danger">*</span></label>
-                <input type="datetime-local" id="startTime" th:field="*{startTime}" class="form-control" required>
-                <div class="form-text text-muted small">Phải lớn hơn thời gian hiện tại.</div>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="endTime" class="form-label fw-bold">Thời gian kết thúc <span class="text-danger">*</span></label>
-                <input type="datetime-local" id="endTime" th:field="*{endTime}" class="form-control" required>
-                <div class="form-text text-muted small">Phải sau thời gian bắt đầu ít nhất 30 phút.</div>
-            </div>
-        </div>
-
-        <div class="mb-3">
-            <label for="description" class="form-label fw-bold">Mô tả (Nội dung tập)</label>
-            <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Chi tiết bài tập..."></textarea>
-        </div>
-
-        <div class="d-flex justify-content-end gap-2">
-            <a th:href="@{/coach/team/{teamId}/training(teamId=${teamId})}" class="btn btn-secondary">Hủy bỏ</a>
-            <button type="submit" class="btn btn-success px-4"><i class="bi bi-save"></i> Lưu lịch tập</button>
-        </div>
-    </form>
+    </div>
 </div>
+
+<div th:replace="~{layout/footer :: footer}"></div>
+
+<script>
+    lucide.createIcons();
+</script>
 
 </body>
 </html>
