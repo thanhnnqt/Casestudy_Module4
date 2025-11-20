@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Cập nhật thống kê trận đấu</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#38003c',
+                        secondary: '#00ff85',
+                        yellowCard: '#FFD500',
+                        redCard: '#D00000'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+<!-- NAVBAR -->
+<div th:replace="layout/navbar :: header"></div>
+
+<!-- CONTENT WRAPPER -->
+<div class="max-w-4xl mx-auto p-6 bg-white mt-10 shadow-xl rounded-2xl border-t-4 border-primary">
+
+    <h2 class="text-3xl font-bold text-primary mb-6 flex items-center gap-2">
+        ⚙ Cập nhật thống kê trận đấu
+    </h2>
+
+    <!-- MATCH ID -->
+    <div class="mb-6">
+        <label class="font-semibold">Match ID</label>
+        <input id="matchId"
+               class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary"
+               placeholder="Nhập matchId và Enter để load"
+               onkeypress="if(event.key==='Enter') loadStats()">
+    </div>
+
+    <!-- TEAM NAMES -->
+    <div class="grid grid-cols-3 text-lg font-bold mb-4">
+        <div id="homeName" class="text-primary text-left">Đội nhà</div>
+        <div></div>
+        <div id="awayName" class="text-red-600 text-right">Đội khách</div>
+    </div>
+
+    <!-- STATS GRID -->
+    <div id="statsForm" class="hidden">
+        <div class="grid grid-cols-3 gap-4 items-center">
+
+            <!-- HOME INPUTS -->
+            <div class="space-y-4" id="homeInputs"></div>
+
+            <!-- LABELS -->
+            <div class="space-y-4 font-semibold text-gray-700 text-center" id="labelColumn"></div>
+
+            <!-- AWAY INPUTS -->
+            <div class="space-y-4" id="awayInputs"></div>
+
+        </div>
+
+        <!-- SUBMIT -->
+        <button onclick="updateStats()"
+                class="w-full py-3 mt-8 bg-primary text-white font-bold rounded-lg hover:bg-secondary hover:text-primary transition">
+            Cập nhật thống kê
+        </button>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="mt-auto" th:replace="layout/footer :: footer"></div>
+
+<script>
+
+    const labels = [
+        "Số lần sút",
+        "Sút trúng đích",
+        "Kiểm soát bóng (%)",
+        "Lượt chuyền bóng",
+        "Tỷ lệ chuyền bóng (%)",
+        "Phạm lỗi",
+        "Thẻ vàng",
+        "Thẻ đỏ",
+        "Việt vị",
+        "Phạt góc"
+    ];
+
+    const fields = [
+        "shots", "shotsOnTarget", "possession",
+        "passes", "accuracy", "fouls",
+        "yellowCards", "redCards", "offsides", "corners"
+    ];
+
+    /* =============================
+        LOAD STATS + TEAM NAMES
+    ============================== */
+    async function loadStats() {
+        const id = document.getElementById("matchId").value;
+        if (!id) return alert("Nhập matchId!");
+
+        // load match để lấy tên đội
+        let match = await fetch(`/api/matches/${id}`).then(r => r.json());
+
+        document.getElementById("homeName").textContent = match.homeTeamName;
+        document.getElementById("awayName").textContent = match.awayTeamName;
+
+        // load stats
+        let stats = await fetch(`/api/matches/${id}/stats`).then(r => r.json());
+
+        document.getElementById("statsForm").classList.remove("hidden");
+
+        const home = document.getElementById("homeInputs");
+        const away = document.getElementById("awayInputs");
+        const labelCol = document.getElementById("labelColumn");
+
+        home.innerHTML = "";
+        away.innerHTML = "";
+        labelCol.innerHTML = "";
+
+        for (let i = 0; i < fields.length; i++) {
+            let f = fields[i];
+
+            // label
+            labelCol.innerHTML += `
+                    <div class="flex justify-center items-center h-12">
+                        <span class="text-gray-700">
+                             ${labels[i]}
+                        </span>
+                    </div>
+                            `;
+
+
+            // home input
+            home.innerHTML += `
+                <input id="${f}Home"
+                       class="w-full px-4 py-3 border rounded-lg text-center ${f === 'yellowCards' ? 'border-yellowCard text-yellow-600' : f === 'redCards' ? 'border-redCard text-red-600' : ''}"
+                       value="${stats[f + 'Home'] ?? 0}">
+            `;
+
+            // away input
+            away.innerHTML += `
+                <input id="${f}Away"
+                       class="w-full px-4 py-3 border rounded-lg text-center ${f === 'yellowCards' ? 'border-yellowCard text-yellow-600' : f === 'redCards' ? 'border-redCard text-red-600' : ''}"
+                       value="${stats[f + 'Away'] ?? 0}">
+            `;
+        }
+    }
+
+    /* =============================
+        SUBMIT UPDATE
+    ============================== */
+    async function updateStats() {
+
+        const id = document.getElementById("matchId").value;
+        if (!id) return alert("Thiếu matchId");
+
+        let payload = {};
+
+        fields.forEach(f => {
+            payload[f + "Home"] = Number(document.getElementById(f + "Home").value);
+            payload[f + "Away"] = Number(document.getElementById(f + "Away").value);
+        });
+
+        let resp = await fetch(`/api/matches/${id}/stats`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+        });
+
+        alert(resp.ok ? "Cập nhật thành công!" : "Lỗi server");
+    }
+
+</script>
+
+</body>
+</html>

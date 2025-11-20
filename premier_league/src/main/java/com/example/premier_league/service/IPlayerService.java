@@ -1,5 +1,7 @@
 package com.example.premier_league.service;
 
+import com.example.premier_league.dto.PlayerDto;
+import com.example.premier_league.dto.PlayerShortDto;
 import com.example.premier_league.entity.Player;
 
 import java.util.List;
@@ -19,4 +21,5 @@ public interface IPlayerService {
     void update(Player player);
 
     void delete(Long id);
-}
+
+    List<PlayerShortDto> getPlayersByTeam(Long teamId);}
