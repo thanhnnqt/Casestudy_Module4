@@ -77,19 +77,25 @@ public class WebSecurityConfig {
         http.authenticationProvider(authProvider);
 
         http.authorizeHttpRequests(auth -> auth
-                // PUBLIC: tất cả trang khác
+                // 1. PUBLIC
                 .requestMatchers(
                         "/", "/home", "/login", "/logout", "/register",
                         "/css/**", "/js/**", "/images/**", "/webjars/**",
                         "/tournament/**", "/player/**", "/coach/**", "/team/**",
                         "/stadium/**", "/matches/**", "/blogs/**", "/news/**", "/layout/**","/tournaments-detail",
-                        "/oauth2/**")
-                .permitAll()
+                        "/oauth2/**"
+                ).permitAll()
 
-                // Chỉ trang đặt vé yêu cầu login
+                // 2. Trang mua vé yêu cầu login
                 .requestMatchers("/ticket").authenticated()
 
-                // Còn lại public
+                // 3. Admin login/logout cho tất cả
+                .requestMatchers("/admin/login", "/admin/logout").permitAll()
+
+                // 4. Admin chỉ cho ADMIN role
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                // 5. Còn lại công khai
                 .anyRequest().permitAll()
         );
 
@@ -97,7 +103,7 @@ public class WebSecurityConfig {
         http.formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/process-login")
-                .defaultSuccessUrl("/", false) // redirect về page gốc nếu trước đó bấm ticket
+                .defaultSuccessUrl("/", false)
                 .failureHandler(customAuthFailureHandler)
                 .usernameParameter("username")
                 .passwordParameter("password")
@@ -124,4 +130,5 @@ public class WebSecurityConfig {
 
         return http.build();
     }
+
 }
