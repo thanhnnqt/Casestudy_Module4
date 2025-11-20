@@ -114,8 +114,19 @@
     </section>
 
     <!-- STADIUM -->
-    <section class="mt-4 text-sm text-gray-600">
-        <p><span class="font-bold text-primary">Địa điểm:</span> <span id="stadium">-</span></p>
+    <!-- STADIUM (Địa điểm trận đấu) -->
+    <section class="mt-8">
+        <div class="flex items-center justify-center gap-3
+                bg-gray-50 border border-gray-200
+                px-4 py-4 rounded-xl shadow-sm">
+
+            <i data-lucide="map-pin" class="w-7 h-7 text-primary"></i>
+
+            <div class="text-center">
+                <p class="text-primary font-bold text-lg">Địa điểm thi đấu</p>
+                <p id="stadium" class="text-2xl font-extrabold text-gray-800 mt-1">-</p>
+            </div>
+        </div>
     </section>
 
 </main>
@@ -327,8 +338,8 @@
                 // handle both shapes: m may be match object or simplified
                 homeName.textContent = m.homeTeam?.name ?? m.homeTeamName ?? "-";
                 awayName.textContent = m.awayTeam?.name ?? m.awayTeamName ?? "-";
-                homeLogo.src = m.homeTeam?.logoUrl ?? m.homeTeamLogo ?? "/images/default-team.png";
-                awayLogo.src = m.awayTeam?.logoUrl ?? m.awayTeamLogo ?? "/images/default-team.png";
+                homeLogo.src = m.homeLogo ?? m.homeTeam?.logoUrl ?? "/images/default-team.png";
+                awayLogo.src = m.awayLogo ?? m.awayTeam?.logoUrl ?? "/images/default-team.png";
 
                 homeScore.textContent = m.homeScore ?? m.homeScore ?? 0;
                 awayScore.textContent = m.awayScore ?? m.awayScore ?? 0;
