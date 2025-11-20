@@ -17,7 +17,6 @@
             </a>
 
             <div class="hidden md:flex items-center gap-2">
-
                 <th:block th:if="${teamId != null}">
                     <a th:href="@{/coach/team/{id}/schedule(id=${teamId})}"
                        class="px-4 py-2 text-white font-bold text-sm uppercase tracking-wide hover:bg-[#500055] hover:text-[#00ff85] rounded-md transition-all duration-200"
@@ -58,7 +57,6 @@
                         Tin tức
                     </a>
                 </th:block>
-
             </div>
 
             <div class="hidden md:flex items-center gap-4">
@@ -72,14 +70,26 @@
 
                 <div sec:authorize="isAuthenticated()" class="flex items-center gap-4 pl-4 border-l border-white/20">
                     <div class="flex items-center gap-3 text-white">
-                        <div class="w-10 h-10 rounded-full border-2 border-[#00ff85] p-0.5 overflow-hidden bg-white/10">
-                            <img th:src="${#authentication.principal.attributes['picture']}"
-                                 onerror="this.src='https://ui-avatars.com/api/?name=User&background=00ff85&color=38003c'"
+                        <div class="w-10 h-10 rounded-full border-2 border-[#00ff85] p-0.5 overflow-hidden bg-white/10 relative">
+
+                            <img th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                                 th:src="${#authentication.principal.attributes['picture']}"
+                                 class="w-full h-full object-cover rounded-full"
+                                 onerror="this.style.display='none'"/>
+
+                            <img th:unless="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                                 th:src="'https://ui-avatars.com/api/?name=' + ${#authentication.name} + '&background=00ff85&color=38003c'"
                                  class="w-full h-full object-cover rounded-full" />
                         </div>
+
                         <div class="flex flex-col">
                             <span class="text-[10px] text-gray-300 uppercase tracking-wider">Xin chào</span>
-                            <span class="font-bold text-[#00ff85] text-sm leading-none" sec:authentication="principal.attributes['name']">User</span>
+                            <span class="font-bold text-[#00ff85] text-sm leading-none">
+                                <span th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                                      th:text="${#authentication.principal.attributes['name']}">User</span>
+                                <span th:unless="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                                      th:text="${#authentication.name}">User</span>
+                            </span>
                         </div>
                     </div>
 
@@ -118,10 +128,23 @@
                 <div sec:authorize="!isAuthenticated()">
                     <a th:href="@{/login}" class="block w-full text-center px-4 py-3 bg-[#00ff85] text-[#38003c] font-bold rounded-lg shadow-md">Đăng Nhập</a>
                 </div>
+
                 <div sec:authorize="isAuthenticated()" class="flex flex-col gap-3">
                     <div class="flex items-center gap-3 px-4 text-white">
-                        <div class="w-8 h-8 rounded-full bg-[#00ff85] text-[#38003c] flex items-center justify-center font-bold">U</div>
-                        <span class="font-bold" sec:authentication="principal.attributes['name']">User</span>
+                        <div class="w-8 h-8 rounded-full bg-[#00ff85] text-[#38003c] flex items-center justify-center font-bold overflow-hidden">
+                            <img th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                                 th:src="${#authentication.principal.attributes['picture']}"
+                                 class="w-full h-full object-cover"/>
+                            <span th:unless="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                                  th:text="${#strings.substring(#authentication.name,0,1)}">U</span>
+                        </div>
+
+                        <span class="font-bold">
+                             <span th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                                   th:text="${#authentication.principal.attributes['name']}">User</span>
+                             <span th:unless="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                                   th:text="${#authentication.name}">User</span>
+                        </span>
                     </div>
                     <form th:action="@{/logout}" method="post">
                         <button class="block w-full text-center px-4 py-3 bg-red-500/20 text-red-400 font-bold rounded-lg hover:bg-red-500/30 transition">Đăng xuất</button>
