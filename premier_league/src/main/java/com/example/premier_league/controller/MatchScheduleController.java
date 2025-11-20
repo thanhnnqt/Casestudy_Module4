@@ -38,7 +38,7 @@ public class MatchScheduleController {
                               @RequestParam(required = false) String round,
                               @RequestParam(defaultValue = "0") int page) {
 
-        Pageable pageable = PageRequest.of(page, 5);
+        Pageable pageable = PageRequest.of(page, 10);
 
         Page<MatchSchedule> matchPage;
 
