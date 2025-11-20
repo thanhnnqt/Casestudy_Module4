@@ -33,7 +33,7 @@
       <p class="text-gray-500 text-sm">Nhập thông tin cơ bản cho giải thưởng</p>
     </div>
 
-    <form th:action="@{/prize/save}" th:object="${prizeDto}" method="post" class="space-y-5">
+    <form th:action="@{/admin/prize/save}" th:object="${prizeDto}" method="post" class="space-y-5">
       <input type="hidden" th:field="*{id}">
 
       <div>
@@ -84,7 +84,7 @@
         <button type="submit" class="flex-1 bg-primary hover:bg-[#500055] text-white font-bold py-3 rounded-lg shadow-md transition-colors">
           Lưu thông tin
         </button>
-        <a th:href="@{/prize}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg shadow-sm text-center transition-colors">
+        <a th:href="@{/admin/prize}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg shadow-sm text-center transition-colors">
           Hủy
         </a>
       </div>

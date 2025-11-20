@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#4f46e5', secondary: '#00ff85' } } }
+        }
+    </script>
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background-color: rgba(99, 102, 241, 0.2); border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans h-screen overflow-hidden flex">
+
+<aside class="w-64 bg-white border-r shadow-sm flex flex-col z-20 hidden md:flex">
+    <div class="h-16 flex items-center px-6 border-b">
+        <div class="flex items-center gap-3">
+            <a th:href="@{/}" class="flex items-center gap-3">
+                <div class="w-10 h-10 overflow-hidden">
+                    <img th:src="@{/images/logoo.png}" alt="Logo" class="w-full h-full object-contain" />
+                </div>
+                <span class="text-xl font-bold text-primary">Premier League</span>
+            </a>
+        </div>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-medium">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Tổng quan
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+            <i data-lucide="shirt" class="w-5 h-5"></i> Quản lý đội bóng
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+            <i data-lucide="award" class="w-5 h-5"></i> Quản lý giải thưởng
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+            <i data-lucide="dollar-sign" class="w-5 h-5"></i> Quản lý nhà tài trợ
+        </a>
+    </nav>
+</aside>
+
+<div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
+
+    <header class="bg-white h-16 border-b flex items-center justify-between px-6 shadow-sm shrink-0">
+        <h1 class="text-xl font-bold text-primary">Tổng Quan Giải Đấu</h1>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold">Admin</span>
+                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">A</div>
+            </div>
+
+            <form th:action="@{/admin/logout}" method="post" class="border-l pl-4 border-gray-200">
+                <button type="submit" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors" title="Đăng xuất">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-6 custom-scroll">
+        <div class="max-w-7xl mx-auto space-y-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-purple-100 p-3 rounded-lg text-purple-600">
+                            <i data-lucide="trending-up" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Số trận vòng này</p>
+                            <h3 class="text-2xl font-bold" th:text="${upcomingMatches != null ? upcomingMatches.size() : 0}">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-green-100 p-3 rounded-lg text-green-600">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Tổng số đội bóng</p>
+                            <h3 class="text-2xl font-bold">20</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-blue-100 p-3 rounded-lg text-blue-600">
+                            <i data-lucide="calendar" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Tổng số trận đấu</p>
+                            <h3 class="text-2xl font-bold">380</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-6 min-h-[600px]">
+
+                <div class="flex border-b border-gray-100 bg-white sticky top-0 z-10">
+                    <button onclick="switchTab('ranking')" id="tab-btn-ranking" class="flex-1 px-6 py-4 font-bold text-sm border-b-2 text-primary border-primary bg-gray-50 transition-colors">
+                        <i data-lucide="bar-chart-2" class="inline w-4 h-4 mr-2"></i> Bảng Xếp Hạng
+                    </button>
+                    <button onclick="switchTab('schedule')" id="tab-btn-schedule" class="flex-1 px-6 py-4 font-bold text-sm border-b-2 text-gray-500 border-transparent hover:text-primary hover:bg-gray-50 transition-colors">
+                        <i data-lucide="calendar" class="inline w-4 h-4 mr-2"></i> Lịch Thi Đấu
+                    </button>
+                </div>
+
+                <div id="content-ranking" class="block">
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[600px]">
+                            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                            <tr>
+                                <th class="py-3 px-4 text-center">#</th>
+                                <th class="py-3 px-4 text-left">Đội</th>
+                                <th class="py-3 px-4 text-center">Điểm</th>
+                                <th class="py-3 px-4 text-center">Thắng</th>
+                                <th class="py-3 px-4 text-center">Hòa</th>
+                                <th class="py-3 px-4 text-center">Thua</th>
+                                <th class="py-3 px-4 text-center">Hiệu số</th>
+                            </tr>
+                            </thead>
+                            <tbody id="rankingBody" class="text-sm divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 text-center border-t border-gray-100">
+                        <button id="btn-expand-ranking" onclick="toggleRankingView()" class="text-primary font-medium hover:underline hidden">
+                            Xem tất cả
+                        </button>
+                    </div>
+                </div>
+
+                <div id="content-schedule" class="hidden p-6 bg-white">
+
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-primary">Danh sách trận đấu</h2>
+                        <form id="roundForm" th:action="@{/admin/home}" method="get">
+                            <select name="round" onchange="document.getElementById('roundForm').submit()"
+                                    class="border rounded-lg p-2 text-sm bg-gray-50 focus:ring-2 focus:ring-primary outline-none">
+                                <option th:each="i : ${#numbers.sequence(1, 38)}"
+                                        th:value="${i}"
+                                        th:text="'Vòng ' + ${i}"
+                                        th:selected="${i == selectedRound}">
+                                </option>
+                            </select>
+                        </form>
+                    </div>
+
+                    <div class="space-y-4" id="schedule-container">
+
+                        <div th:if="${upcomingMatches == null || upcomingMatches.isEmpty()}" class="text-center py-12 text-gray-400">
+                            Không có dữ liệu cho vòng này.
+                        </div>
+
+                        <div th:if="${upcomingMatches != null}" th:each="match, iterStat : ${upcomingMatches}"
+                             th:classappend="${iterStat.index >= 5} ? 'extra-schedule-item' : ''"
+                             th:style="${iterStat.index >= 5} ? 'display: none;' : ''"
+                             class="p-4 border rounded-xl hover:bg-gray-50 transition flex items-center justify-between shadow-sm">
+
+                            <div class="w-1/3 text-center">
+                                <div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+                                    <img th:if="${match.homeTeam != null}" th:src="${match.homeTeam.logoUrl}" class="w-full h-full object-contain"/>
+                                </div>
+                                <p class="font-bold truncate" th:text="${match.homeTeam != null ? match.homeTeam.name : 'Unknown'}">Home</p>
+                            </div>
+
+                            <div class="w-1/3 text-center">
+                                <div class="font-black text-2xl text-primary">
+                                    <span th:if="${match.status == 'FINISHED' || match.status == 'finished'}"
+                                          th:text="${match.homeScore + ' - ' + match.awayScore}"></span>
+                                    <span th:unless="${match.status == 'FINISHED' || match.status == 'finished'}">VS</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1" th:text="${match.homeTeam != null ? match.homeTeam.stadium : ''}">Sân</p>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    <span th:text="${match.matchDate}"></span> <span th:text="${match.matchTime}"></span>
+                                </p>
+                            </div>
+
+                            <div class="w-1/3 text-center">
+                                <div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+                                    <img th:if="${match.awayTeam != null}" th:src="${match.awayTeam.logoUrl}" class="w-full h-full object-contain"/>
+                                </div>
+                                <p class="font-bold truncate" th:text="${match.awayTeam != null ? match.awayTeam.name : 'Unknown'}">Away</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-6" th:if="${upcomingMatches != null && upcomingMatches.size() > 5}">
+                        <button id="btn-expand-schedule" onclick="toggleScheduleView()" class="text-primary font-medium hover:underline">
+                            Xem tất cả
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // 1. Chuyển Tab
+    function switchTab(name) {
+        const isRanking = name === 'ranking';
+        document.getElementById('content-ranking').classList.toggle('hidden', !isRanking);
+        document.getElementById('content-schedule').classList.toggle('hidden', isRanking);
+
+        // Style button
+        const btnR = document.getElementById('tab-btn-ranking');
+        const btnS = document.getElementById('tab-btn-schedule');
+
+        if(isRanking) {
+            btnR.className = "flex-1 px-6 py-4 font-bold text-sm border-b-2 text-primary border-primary bg-gray-50 transition-colors";
+            btnS.className = "flex-1 px-6 py-4 font-bold text-sm border-b-2 text-gray-500 border-transparent hover:text-primary hover:bg-gray-50 transition-colors";
+        } else {
+            btnS.className = "flex-1 px-6 py-4 font-bold text-sm border-b-2 text-primary border-primary bg-gray-50 transition-colors";
+            btnR.className = "flex-1 px-6 py-4 font-bold text-sm border-b-2 text-gray-500 border-transparent hover:text-primary hover:bg-gray-50 transition-colors";
+        }
+    }
+
+    // 2. Toggle Xem thêm Lịch
+    let isScheduleExpanded = false;
+    function toggleScheduleView() {
+        isScheduleExpanded = !isScheduleExpanded;
+        document.querySelectorAll('.extra-schedule-item').forEach(el => {
+            el.style.display = isScheduleExpanded ? 'flex' : 'none';
+        });
+        document.getElementById('btn-expand-schedule').innerText = isScheduleExpanded ? "Thu gọn" : "Xem tất cả";
+    }
+
+    // 3. Init
+    document.addEventListener('DOMContentLoaded', () => {
+        loadRanking(); // Luôn load BXH
+
+        // Check URL param
+        if(new URLSearchParams(window.location.search).has('round')) {
+            switchTab('schedule');
+        }
+        lucide.createIcons();
+    });
+
+    // 4. Logic BXH (AJAX)
+    const rankingBody = document.getElementById("rankingBody");
+    const btnExpandRanking = document.getElementById("btn-expand-ranking");
+    let allRankingData = [];
+    let isRankingExpanded = false;
+
+    async function loadRanking() {
+        try {
+            const res = await fetch("/api/rankings/v1");
+            const data = await res.json();
+            allRankingData = data;
+            renderRankingTable();
+            if(data.length > 5) btnExpandRanking.classList.remove('hidden');
+        } catch (e) { console.error(e); }
+    }
+
+    function renderRankingTable() {
+        rankingBody.innerHTML = "";
+        const dataToShow = isRankingExpanded ? allRankingData : allRankingData.slice(0, 5);
+
+        dataToShow.forEach((r, i) => {
+            rankingBody.innerHTML += `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-4 text-center font-semibold text-primary">${i + 1}</td>
+                    <td class="p-4 flex items-center gap-3">
+                        <img src="${r.logoUrl || 'https://via.placeholder.com/32'}" class="w-8 h-8 object-contain"/>
+                        <span class="font-bold">${r.name}</span>
+                    </td>
+                    <td class="p-4 text-center font-bold text-lg text-primary">${r.points}</td>
+                    <td class="p-4 text-center text-green-600 font-medium">${r.winCount||0}</td>
+                    <td class="p-4 text-center text-gray-600">${r.drawCount||0}</td>
+                    <td class="p-4 text-center text-red-500">${r.loseCount||0}</td>
+                    <td class="p-4 text-center font-mono">${r.goalDifference > 0 ? '+' : ''}${r.goalDifference}</td>
+                </tr>`;
+        });
+    }
+
+    function toggleRankingView() {
+        isRankingExpanded = !isRankingExpanded;
+        renderRankingTable();
+        btnExpandRanking.innerText = isRankingExpanded ? "Thu gọn" : "Xem tất cả";
+    }
+
+    // WebSocket
+    const socket = new SockJS('/ws');
+    const stomp = Stomp.over(socket);
+    stomp.connect({}, () => {
+        stomp.subscribe('/topic/ranking-updated', () => loadRanking());
+    });
+</script>
+
+</body>
+</html>

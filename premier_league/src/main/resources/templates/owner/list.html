@@ -23,7 +23,7 @@
       <h1 class="text-3xl font-bold text-primary">Quản lý Chủ Sở Hữu</h1>
       <p class="text-gray-600 mt-1">Danh sách các ông bầu của giải đấu</p>
     </div>
-    <a th:href="@{/owners/create}" class="bg-primary hover:bg-[#500055] text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all flex items-center gap-2">
+    <a th:href="@{/admin/owners/create}" class="bg-primary hover:bg-[#500055] text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all flex items-center gap-2">
       <i data-lucide="plus-circle" class="w-5 h-5"></i> Thêm Mới
     </a>
   </div>
@@ -73,10 +73,10 @@
 
         <td class="p-4">
           <div class="flex justify-center gap-2">
-            <a th:href="@{'/owners/edit/' + ${o.id}}" class="bg-blue-50 text-blue-600 p-2 rounded-lg hover:bg-blue-500 hover:text-white transition-colors">
+            <a th:href="@{'/admin/owners/edit/' + ${o.id}}" class="bg-blue-50 text-blue-600 p-2 rounded-lg hover:bg-blue-500 hover:text-white transition-colors">
               <i data-lucide="edit-2" class="w-4 h-4"></i>
             </a>
-            <a th:href="@{'/owners/delete/' + ${o.id}}" onclick="return confirm('Xóa chủ sở hữu này?')" class="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-500 hover:text-white transition-colors">
+            <a th:href="@{'/admin/owners/delete/' + ${o.id}}" onclick="return confirm('Xóa chủ sở hữu này?')" class="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-500 hover:text-white transition-colors">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </a>
           </div>

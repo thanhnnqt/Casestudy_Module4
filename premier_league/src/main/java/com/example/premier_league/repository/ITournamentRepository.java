@@ -4,4 +4,5 @@ import com.example.premier_league.entity.Tournament;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ITournamentRepository extends JpaRepository<Tournament, Long> {
+    boolean existsBySeason(String season);
 }

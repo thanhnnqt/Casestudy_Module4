@@ -123,4 +123,10 @@ public class MatchService implements IMatchService {
         return matchRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Match not found: " + id));
     }
+
+    @Override
+    public void save(Match match) {
+        matchRepository.save(match);
+    }
+
 }

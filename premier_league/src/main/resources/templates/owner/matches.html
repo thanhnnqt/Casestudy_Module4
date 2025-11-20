@@ -12,13 +12,11 @@
     .table-custom thead th { background: #f9fafb; color: #6b7280; font-size: 0.75rem; padding: 1rem; text-transform: uppercase; }
     .table-custom tbody td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid #f3f4f6; font-size: 0.9rem; }
     .badge-soft { padding: 0.35em 0.65em; font-size: 0.75em; font-weight: 600; border-radius: 0.375rem; }
-    /* Màu badge */
     .bg-soft-info { background: #eff6ff; color: #2563eb; }
     .bg-soft-success { background: #f0fdf4; color: #16a34a; }
     .bg-soft-danger { background: #fef2f2; color: #dc2626; }
     .bg-soft-warning { background: #fffbeb; color: #d97706; }
     .bg-soft-secondary { background: #f3f4f6; color: #4b5563; }
-
     .btn-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.375rem; padding: 0; }
   </style>
 
@@ -64,7 +62,8 @@
             <th>Trận đấu</th>
             <th class="text-center">Vòng</th>
             <th>Thời gian</th>
-            <th>Sân vận động</th> <th class="text-center">Trạng thái</th>
+            <th>Sân vận động</th>
+            <th class="text-center">Trạng thái</th>
             <th class="text-end">Hành động</th>
           </tr>
           </thead>
@@ -100,10 +99,12 @@
             </td>
 
             <td>
-              <div class="d-flex flex-column" th:if="${match.matchDate != null}">
-                <span class="fw-bold text-dark" th:text="${#temporals.format(match.matchDate, 'dd/MM/yyyy')}"></span>
+              <div class="d-flex flex-column">
+                <span class="fw-bold text-dark"
+                      th:text="${match.matchDate != null ? #temporals.format(match.matchDate, 'dd/MM/yyyy') : '-'}"></span>
                 <span class="small text-muted">
-                   <i class="bi bi-clock me-1"></i><span th:text="${#temporals.format(match.matchDate, 'HH:mm')}"></span>
+                   <i class="bi bi-clock me-1"></i>
+                   <span th:text="${match.matchTime != null ? #temporals.format(match.matchTime, 'HH:mm') : '--:--'}"></span>
                 </span>
               </div>
             </td>
@@ -112,25 +113,31 @@
 
             <td class="text-center">
               <span th:if="${match.status != null}" th:switch="${match.status.name()}">
-                  <span th:case="'UPCOMING'" class="badge badge-soft bg-soft-info">Lịch đấu</span>
                   <span th:case="'SCHEDULED'" class="badge badge-soft bg-soft-success">Sắp đá</span>
                   <span th:case="'LIVE'" class="badge badge-soft bg-soft-danger">Live</span>
                   <span th:case="'POSTPONED'" class="badge badge-soft bg-soft-warning">Hoãn</span>
                   <span th:case="'FINISHED'" class="badge badge-soft bg-soft-secondary">Kết thúc</span>
+                  <span th:case="*" class="badge badge-soft bg-soft-info" th:text="${match.status}"></span>
               </span>
             </td>
 
             <td class="text-end">
               <div class="d-flex justify-content-end gap-1" th:if="${match.status != null}">
-                <th:block th:if="${match.status.name() == 'UPCOMING' or match.status.name() == 'SCHEDULED'}">
+
+                <th:block th:if="${match.status.name() == 'SCHEDULED'}">
                   <a th:href="@{'/admin/matches/start/' + ${match.id}}" class="btn btn-icon btn-outline-success" title="Bắt đầu"><i class="bi bi-play-fill"></i></a>
+                  <a th:href="@{'/admin/matches/postpone/' + ${match.id}}" class="btn btn-icon btn-outline-warning" title="Hoãn trận"><i class="bi bi-pause-fill"></i></a>
                 </th:block>
 
                 <th:block th:if="${match.status.name() == 'LIVE'}">
-                  <a th:href="@{'/admin/matches/live/' + ${match.id}}" class="btn btn-icon btn-outline-danger" title="Xem"><i class="bi bi-eye"></i></a>
+                  <a th:href="@{'/admin/matches/live/' + ${match.id}}" class="btn btn-icon btn-outline-danger" title="Xem Live"><i class="bi bi-eye"></i></a>
                 </th:block>
 
-                <a href="#" class="btn btn-icon btn-light text-muted"><i class="bi bi-pencil-square"></i></a>
+                <th:block th:if="${match.status.name() == 'POSTPONED'}">
+                  <a th:href="@{'/admin/matches/reschedule/' + ${match.id}}" class="btn btn-icon btn-outline-primary" title="Dời lịch"><i class="bi bi-calendar-date"></i></a>
+                </th:block>
+
+                <a href="#" class="btn btn-icon btn-light text-muted" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></a>
               </div>
             </td>
           </tr>
@@ -142,11 +149,11 @@
         <nav>
           <ul class="pagination justify-content-center mb-0">
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-              <a class="page-link rounded-pill px-3" th:href="@{/admin/matches(page=${currentPage - 1}, team=${team})}">&laquo;</a>
+              <a class="page-link rounded-pill px-3" th:href="@{/admin/matches(page=${currentPage - 1}, team=${team}, date=${date}, round=${round})}">&laquo;</a>
             </li>
             <li class="page-item disabled"><span class="page-link border-0">Trang <span th:text="${currentPage + 1}"></span></span></li>
             <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-              <a class="page-link rounded-pill px-3" th:href="@{/admin/matches(page=${currentPage + 1}, team=${team})}">&raquo;</a>
+              <a class="page-link rounded-pill px-3" th:href="@{/admin/matches(page=${currentPage + 1}, team=${team}, date=${date}, round=${round})}">&raquo;</a>
             </li>
           </ul>
         </nav>
