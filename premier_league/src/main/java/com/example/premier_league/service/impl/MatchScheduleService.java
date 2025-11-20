@@ -181,6 +181,9 @@ public class MatchScheduleService implements IMatchScheduleService {
 
     @Override
     public void reschedule(Long id, LocalDate newDate, String newTime) {
+        if (newDate.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Ngày dời lịch không được nhỏ hơn ngày hiện tại!");
+        }
         MatchSchedule match = findById(id);
 
         // Lấy id 2 đội của trận này
@@ -228,5 +231,9 @@ public class MatchScheduleService implements IMatchScheduleService {
 
         autoUpdateStatus(match);
         matchScheduleRepository.save(match);
+    }
+    @Override
+    public boolean hasSchedule() {
+        return matchScheduleRepository.count() > 0;
     }
 }

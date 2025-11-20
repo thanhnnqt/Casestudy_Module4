@@ -7,4 +7,6 @@ import java.util.List;
 public interface ISessionService {
     List<Session> findAll();
     List<Session> findAllByStadium_Id(Integer stadiumId);
+    boolean save(Session session);
+    Session findByNameAndStadiumName(String name, String stadiumName);
 }

@@ -22,4 +22,5 @@ public interface IMatchScheduleService {
     void updateStatus(Long id, MatchStatus status);
     void reschedule(Long id, LocalDate newDate, String newTime);
     List<CoachMatchScheduleDto> getCoachMatchSchedules(Long teamId);//THới
+    boolean hasSchedule();
 }

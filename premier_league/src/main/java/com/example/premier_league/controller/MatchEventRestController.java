@@ -1,5 +1,6 @@
 package com.example.premier_league.controller;
 
+import com.example.premier_league.dto.MatchEventDto;
 import com.example.premier_league.entity.MatchEvent;
 import com.example.premier_league.service.IMatchEventService;
 import lombok.RequiredArgsConstructor;
@@ -16,17 +17,14 @@ public class MatchEventRestController {
     private final IMatchEventService eventService;
 
     /** Tạo sự kiện mới */
-    @PostMapping("/matches/{matchId}/events")
-    public ResponseEntity<?> createEvent(@PathVariable Long matchId, @RequestBody MatchEvent event) {
-        try {
-            event.setMatchId(matchId);
-            MatchEvent saved = eventService.createEvent(event);
-            return ResponseEntity.ok(saved);
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+    @PostMapping("/{matchId}/events")
+    public ResponseEntity<?> addEvent(
+            @PathVariable Long matchId,
+            @RequestBody MatchEventDto dto
+    ) {
+        eventService.addEvent(matchId, dto);
+        return ResponseEntity.ok("success");
     }
-
 
     /** Lấy tất cả event của trận */
     @GetMapping("/{matchId}/events")
@@ -34,7 +32,7 @@ public class MatchEventRestController {
         return ResponseEntity.ok(eventService.getEventsByMatch(matchId));
     }
 
-    /** Lấy thông tin trận đấu + tỉ số */
+    /** Lấy thông tin tỉ số theo trận */
     @GetMapping("/{matchId}/score")
     public ResponseEntity<?> score(@PathVariable Long matchId) {
         var m = eventService.findMatchById(matchId);
@@ -42,3 +40,4 @@ public class MatchEventRestController {
         return ResponseEntity.ok(m);
     }
 }
+

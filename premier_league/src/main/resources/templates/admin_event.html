@@ -37,6 +37,7 @@
 
     <div class="space-y-4">
 
+        <!-- MATCH ID -->
         <div>
             <label class="font-semibold">Match ID</label>
             <input id="matchId" type="number"
@@ -44,13 +45,25 @@
                    value="1"/>
         </div>
 
+        <!-- SELECT TEAM -->
         <div>
-            <label class="font-semibold">Team ID (optional)</label>
-            <input id="teamId" type="number"
-                   class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary"
-                   placeholder="ID đội ghi bàn / thẻ"/>
+            <label class="font-semibold">Chọn Đội</label>
+            <select id="teamSelect"
+                    class="w-full mt-1 px-4 py-3 border rounded-lg bg-gray-50 focus:border-primary">
+                <option value="">-- Chọn đội --</option>
+            </select>
         </div>
 
+        <!-- SELECT PLAYER -->
+        <div>
+            <label class="font-semibold">Chọn Cầu Thủ</label>
+            <select id="playerSelect"
+                    class="w-full mt-1 px-4 py-3 border rounded-lg bg-gray-50 focus:border-primary">
+                <option value="">-- Chọn cầu thủ --</option>
+            </select>
+        </div>
+
+        <!-- MINUTE -->
         <div>
             <label class="font-semibold">Minute</label>
             <input id="minute" type="number"
@@ -58,18 +71,20 @@
                    placeholder="Phút xảy ra"/>
         </div>
 
+        <!-- EVENT TYPE -->
         <div>
             <label class="font-semibold">Loại Sự Kiện</label>
             <select id="type"
                     class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary">
-                <option>GOAL</option>
-                <option>YELLOW_CARD</option>
-                <option>RED_CARD</option>
-                <option>PENALTY</option>
-                <option>MATCH_END</option>
+                <option value="GOAL">Bàn thắng</option>
+                <option value="YELLOW_CARD">Thẻ vàng</option>
+                <option value="RED_CARD">Thẻ đỏ</option>
+                <option value="PENALTY">Phạt đền</option>
+                <option value="MATCH_END">Kết thúc trận đấu</option>
             </select>
         </div>
 
+        <!-- DESCRIPTION -->
         <div>
             <label class="font-semibold">Mô tả</label>
             <input id="desc" type="text"
@@ -77,6 +92,7 @@
                    placeholder="Ví dụ: 'Ghi bàn đẹp mắt từ ngoài vòng cấm'"/>
         </div>
 
+        <!-- SEND -->
         <button id="send"
                 class="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-secondary hover:text-primary transition">
             Gửi Sự Kiện
@@ -84,67 +100,99 @@
     </div>
 </div>
 
-<!-- FOOTER -->
 <div class="mt-auto" th:replace="layout/footer :: footer"></div>
 
 <script>
     lucide.createIcons();
 
+    /* ================================
+     * 1) Load match info -> fill team select
+     * ================================ */
+    async function loadTeams() {
+        const matchId = document.getElementById("matchId").value;
+        if (!matchId) return;
+
+        const res = await fetch(`/api/matches/${matchId}`);
+        const match = await res.json();
+
+        const teamSelect = document.getElementById("teamSelect");
+        teamSelect.innerHTML = `
+            <option value="">-- Chọn đội --</option>
+            <option value="${match.homeTeamId}">${match.homeTeamName}</option>
+            <option value="${match.awayTeamId}">${match.awayTeamName}</option>
+            `;
+    }
+
+    /* ================================
+     * 2) Load players by team
+     * ================================ */
+    async function loadPlayers(teamId) {
+        const playerSelect = document.getElementById("playerSelect");
+
+        if (!teamId) {
+            playerSelect.innerHTML = `<option value="">-- Chọn cầu thủ --</option>`;
+            return;
+        }
+
+        const res = await fetch(`/api/teams/${teamId}/players`);
+        const players = await res.json();
+
+        playerSelect.innerHTML = `<option value="">-- Chọn cầu thủ --</option>`;
+        players.forEach(p => {
+            playerSelect.innerHTML += `
+                <option value="${p.id}">${p.name} (${p.position})</option>
+            `;
+        });
+    }
+
+    // Khi nhập matchId xong -> load đội
+    document.getElementById("matchId").addEventListener("change", loadTeams);
+    loadTeams(); // load ngay từ đầu
+
+    // Khi chọn đội -> load cầu thủ đội đó
+    document.getElementById("teamSelect").addEventListener("change", (e) => {
+        loadPlayers(e.target.value);
+    });
+
+    /* ================================
+     * 3) Gửi sự kiện
+     * ================================ */
     document.getElementById('send').addEventListener('click', () => {
 
         const matchId = +document.getElementById('matchId').value;
         const minute = document.getElementById('minute').value;
         const type = document.getElementById('type').value;
         const desc = document.getElementById('desc').value;
-        const teamId = document.getElementById('teamId').value;
 
-        /* ============================
-         * VALIDATE INPUT
-         * ============================ */
+        const teamId = document.getElementById('teamSelect').value;
+        const playerId = document.getElementById('playerSelect').value;
+
         if (!matchId) return alert("⛔ Phải nhập Match ID!");
-        if (!minute) return alert("⛔ Phải nhập phút xảy ra!");
-        if (!type) return alert("⛔ Chưa chọn loại sự kiện!");
+        if (!minute) return alert("⛔ Phải nhập phút!");
 
-        if (type === "GOAL" && !teamId) {
-            return alert("⛔ Ghi bàn thì phải có Team ID!");
-        }
+        if (type === "GOAL" && !teamId) return alert("⛔ Ghi bàn phải chọn đội!");
+        if (type === "GOAL" && !playerId) return alert("⛔ Ghi bàn phải chọn cầu thủ!");
 
         const payload = {
             teamId: teamId || null,
+            playerId: playerId || null,
             minute: minute,
             type: type,
             description: desc
         };
 
-        /* ============================
-         * GỬI API
-         * ============================ */
         fetch(`/api/matches/${matchId}/events`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
         })
             .then(async resp => {
-                const text = await resp.text();
-
-                if (!resp.ok) {
-                    alert("❌ Lỗi: " + text);
-                } else {
-                    alert("✅ Thành công!");
-
-                    /* ============================
-                     * RESET FORM
-                     * ============================ */
-                    document.getElementById('teamId').value = "";
-                    document.getElementById('minute').value = "";
-                    document.getElementById('desc').value = "";
-                    document.getElementById('type').value = "GOAL";
-                }
-            })
-            .catch(() => alert("❌ Network error!"));
+                const msg = await resp.text();
+                if (!resp.ok) alert("❌ Lỗi: " + msg);
+                else alert("✅ Thành công!");
+            });
     });
 </script>
-
 
 </body>
 </html>

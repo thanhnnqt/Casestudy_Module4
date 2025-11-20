@@ -27,6 +27,7 @@ public class TicketDto {
     private LocalTime timeMatch;
     private String seatNumber;
     private String standSession;
+    private Integer totalPay;
     @ManyToOne
     @JoinColumn(name = "price")
     private TicketType ticketType;
