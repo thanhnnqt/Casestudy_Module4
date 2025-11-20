@@ -1,69 +1,307 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{coach/dashboard :: coachLayout(
-                      pageTitle='Lịch thi đấu',
-                      activePage='schedule',
-                      content=~{::.main-content-child}
-                  )}">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Lịch thi đấu</title>
+    <meta http-equiv="Content-Language" content="vi">
+    <title>Lịch thi đấu - Premier League</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#38003c',
+                        secondary: '#00ff85',
+                        pink: '#ff0050'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Font: Inter với latin-ext để hỗ trợ tiếng Việt -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap&subset=latin-ext" rel="stylesheet">
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #38003c; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Prevent buttons & small badges from breaking to next line */
+        .no-wrap {
+            white-space: nowrap;
+        }
+
+        .actions-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: nowrap; /* keep buttons on one line */
+        }
+
+        /* Ensure action buttons keep their inline-flex layout */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        /* Center the "Trận đấu" area and ensure VS is centered between teams */
+        .match-row {
+            display: flex;
+            align-items: center;       /* vertical center */
+            justify-content: center;   /* center whole block */
+            gap: 0.75rem;
+        }
+
+        /* Two team blocks take remaining space and align text to two edges */
+        .team {
+            flex: 1 1 0;
+            min-width: 0;              /* prevent overflow */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .team-left { text-align: right; padding-right: 0.5rem; }
+        .team-right{ text-align: left;  padding-left: 0.5rem; }
+
+        /* VS badge fixed size, always centered between two teams */
+        .vs-badge{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 52px;
+            height: 32px;
+            line-height: 32px;
+            padding: 0 8px;
+            border-radius: 8px;
+            background: #e6e9ee;
+            color: #6b7280;
+            font-weight: 700;
+            white-space: nowrap;
+            margin: 0;
+        }
+
+        /* Stadium line under the teams */
+        .stadium-line {
+            text-align: center;
+            margin-top: 0.5rem;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Group header row style */
+        .group-row {
+            background-color: #faf5ff;
+            color: #38003c;
+            font-weight: 700;
+        }
+
+        /* Responsive: on very small screens, allow teams to wrap onto two lines but keep VS centered */
+        @media (max-width: 480px) {
+            .match-row {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .team { text-align: center !important; padding: 0 !important; }
+            .vs-badge { min-width: 44px; }
+            .actions-row { gap: 0.25rem; }
+        }
+    </style>
 </head>
-<body>
 
-<div class="main-content-child">
-    <h1 class="mb-4">Lịch thi đấu & Quản lý đội</h1>
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
-    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+<!-- NAVBAR -->
+<div th:replace="~{layout/navbarCoach :: header}"></div>
 
-    <table class="table table-striped table-hover table-bordered bg-white align-middle">
-        <thead class="table-dark text-center">
-        <tr>
-            <th>Vòng</th>
-            <th>Thời gian</th>
-            <th>Cặp đấu</th>
-            <th>Trận đấu</th>
-            <th>Đội hình</th> <th>Chiến thuật</th> <th>Đăng ký</th> </tr>
-        </thead>
-        <tbody>
-        <tr th:each="dto : ${matchesDto}">
-            <td class="text-center" th:text="${dto.match.round}"></td>
-            <td>
-                <div class="fw-bold" th:text="${dto.match.matchDate}"></div>
-                <div class="small text-muted" th:text="${dto.match.matchTime}"></div>
-            </td>
-            <td>
-                <span class="fw-bold text-primary" th:text="${dto.match.homeTeam.name}"></span>
-                vs
-                <span class="fw-bold text-primary" th:text="${dto.match.awayTeam.name}"></span>
-            </td>
-            <td class="text-center">
-                <span class="badge bg-secondary text-dark" th:if="${dto.match.status.name() == 'UPCOMING'}">Sắp tới</span>
-                <span class="badge bg-primary" th:if="${dto.match.status.name() == 'SCHEDULED'}">Đã lên lịch</span>
-                <span class="badge bg-danger" th:if="${dto.match.status.name() == 'LIVE'}">Đang đá</span>
-                <span class="badge bg-dark" th:if="${dto.match.status.name() == 'FINISHED'}">Kết thúc</span>
-            </td>
-            <td class="text-center">
-                <span th:if="${dto.lineupRegistered}" class="badge bg-success"><i class="bi bi-check-circle"></i> Đã đăng ký</span>
-                <span th:unless="${dto.lineupRegistered}" class="badge bg-warning text-dark"><i class="bi bi-exclamation-circle"></i> Chưa đăng ký</span>
-            </td>
-            <td class="text-center">
-                <a th:href="@{/coach/team/{teamId}/match/{matchId}/tactics(teamId=${teamId}, matchId=${dto.match.id})}"
-                   class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-clipboard-data"></i> Sơ đồ
-                </a>
-            </td>
-            <td class="text-center">
-                <a th:href="@{/coach/team/{teamId}/match/{matchId}/register(teamId=${teamId}, matchId=${dto.match.id})}"
-                   class="btn btn-success btn-sm">
-                    <i class="bi bi-pen"></i> Đăng ký
-                </a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+<!-- MAIN CONTENT -->
+<div class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+
+    <!-- Header Card -->
+    <div class="mb-8 bg-white rounded-2xl shadow-lg overflow-hidden relative group">
+        <div class="absolute inset-0 bg-primary/90 z-10"></div>
+        <div class="absolute inset-0 opacity-20 z-0" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
+
+        <div class="relative z-20 p-8 text-white flex justify-between items-center">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="bg-secondary text-primary font-bold px-3 py-1 rounded text-xs uppercase tracking-wider">
+                        Mùa giải 2024/2025
+                    </div>
+                    <span class="text-secondary font-semibold text-sm uppercase tracking-widest">HLV: <span th:text="${teamName}">Team Name</span></span>
+                </div>
+                <h1 class="text-4xl font-black tracking-tight mb-2 text-white" style="font-family: 'Inter', sans-serif;">
+                    LỊCH THI ĐẤU & ĐỘI HÌNH
+                </h1>
+                <p class="text-gray-300 max-w-2xl">Quản lý lịch trình, sắp xếp chiến thuật và đăng ký danh sách thi đấu cho câu lạc bộ của bạn.</p>
+            </div>
+            <div class="hidden md:block">
+                <i data-lucide="calendar-days" class="w-24 h-24 text-white/10"></i>
+            </div>
+        </div>
+
+        <!-- Decorative bar -->
+        <div class="h-2 bg-gradient-to-r from-secondary via-pink-500 to-purple-600 relative z-30"></div>
+    </div>
+
+    <!-- Messages -->
+    <div th:if="${message}" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow-sm flex items-center gap-3 animate-fade-in-down">
+        <i data-lucide="check-circle" class="w-6 h-6"></i>
+        <span class="font-medium" th:text="${message}"></span>
+    </div>
+    <div th:if="${error}" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm flex items-center gap-3 animate-fade-in-down">
+        <i data-lucide="alert-circle" class="w-6 h-6"></i>
+        <span class="font-medium" th:text="${error}"></span>
+    </div>
+
+    <!-- DATA TABLE -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                    <th class="p-5 font-bold text-center w-16">Vòng</th>
+                    <th class="p-5 font-bold w-40">Thời gian</th>
+                    <th class="p-5 font-bold text-center">Trận đấu</th>
+                    <th class="p-5 font-bold text-center w-32">Trạng thái</th>
+                    <th class="p-5 font-bold text-center w-32">Đăng ký</th>
+                    <th class="p-5 font-bold text-center w-48">Hành động</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+
+                <tr th:each="dto : ${matchesDto}" class="hover:bg-purple-50/50 transition-colors group">
+                    <!-- Vòng -->
+                    <td class="p-5 text-center font-bold text-primary bg-gray-50/50 group-hover:bg-purple-50/50">
+                        <span class="text-lg" th:text="${dto.match.round}">1</span>
+                    </td>
+
+                    <!-- Thời gian -->
+                    <td class="p-5">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-gray-900 text-base" th:text="${#temporals.format(dto.match.matchDate, 'dd/MM')}">01/01</span>
+                            <span class="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                                <i data-lucide="clock" class="w-3 h-3"></i>
+                                <span th:text="${dto.match.matchTime}">19:00</span>
+                            </span>
+                        </div>
+                    </td>
+
+                    <!-- Trận đấu (home - VS - away) -->
+                    <td class="p-5">
+                        <div class="match-row max-w-2xl mx-auto">
+                            <!-- Home (right-aligned inside its flex box) -->
+                            <div class="team team-left" th:text="${dto.match.homeTeam.name}">Liverpool</div>
+
+                            <!-- VS badge cố định ở giữa -->
+                            <div class="vs-badge" aria-hidden="true">VS</div>
+
+                            <!-- Away (left-aligned inside its flex box) -->
+                            <div class="team team-right" th:text="${dto.match.awayTeam.name}">Arsenal</div>
+                        </div>
+
+                        <!-- Stadium (dưới, luôn căn giữa) -->
+                        <div class="stadium-line" th:if="${dto.match.homeTeam.stadium != null}">
+                            <i data-lucide="map-pin" class="w-3 h-3"></i>
+                            <span th:text="${dto.match.homeTeam.stadium}">Anfield</span>
+                        </div>
+                    </td>
+
+                    <!-- Trạng thái trận đấu -->
+                    <td class="p-5 text-center">
+                         <span th:classappend="${
+                                dto.match.status.name() == 'UPCOMING' ? 'bg-gray-100 text-gray-600' :
+                               (dto.match.status.name() == 'SCHEDULED' ? 'bg-blue-50 text-blue-600' :
+                               (dto.match.status.name() == 'LIVE' ? 'bg-pink-50 text-pink-600 animate-pulse' :
+                               'bg-purple-50 text-primary'))
+                               }"
+                               class="px-3 py-1 rounded-full text-xs font-bold border border-transparent uppercase">
+                            <span th:text="${dto.match.status}">SCHEDULED</span>
+                         </span>
+                    </td>
+
+                    <!-- Trạng thái Đăng ký đội hình -->
+                    <td class="p-5 text-center">
+                        <div>
+                            <div th:if="${dto.lineupRegistered}" class="inline-flex items-center gap-1 text-white bg-green-600 px-3 py-1 rounded-full text-xs font-bold">
+                                <span class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span> Đã ĐK
+                            </div>
+                            <div th:unless="${dto.lineupRegistered}" class="inline-flex items-center gap-1 text-gray-600 bg-gray-100 px-3 py-1 rounded-full text-xs font-semibold">
+                                <span class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span> Chưa ĐK
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Hành động -->
+                    <td class="p-5 text-center">
+                        <div class="actions-row">
+                            <!-- Nút Sơ đồ (Tactics) — icon + text trên 1 dòng -->
+                            <a th:href="@{/coach/team/{tid}/match/{mid}/tactics(tid=${teamId}, mid=${dto.match.id})}"
+                               class="action-btn group/btn relative inline-flex items-center justify-center p-0.5 text-sm font-medium rounded-lg bg-gradient-to-br from-purple-600 to-blue-500 shadow-md">
+                                <span class="relative px-4 py-2 bg-white rounded-md group-hover/btn:bg-opacity-0 group-hover/btn:text-white font-bold no-wrap inline-flex items-center gap-2">
+                                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                                    <span>Sơ đồ</span>
+                                </span>
+                            </a>
+
+                            <!-- Nút Đăng ký (Register) -->
+                            <a th:href="@{/coach/team/{tid}/match/{mid}/register(tid=${teamId}, mid=${dto.match.id})}"
+                               class="action-btn text-primary bg-secondary hover:bg-green-400 focus:ring-4 focus:outline-none focus:ring-green-200 font-bold rounded-lg text-sm px-4 py-2.5 inline-flex items-center shadow-md no-wrap">
+                                <i data-lucide="pen-tool" class="w-4 h-4"></i>
+                                <span>Đăng ký</span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State (Nếu không có trận nào) -->
+        <div th:if="${#lists.isEmpty(matchesDto)}" class="text-center py-12">
+            <div class="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="calendar-off" class="w-10 h-10 text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900">Chưa có lịch thi đấu</h3>
+            <p class="text-gray-500">Vui lòng quay lại sau khi ban tổ chức công bố lịch.</p>
+        </div>
+    </div>
+
 </div>
+
+<!-- FOOTER -->
+<div th:replace="~{layout/footer :: footer}"></div>
+
+<script>
+    lucide.createIcons();
+</script>
 
 </body>
 </html>

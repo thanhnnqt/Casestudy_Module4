@@ -5,9 +5,13 @@ import com.example.premier_league.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.beans.PropertyEditorSupport;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,6 +27,7 @@ public class FuncCoachController {
     private final IMatchLineupService iMatchLineupService;
     private final IFormationService iFormationService;
 
+    // --- Helper: Luôn lấy thông tin đội cho mọi Request ---
     @ModelAttribute
     public void addCommonAttributes(@PathVariable Long teamId, Model model) {
         Team team = iTeamService.findById(teamId);
@@ -31,6 +36,14 @@ public class FuncCoachController {
         model.addAttribute("teamName", team.getName());
     }
 
+    // --- 0. TRANG CHỦ HLV (Redirect về lịch thi đấu) ---
+    // Xử lý lỗi 404 khi vào /coach/team/1
+    @GetMapping("")
+    public String coachHome(@PathVariable Long teamId) {
+        return "redirect:/coach/team/" + teamId + "/schedule";
+    }
+
+    // ===================== 1. LỊCH THI ĐẤU =====================
     @GetMapping("/schedule")
     public String getMatchSchedule(@PathVariable Long teamId, Model model) {
         model.addAttribute("matchesDto", iMatchScheduleService.getCoachMatchSchedules(teamId));
@@ -39,7 +52,7 @@ public class FuncCoachController {
         return "coach/match_schedule";
     }
 
-    // ===================== 1. QUẢN LÝ LỊCH TẬP =====================
+    // ===================== 2. QUẢN LÝ LỊCH TẬP =====================
     @GetMapping("/training")
     public String listTrainingSchedules(@PathVariable Long teamId, Model model) {
         model.addAttribute("schedules", iTrainingScheduleService.findByTeamId(teamId));
@@ -57,20 +70,52 @@ public class FuncCoachController {
         return "coach/training_form";
     }
 
+    // --- [QUAN TRỌNG] Hàm Lưu Lịch Tập (Đã sửa lỗi mất dữ liệu) ---
     @PostMapping("/training/save")
     public String saveTrainingSchedule(@PathVariable Long teamId,
                                        @ModelAttribute TrainingSchedule schedule,
+                                       Model model, // Thêm Model để truyền lại dữ liệu
                                        RedirectAttributes redirect) {
         try {
             Team team = iTeamService.findById(teamId);
             schedule.setTeam(team);
-            iTrainingScheduleService.save(schedule); // Validate ở service
+
+            // Validate logic thời gian tại Service
+            iTrainingScheduleService.save(schedule);
+
             redirect.addFlashAttribute("message", "Lưu lịch tập thành công!");
+            return "redirect:/coach/team/" + teamId + "/training";
         } catch (RuntimeException e) {
-            redirect.addFlashAttribute("error", e.getMessage()); // Hiển thị lỗi validate
-            return "redirect:/coach/team/" + teamId + "/training/add";
+            // KHI CÓ LỖI:
+            // 1. Gửi thông báo lỗi ra view
+            model.addAttribute("error", e.getMessage());
+
+            model.addAttribute("schedule", schedule);
+
+            // 2. Khôi phục các thuộc tính giao diện (Title, ActivePage)
+            String title = (schedule.getId() == null) ? "Thêm lịch tập mới" : "Chỉnh sửa lịch tập";
+            model.addAttribute("formTitle", title);
+            model.addAttribute("pageTitle", "Quản lý Lịch tập");
+            model.addAttribute("activePage", "training");
+
+            // 3. Trả về trực tiếp View (không redirect) để giữ lại dữ liệu người dùng vừa nhập
+            return "coach/training_form";
         }
-        return "redirect:/coach/team/" + teamId + "/training";
+    }
+
+    @GetMapping("/training/edit/{trainingId}")
+    public String showEditTrainingForm(@PathVariable Long teamId, @PathVariable Long trainingId, Model model) {
+        TrainingSchedule schedule = iTrainingScheduleService.findById(trainingId);
+        // Kiểm tra quyền sở hữu
+        if (schedule == null || !schedule.getTeam().getId().equals(teamId)) {
+            return "redirect:/coach/team/" + teamId + "/training";
+        }
+
+        model.addAttribute("schedule", schedule);
+        model.addAttribute("formTitle", "Chỉnh sửa lịch tập");
+        model.addAttribute("pageTitle", "Sửa Lịch tập");
+        model.addAttribute("activePage", "training");
+        return "coach/training_form";
     }
 
     @GetMapping("/training/delete/{trainingId}")
@@ -80,7 +125,7 @@ public class FuncCoachController {
         return "redirect:/coach/team/" + teamId + "/training";
     }
 
-    // ===================== 2. DANH SÁCH CẦU THỦ =====================
+    // ===================== 3. DANH SÁCH CẦU THỦ =====================
     @GetMapping("/players")
     public String getPlayerList(@PathVariable Long teamId, Model model) {
         List<Player> players = iPlayerService.findByTeamId(teamId);
@@ -100,13 +145,12 @@ public class FuncCoachController {
         return "coach/player_list";
     }
 
-    // ===================== 3. SƠ ĐỒ CHIẾN THUẬT (DRAFT) =====================
-    // Cho phép lưu nháp, không ràng buộc số lượng
+    // ===================== 4. SƠ ĐỒ CHIẾN THUẬT (DRAFT) =====================
     @GetMapping("/match/{matchId}/tactics")
     public String showTacticsForm(@PathVariable Long teamId, @PathVariable Long matchId, Model model) {
         prepareLineupModel(teamId, matchId, model);
         model.addAttribute("pageTitle", "Sơ đồ chiến thuật");
-        return "coach/manage_lineup"; // File cũ, đổi tên hiển thị thôi
+        return "coach/manage_lineup";
     }
 
     @PostMapping("/match/{matchId}/tactics/save")
@@ -115,32 +159,39 @@ public class FuncCoachController {
                               @RequestParam(value = "mainPlayerIds", required = false) List<Long> mainPlayerIds,
                               @RequestParam(value = "subPlayerIds", required = false) List<Long> subPlayerIds,
                               RedirectAttributes redirect) {
-        // Gọi service với captainId = null (vì là sơ đồ nháp)
+        // Lưu nháp (captain = null)
         iMatchLineupService.saveLineup(teamId, matchId, mainPlayerIds, subPlayerIds, null);
         redirect.addFlashAttribute("message", "Đã lưu sơ đồ chiến thuật (Nháp)!");
         return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/tactics";
     }
 
-    // ===================== 4. ĐĂNG KÝ ĐỘI HÌNH (OFFICIAL) =====================
-    // Bắt buộc đủ 11 người + Captain
+    // ===================== 5. ĐĂNG KÝ ĐỘI HÌNH (OFFICIAL) =====================
     @GetMapping("/match/{matchId}/register")
     public String showRegisterForm(@PathVariable Long teamId, @PathVariable Long matchId, Model model) {
         prepareLineupModel(teamId, matchId, model);
 
-        // Tìm captain hiện tại
         List<MatchLineup> currentLineup = iMatchLineupService.findByMatchAndTeam(matchId, teamId);
         Long currentCaptainId = currentLineup.stream()
                 .filter(MatchLineup::isCaptain)
                 .map(l -> l.getPlayer().getId())
                 .findFirst().orElse(null);
 
-        model.addAttribute("currentCaptainId", currentCaptainId);
-        model.addAttribute("pageTitle", "Đăng ký đội hình");
+        // Lấy danh sách ID để restore giao diện (nếu cần thiết cho logic restore)
+        List<Long> mainIds = currentLineup.stream()
+                .filter(l -> l.getType() == MatchLineup.LineupType.MAIN)
+                .map(l -> l.getPlayer().getId()).collect(Collectors.toList());
+        List<Long> subIds = currentLineup.stream()
+                .filter(l -> l.getType() == MatchLineup.LineupType.SUB)
+                .map(l -> l.getPlayer().getId()).collect(Collectors.toList());
 
-        // Lấy toàn bộ cầu thủ để hiển thị ở bảng chọn
+        model.addAttribute("currentCaptainId", currentCaptainId);
+        model.addAttribute("savedMainIds", mainIds);
+        model.addAttribute("savedSubIds", subIds);
+
+        model.addAttribute("pageTitle", "Đăng ký đội hình");
         model.addAttribute("allPlayersForTable", iPlayerService.findByTeamId(teamId));
 
-        return "coach/register_lineup"; // File mới
+        return "coach/register_lineup";
     }
 
     @PostMapping("/match/{matchId}/register/save")
@@ -151,23 +202,22 @@ public class FuncCoachController {
                                    @RequestParam(value = "captainId", required = false) Long captainId,
                                    RedirectAttributes redirect) {
 
-        // 1. Xử lý NULL an toàn: Nếu null thì tạo list rỗng để tránh lỗi NullPointerException
         List<Long> mainIds = (mainPlayerIds != null) ? mainPlayerIds : new ArrayList<>();
         List<Long> subIds = (subPlayerIds != null) ? subPlayerIds : new ArrayList<>();
 
-        // 2. Validate (Kiểm tra) số lượng cầu thủ chính (Đủ 11)
+        // Validate số lượng chính
         if (mainIds.size() != 11) {
             redirect.addFlashAttribute("error", "Đăng ký thất bại: Phải chọn ĐỦ 11 cầu thủ đá chính!");
             return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/register";
         }
 
-        // 3. Validate (Kiểm tra) số lượng cầu thủ dự bị (Tối thiểu 1) <--- THÊM MỚI
+        // Validate số lượng dự bị
         if (subIds.isEmpty()) {
             redirect.addFlashAttribute("error", "Đăng ký thất bại: Phải có tối thiểu 1 cầu thủ dự bị!");
             return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/register";
         }
 
-        // 4. Validate Đội trưởng
+        // Validate đội trưởng
         if (captainId == null) {
             redirect.addFlashAttribute("error", "Đăng ký thất bại: Chưa chọn Đội trưởng!");
             return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/register";
@@ -177,23 +227,31 @@ public class FuncCoachController {
             return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/register";
         }
 
-        // 5. Gọi Service để lưu (Service không cần sửa nếu Controller đã xử lý null)
         iMatchLineupService.saveLineup(teamId, matchId, mainIds, subIds, captainId);
 
         redirect.addFlashAttribute("message", "Đăng ký đội hình thành công!");
         return "redirect:/coach/team/" + teamId + "/schedule";
     }
 
-    // --- Helper ---
+    // --- Helper Methods ---
     private void prepareLineupModel(Long teamId, Long matchId, Model model) {
         MatchSchedule match = iMatchScheduleService.findById(matchId);
         List<Player> allPlayers = iPlayerService.findByTeamId(teamId);
         List<MatchLineup> currentLineup = iMatchLineupService.findByMatchAndTeam(matchId, teamId);
 
-        List<Player> mainPlayers = currentLineup.stream().filter(l -> l.getType() == MatchLineup.LineupType.MAIN).map(MatchLineup::getPlayer).collect(Collectors.toList());
-        List<Player> subPlayers = currentLineup.stream().filter(l -> l.getType() == MatchLineup.LineupType.SUB).map(MatchLineup::getPlayer).collect(Collectors.toList());
-        List<Long> selectedIds = currentLineup.stream().map(l -> l.getPlayer().getId()).collect(Collectors.toList());
-        List<Player> availablePlayers = allPlayers.stream().filter(p -> !selectedIds.contains(p.getId())).collect(Collectors.toList());
+        List<Player> mainPlayers = currentLineup.stream()
+                .filter(l -> l.getType() == MatchLineup.LineupType.MAIN)
+                .map(MatchLineup::getPlayer).collect(Collectors.toList());
+
+        List<Player> subPlayers = currentLineup.stream()
+                .filter(l -> l.getType() == MatchLineup.LineupType.SUB)
+                .map(MatchLineup::getPlayer).collect(Collectors.toList());
+
+        List<Long> selectedIds = currentLineup.stream()
+                .map(l -> l.getPlayer().getId()).collect(Collectors.toList());
+
+        List<Player> availablePlayers = allPlayers.stream()
+                .filter(p -> !selectedIds.contains(p.getId())).collect(Collectors.toList());
 
         model.addAttribute("match", match);
         model.addAttribute("availablePlayers", availablePlayers);
@@ -201,5 +259,24 @@ public class FuncCoachController {
         model.addAttribute("subPlayers", subPlayers);
         model.addAttribute("formations", iFormationService.getAllFormations());
         model.addAttribute("currentFormationName", "4-4-2");
+    }
+
+    // --- [THÊM MỚI] Cấu hình binding cho LocalDateTime ---
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(LocalDateTime.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) {
+                if (text != null && !text.isEmpty()) {
+                    setValue(LocalDateTime.parse(text, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                }
+            }
+
+            @Override
+            public String getAsText() {
+                LocalDateTime value = (LocalDateTime) getValue();
+                return (value != null ? value.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "");
+            }
+        });
     }
 }
