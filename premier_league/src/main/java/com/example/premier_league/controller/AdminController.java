@@ -19,11 +19,24 @@ public class AdminController {
 
     @Autowired
     private MatchScheduleService matchScheduleService;
+
+    // CẬP NHẬT: Thêm tham số error và logout để hứng thông báo từ Security
     @GetMapping("/admin/login")
-    public String adminLogin() {
+    public String adminLogin(
+            @RequestParam(value = "error", required = false) String error,
+            @RequestParam(value = "logout", required = false) String logout,
+            Model model
+    ) {
+        if (error != null) {
+            model.addAttribute("error", "Tài khoản hoặc mật khẩu quản trị không đúng!");
+        }
+        if (logout != null) {
+            model.addAttribute("message", "Bạn đã đăng xuất khỏi quyền quản trị.");
+        }
         return "admin/admin-login";
     }
-    @GetMapping("/admin/home")
+
+    @GetMapping("/admin/home") // Lưu ý: Trong WebSecurityConfig bạn để defaultSuccessUrl là /admin/dashboard, hãy chắc chắn đường dẫn khớp nhau (home hay dashboard)
     public String adminDashboard(
             @RequestParam(value = "round", required = false, defaultValue = "1") Integer round,
             Model model

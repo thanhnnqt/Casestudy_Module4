@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
@@ -27,13 +27,28 @@
 
                 <div sec:authorize="isAuthenticated()" class="flex items-center gap-4 border-l pl-4 ml-4">
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-primary font-bold overflow-hidden">
-                            <img th:src="${#authentication.principal.attributes['picture']}" class="w-full h-full object-cover" onerror="this.style.display='none'"/>
-                            <i data-lucide="user" class="w-5 h-5"></i>
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-primary font-bold overflow-hidden relative">
+                            <i data-lucide="user" class="w-5 h-5 absolute z-0"></i>
+
+                            <img th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                                 th:src="${#authentication.principal.attributes['picture']}"
+                                 class="w-full h-full object-cover z-10 relative"
+                                 onerror="this.style.display='none'"/>
+
+                            <img th:unless="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                                 th:src="'https://ui-avatars.com/api/?background=random&name=' + ${#authentication.name}"
+                                 class="w-full h-full object-cover z-10 relative" />
                         </div>
-                        <span class="text-sm font-semibold text-gray-700"
-                              sec:authentication="principal.attributes['name']">User</span>
+
+                        <span th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                              class="text-sm font-semibold text-gray-700"
+                              th:text="${#authentication.principal.attributes['name']}">Google User</span>
+
+                        <span th:unless="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                              class="text-sm font-semibold text-gray-700"
+                              th:text="${#authentication.name}">Form User</span>
                     </div>
+
                     <form th:action="@{/logout}" method="post" class="m-0">
                         <button type="submit" class="flex items-center gap-1 text-red-500 hover:text-red-700 font-medium text-sm">
                             <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -51,15 +66,24 @@
 
         <div id="mobile-menu" class="hidden md:hidden py-4 border-t bg-white">
             <a th:href="@{/}" class="block py-2 px-4 font-medium hover:bg-gray-50 text-gray-700">Trang chủ</a>
-            <a th:href="@{/tournaments}" class="block py-2 px-4 font-medium hover:bg-gray-50 text-gray-700">Giải đấu</a>
-            <a th:href="@{/tickets}" class="block py-2 px-4 font-medium hover:bg-gray-50 text-gray-700">Đặt Vé</a>
+            <a th:href="@{/tournament}" class="block py-2 px-4 font-medium hover:bg-gray-50 text-gray-700">Giải đấu</a>
+            <a th:href="@{/ticket}" class="block py-2 px-4 font-medium hover:bg-gray-50 text-gray-700">Đặt Vé</a>
             <div class="border-t my-2"></div>
+
             <div sec:authorize="!isAuthenticated()">
                 <a th:href="@{/login}" class="block py-2 px-4 font-bold text-primary hover:bg-gray-50">Đăng Nhập</a>
             </div>
+
             <div sec:authorize="isAuthenticated()">
                 <div class="px-4 py-2 text-gray-500 text-sm">
-                    Xin chào, <span sec:authentication="principal.attributes['name']" class="font-bold text-gray-900"></span>
+                    Xin chào,
+                    <span th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                          th:text="${#authentication.principal.attributes['name']}"
+                          class="font-bold text-gray-900"></span>
+
+                    <span th:unless="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                          th:text="${#authentication.name}"
+                          class="font-bold text-gray-900"></span>
                 </div>
                 <form th:action="@{/logout}" method="post" class="block">
                     <button type="submit" class="w-full text-left py-2 px-4 font-medium text-red-600 hover:bg-red-50 flex items-center gap-2">
@@ -70,6 +94,52 @@
             </div>
         </div>
     </div>
+
+    <div id="toast-notification">
+        <h3 id="toast-title" class="font-bold">Title</h3>
+        <p id="toast-desc" class="font-normal text-sm">Description</p>
+    </div>
+
+    <style>
+        #toast-notification {
+            position: fixed; bottom: 2rem; right: 2rem;
+            padding: 1rem 1.5rem; border-radius: 0.5rem;
+            background-color: #00ff85; color: #38003c;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            z-index: 100; opacity: 0; transform: translateY(20px);
+            transition: all 0.3s ease; visibility: hidden;
+        }
+        #toast-notification.show {
+            opacity: 1; transform: translateY(0); visibility: visible;
+        }
+    </style>
+
+    <script th:inline="javascript">
+        // Logic nhận thông báo
+        const toastTitle = /*[[${toastTitle}]]*/ null;
+        const toastMessage = /*[[${toastMessage}]]*/ null;
+        const toastType = /*[[${toastType}]]*/ null;
+
+        function showToast(title, desc, type) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-desc').innerText = desc;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (toastTitle && toastMessage) {
+                showToast(toastTitle, toastMessage, toastType);
+
+                // Xóa param ?success trên URL
+                const url = new URL(window.location);
+                url.searchParams.delete('success');
+                window.history.replaceState({}, '', url);
+            }
+        });
+    </script>
+
 </nav>
 </body>
 </html>
