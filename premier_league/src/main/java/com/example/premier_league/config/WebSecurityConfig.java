@@ -83,7 +83,7 @@ public class WebSecurityConfig {
                         "/css/**", "/js/**", "/images/**", "/webjars/**",
                         "/tournament/**", "/player/**", "/coach/**", "/team/**",
                         "/stadium/**", "/matches/**", "/blogs/**", "/news/**", "/layout/**","/tournaments-detail",
-                        "/oauth2/**","/ticket")
+                        "/oauth2/**","/ticket","admin/**")
                 .permitAll()
 
                 // Chỉ trang đặt vé yêu cầu login
