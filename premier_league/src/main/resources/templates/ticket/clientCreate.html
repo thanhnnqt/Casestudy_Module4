@@ -603,7 +603,7 @@
                             th:text="${ticketTypeItem.typeTicket}"
                             th:value="${ticketTypeItem.id}"></option>
                 </select>
-                <p th:if="${messTicketType}" th:text="${messTicketType}"></p>
+                <p class="text-danger" th:if="${messTicketType}" th:text="${messTicketType}"></p>
                 <div class="small-help mt-1">
                     Giá sẽ nhân với số ghế bạn chọn.
                 </div>
@@ -611,7 +611,7 @@
             <div class="col-md-6">
                 <label class="info-label">Số luợng vé: </label>
                 <input th:field="*{quantity}" type="number" min="1" id="quantityInput">
-                <p th:if="${messQuantity}" th:text="${messQuantity}"></p>
+                <p class="text-danger" th:if="${messQuantity}" th:text="${messQuantity}"></p>
                 <div class="small-help mt-1">
                     Nhập số lượng ghế muốn mua cho khu đang chọn
                 </div>
