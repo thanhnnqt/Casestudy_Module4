@@ -44,9 +44,8 @@ public class MatchScheduleGenerator {
             return;
         }
 
-        // Random thứ tự đội
+        // KHÔNG RANDOM thứ tự đội nữa
         List<Team> teamList = new ArrayList<>(teams);
-        Collections.shuffle(teamList);
 
         int totalRounds = teamList.size() - 1;   // 19 vòng
         int matchesPerRound = teamList.size() / 2; // 10 trận/vòng
@@ -69,7 +68,6 @@ public class MatchScheduleGenerator {
 
                 MatchSchedule m = new MatchSchedule();
 
-                // 6 trận thứ 7 - 4 trận chủ nhật
                 if (match < 6) {
                     m.setMatchDate(startDate.plusWeeks(round));
                     m.setMatchTime(saturdayTimes.get(match));
@@ -86,13 +84,14 @@ public class MatchScheduleGenerator {
                 allMatches.add(m);
             }
 
-            // Xoay bảng (trừ đội đầu)
+            // xoay bảng
             teamList.add(1, teamList.remove(teamList.size() - 1));
         }
 
         /* ====================== LƯỢT VỀ ======================= */
-        List<Team> reverseList = new ArrayList<>(teamList);
-        Collections.shuffle(reverseList);
+
+        // KHÔNG RANDOM lượt về nữa
+        List<Team> reverseList = new ArrayList<>(teams);
 
         for (int round = 0; round < totalRounds; round++) {
 
@@ -139,7 +138,6 @@ public class MatchScheduleGenerator {
                 LocalTime.of(23, 30)
         };
 
-        // mỗi giờ có 2 trận = 6 trận
         for (LocalTime t : saturdayTimes) {
             times.add(t);
             times.add(t);
@@ -158,7 +156,6 @@ public class MatchScheduleGenerator {
                 LocalTime.of(22, 0)
         };
 
-        // mỗi giờ 2 trận = 4 trận
         for (LocalTime t : sundayTimes) {
             times.add(t);
             times.add(t);

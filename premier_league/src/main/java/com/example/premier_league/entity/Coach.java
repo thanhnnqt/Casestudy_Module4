@@ -43,8 +43,14 @@ public class Coach {
     private Integer experienceYears;
 
     // Chứng chỉ huấn luyện: UEFA Pro/A/B...
-    @Column(length = 50)
-    private String licenseLevel;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "coach_license_levels",
+            joinColumns = @JoinColumn(name = "coach_id")
+    )
+    @Column(name = "license_level", length = 50)
+    private java.util.List<String> licenseLevels = new java.util.ArrayList<>();
+
 
     private LocalDate joinDate;
 

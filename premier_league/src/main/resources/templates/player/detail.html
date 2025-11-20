@@ -22,10 +22,10 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="mb-0" th:text="${player.name}">Tên cầu thủ</h3>
                 <div>
-                    <a th:href="@{'/players/update/' + ${player.id}}" class="btn btn-sm btn-outline-primary">
+                    <a th:href="@{'/admin/players/update/' + ${player.id}}" class="btn btn-sm btn-outline-primary">
                         Sửa
                     </a>
-                    <a th:href="@{'/players/delete/' + ${player.id}}"
+                    <a th:href="@{'/admin/players/delete/' + ${player.id}}"
                        onclick="return confirm('Bạn có chắc chắn muốn xóa cầu thủ này?')"
                        class="btn btn-sm btn-outline-danger">
                         Xóa
@@ -56,7 +56,7 @@
 
             <hr>
 
-            <a href="/players" class="btn btn-secondary mt-2">Quay lại danh sách</a>
+            <a href="/admin/players" class="btn btn-secondary mt-2">Quay lại danh sách</a>
         </div>
     </div>
 
