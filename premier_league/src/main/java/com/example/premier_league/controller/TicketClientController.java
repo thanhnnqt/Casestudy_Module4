@@ -18,22 +18,17 @@ public class TicketClientController {
     private final ITicketTypeService ticketTypeService;
     private final ISessionService sessionService;
     private final IStadiumService stadiumService;
-    private final IStadiumRowService stadiumRowService;
-    private final ISeatService seatService;
 
-    public TicketClientController(MatchScheduleService matchScheduleService, ITicketService ticketService, ITicketTypeService ticketTypeService, ISessionService sessionService, IStadiumService stadiumService, IStadiumRowService stadiumRowService, ISeatService seatService) {
+    public TicketClientController(MatchScheduleService matchScheduleService, ITicketService ticketService, ITicketTypeService ticketTypeService, ISessionService sessionService, IStadiumService stadiumService, ISeatService seatService) {
         this.matchScheduleService = matchScheduleService;
         this.ticketService = ticketService;
         this.ticketTypeService = ticketTypeService;
         this.sessionService = sessionService;
         this.stadiumService = stadiumService;
-        this.stadiumRowService = stadiumRowService;
-        this.seatService = seatService;
     }
 
     @GetMapping("/create")
     public String tickets(Model model, @RequestParam(name = "id") Long id) {
-
         MatchSchedule matchSchedule = matchScheduleService.findById(id);
         List<TicketType> ticketTypeList = ticketTypeService.findAll();
 
@@ -50,17 +45,6 @@ public class TicketClientController {
         Stadium stadium = stadiumService.findByName(ticket.getStadium());
         List<Session> sessionList = sessionService.findAllByStadium_Id(stadium.getId());
 
-        for (Session session : sessionList) {
-            List<StadiumRow> rowList = stadiumRowService.findAllBySessionId(session.getId());
-
-            for (StadiumRow row : rowList) {
-                List<Seat> seatList = seatService.findAllByRowId(row.getId());
-                row.setSeatList(seatList);
-            }
-
-            session.setRowList(rowList);
-        }
-
         TicketDto ticketDto = new TicketDto();
         ticketDto.setHomeTeam(ticket.getHomeTeam());
         ticketDto.setAwayTeam(ticket.getAwayTeam());
@@ -76,29 +60,65 @@ public class TicketClientController {
         return "ticket/clientCreate";
     }
 
-
     @PostMapping("/saveCreate")
-    public String showInfoTicket(@ModelAttribute TicketDto ticketDto, Model model) {
+    public String saveCreate(@ModelAttribute("ticketDto") TicketDto ticketDto, Model model) {
 
-        List<String> seatNumberList = new ArrayList<>();
-
-        // Nếu seatNumber có dạng "A1,A2,B10" → set quantity = số ghế
-        if (ticketDto.getSeatNumber() != null && !ticketDto.getSeatNumber().trim().isEmpty()) {
-            String[] seats = ticketDto.getSeatNumber().split("\\s*,\\s*");
-            seatNumberList = List.of(seats); // Java 9+
-            ticketDto.setQuantity(seats.length);
-
-            // ⭐ Đánh dấu các ghế này là đã đặt trong DB
-            seatService.markSeatsOccupiedBySeatNumbers(seatNumberList);
+        if (ticketDto.getStandSession() == null || ticketDto.getStandSession().isBlank()) {
+            model.addAttribute("mess", "Vui lòng chọn khu ghế.");
+            model.addAttribute("ticketDto", ticketDto);
+            return "ticket/infoTicketOfClient";
         }
 
+        if (ticketDto.getQuantity() == null || ticketDto.getQuantity() <= 0) {
+            model.addAttribute("mess", "Vui lòng nhập số lượng ghế hợp lệ.");
+            model.addAttribute("ticketDto", ticketDto);
+            return "ticket/infoTicketOfClient";
+        }
+
+        Session session = sessionService.findByNameAndStadiumName(ticketDto.getStandSession(), ticketDto.getStadium());
+
+        if (session == null) {
+            model.addAttribute("mess", "Không tìm thấy khu ghế tương ứng.");
+            model.addAttribute("ticketDto", ticketDto);
+            return "ticket/infoTicketOfClient";
+        }
+
+        int capacity = session.getCapacity() == null ? 0 : session.getCapacity();
+        int lastAssigned = session.getLastAssignedSeat() == null ? 0 : session.getLastAssignedSeat();
+        int requestQuantity = ticketDto.getQuantity();
+
+
+        if (lastAssigned + requestQuantity > capacity) {
+            model.addAttribute("mess", "Số lượng ghế còn lại trong khu "
+                    + session.getName() + " không đủ. Vui lòng chọn lại.");
+            model.addAttribute("ticketDto", ticketDto);
+            return "ticket/infoTicketOfClient";
+        }
+
+
+        String standName = session.getName();
+        String shortStand = standName.substring(standName.lastIndexOf(" ") + 1);
+
+        List<String> newSeats = new ArrayList<>();
+        for (int i = 1; i <= requestQuantity; i++) {
+            int seatIndex = lastAssigned + i;
+            newSeats.add(shortStand + seatIndex);
+        }
+
+        session.setLastAssignedSeat(lastAssigned + requestQuantity);
+        sessionService.save(session);
+
+        String seatNumberString = String.join(",", newSeats);
+        ticketDto.setSeatNumber(seatNumberString);
+
         TicketType ticketType = ticketTypeService.findById(ticketDto.getTicketType().getId());
-        int totalPay = ticketType.getPrice() * ticketDto.getQuantity();
+        Integer totalPay = requestQuantity * ticketType.getPrice();
+        ticketDto.setTotalPay(totalPay);
 
         model.addAttribute("ticketDto", ticketDto);
-        model.addAttribute("totalPay", totalPay);
-        model.addAttribute("mess", "Đã tạo vé thành công");
+        model.addAttribute("mess", "Đặt vé thành công!");
 
         return "ticket/infoTicketOfClient";
     }
+
 }

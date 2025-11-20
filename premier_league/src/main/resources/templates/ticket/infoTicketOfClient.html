@@ -82,58 +82,57 @@
     <h4 class="ticket-title">Thông tin đặt vé</h4>
 
     <div class="info-row">
-        <span class="info-label">Stadium: </span>
+        <span class="info-label">Sân vận động: </span>
         <span class="info-value" th:text="${ticketDto.stadium}"></span>
     </div>
 
     <div class="info-row">
-        <span class="info-label">Home team: </span>
+        <span class="info-label">Đội nhà: </span>
         <span class="info-value" th:text="${ticketDto.homeTeam}"></span>
     </div>
 
     <div class="info-row">
-        <span class="info-label">Away team: </span>
+        <span class="info-label">Đội khách: </span>
         <span class="info-value" th:text="${ticketDto.awayTeam}"></span>
     </div>
 
     <div class="info-row">
-        <span class="info-label">Address: </span>
+        <span class="info-label">Địa chỉ: </span>
         <span class="info-value" th:text="${ticketDto.address}"></span>
     </div>
 
     <div class="info-row">
-        <span class="info-label">Date match: </span>
+        <span class="info-label">Ngày diễn ra trận đấu: </span>
         <span class="info-value" th:text="${ticketDto.dateMatch}"></span>
     </div>
 
     <div class="info-row">
-        <span class="info-label">Time match: </span>
+        <span class="info-label">Thời gian diễn ra trận đấu: </span>
         <span class="info-value" th:text="${ticketDto.timeMatch}"></span>
     </div>
 
     <div class="info-row">
-        <span class="info-label">Quantity (số ghế): </span>
+        <span class="info-label">Số ghế: </span>
         <span class="info-value" th:text="${ticketDto.quantity}"></span>
     </div>
 
     <div class="info-row">
-        <span class="info-label">Stand(s) / Khu: </span>
-        <!-- sẽ là: North Bank - Dãy A, East Stand - Dãy B -->
+        <span class="info-label">Khu: </span>
         <span class="info-value" th:text="${ticketDto.standSession}"></span>
     </div>
 
     <div class="info-row">
-        <span class="info-label">Seat number(s): </span>
-        <!-- Ví dụ: A1,A2,B10 -->
+        <span class="info-label">Số chỗ: </span>
         <span class="info-value" th:text="${ticketDto.seatNumber}"></span>
     </div>
 
     <div class="info-row mt-2">
-        <span class="info-label">Total: </span>
-        <span class="info-value text-danger fs-5" th:text="${totalPay}"></span><span> đ</span>
+        <span class="info-label">Tổng tiền: </span>
+        <span class="info-value text-danger fs-5" th:text="${#numbers.formatDecimal(ticketDto.getTotalPay(), 0, 'COMMA', 0, 'POINT')}"></span><span> đ</span>
     </div>
 
     <a class="back-btn" href="/">Quay về trang chủ</a>
+    <a class="back-btn" th:href="@{/payment/showFormToPay(total=${ticketDto.getTotalPay()})}">Thanh toán</a>
 
 </div>
 
