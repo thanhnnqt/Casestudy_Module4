@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <title>Admin - Thêm Sự Kiện Trận Đấu</title>
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,6 +23,9 @@
 
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
+<!-- Nhận matchId từ controller -->
+<div id="root" th:attr="data-match-id=${matchId}"></div>
+
 <!-- NAVBAR -->
 <div th:replace="layout/navbar :: header"></div>
 
@@ -40,9 +42,8 @@
         <!-- MATCH ID -->
         <div>
             <label class="font-semibold">Match ID</label>
-            <input id="matchId" type="number"
-                   class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary"
-                   value="1"/>
+            <input id="matchId"
+                   class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary" />
         </div>
 
         <!-- SELECT TEAM -->
@@ -92,7 +93,6 @@
                    placeholder="Ví dụ: 'Ghi bàn đẹp mắt từ ngoài vòng cấm'"/>
         </div>
 
-        <!-- SEND -->
         <button id="send"
                 class="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-secondary hover:text-primary transition">
             Gửi Sự Kiện
@@ -105,9 +105,16 @@
 <script>
     lucide.createIcons();
 
-    /* ================================
-     * 1) Load match info -> fill team select
-     * ================================ */
+    /* ===========================
+       LẤY matchId TỪ CONTROLLER
+    ============================ */
+    const matchIdFromServer = document.getElementById("root").dataset.matchId;
+
+    if (matchIdFromServer) {
+        document.getElementById("matchId").value = matchIdFromServer;
+        loadTeams();
+    }
+
     async function loadTeams() {
         const matchId = document.getElementById("matchId").value;
         if (!matchId) return;
@@ -120,12 +127,9 @@
             <option value="">-- Chọn đội --</option>
             <option value="${match.homeTeamId}">${match.homeTeamName}</option>
             <option value="${match.awayTeamId}">${match.awayTeamName}</option>
-            `;
+        `;
     }
 
-    /* ================================
-     * 2) Load players by team
-     * ================================ */
     async function loadPlayers(teamId) {
         const playerSelect = document.getElementById("playerSelect");
 
@@ -145,19 +149,11 @@
         });
     }
 
-    // Khi nhập matchId xong -> load đội
-    document.getElementById("matchId").addEventListener("change", loadTeams);
-    loadTeams(); // load ngay từ đầu
-
-    // Khi chọn đội -> load cầu thủ đội đó
-    document.getElementById("teamSelect").addEventListener("change", (e) => {
+    document.getElementById("teamSelect").addEventListener("change", e => {
         loadPlayers(e.target.value);
     });
 
-    /* ================================
-     * 3) Gửi sự kiện
-     * ================================ */
-    document.getElementById('send').addEventListener('click', () => {
+    document.getElementById('send').addEventListener('click', async () => {
 
         const matchId = +document.getElementById('matchId').value;
         const minute = document.getElementById('minute').value;
@@ -181,17 +177,33 @@
             description: desc
         };
 
-        fetch(`/api/matches/${matchId}/events`, {
+        // gửi sự kiện
+        const resp = await fetch(`/api/matches/${matchId}/events`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
-        })
-            .then(async resp => {
-                const msg = await resp.text();
-                if (!resp.ok) alert("❌ Lỗi: " + msg);
-                else alert("✅ Thành công!");
+        });
+
+        if (!resp.ok) {
+            const msg = await resp.text();
+            return alert("❌ Lỗi: " + msg);
+        }
+
+        // nếu MATCH_END → cập nhật trạng thái luôn
+        if (type === "MATCH_END") {
+            await fetch(`/admin/matches/finish/${matchId}`, {
+                method: "POST"
             });
+
+            alert("🏁 Trận đấu đã kết thúc!");
+            window.location.href = "/admin/matches";
+            return;
+        }
+
+        alert("✅ Thành công!");
     });
+
+
 </script>
 
 </body>

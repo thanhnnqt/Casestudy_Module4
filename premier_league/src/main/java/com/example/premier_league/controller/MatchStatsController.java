@@ -16,5 +16,11 @@ public class MatchStatsController {
     public String formUpdateStats(){
         return "admin_stats";
     }
+    @GetMapping("/{matchId}")
+    public String formUpdateStats(@PathVariable Long matchId, Model model) {
+        model.addAttribute("matchId", matchId);
+        return "admin_stats";
+    }
+
 }
 

@@ -152,17 +152,19 @@
 
             <td class="d-flex gap-2">
 
-                <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).UPCOMING}"
-                   th:href="@{'/admin/events'}"
+                <a th:if="${match.status.equals(T(com.example.premier_league.entity.MatchStatus).UPCOMING)}"
+                   th:href="@{'/admin/events?matchId=' + ${match.id}}"
                    class="btn btn-success btn-sm">Bắt đầu</a>
+
 
                 <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).UPCOMING}"
                    th:href="@{'/admin/matches/postpone/' + ${match.id}}"
                    class="btn btn-warning btn-sm">Hoãn</a>
 
-                <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).SCHEDULED}"
-                   th:href="@{'/admin/matches/start/' + ${match.id}}"
+                <a th:if="${match.status.equals(T(com.example.premier_league.entity.MatchStatus).SCHEDULED)}"
+                   th:href="@{'/admin/events?matchId=' + ${match.id}}"
                    class="btn btn-success btn-sm">Bắt đầu</a>
+
 
                 <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).SCHEDULED}"
                    th:href="@{'/admin/matches/postpone/' + ${match.id}}"

@@ -16,7 +16,6 @@ public class MatchEventRestController {
 
     private final IMatchEventService eventService;
 
-    /** Tạo sự kiện mới */
     @PostMapping("/{matchId}/events")
     public ResponseEntity<?> addEvent(
             @PathVariable Long matchId,
@@ -26,13 +25,11 @@ public class MatchEventRestController {
         return ResponseEntity.ok("success");
     }
 
-    /** Lấy tất cả event của trận */
     @GetMapping("/{matchId}/events")
     public ResponseEntity<List<MatchEvent>> list(@PathVariable Long matchId) {
         return ResponseEntity.ok(eventService.getEventsByMatch(matchId));
     }
 
-    /** Lấy thông tin tỉ số theo trận */
     @GetMapping("/{matchId}/score")
     public ResponseEntity<?> score(@PathVariable Long matchId) {
         var m = eventService.findMatchById(matchId);

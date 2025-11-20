@@ -42,6 +42,14 @@
                placeholder="Nhập matchId và Enter để load"
                onkeypress="if(event.key==='Enter') loadStats()">
     </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const matchId = urlParams.get("matchId");
+        if (matchId) {
+            document.getElementById("matchId").value = matchId;
+            loadStats();
+        }
+    </script>
 
     <!-- TEAM NAMES -->
     <div class="grid grid-cols-3 text-lg font-bold mb-4">
