@@ -566,7 +566,7 @@
                 <input type="hidden" th:field="*{awayTeam}">
             </div>
         </div>
-
+        <input type="hidden" name="standSessionId" th:value="${standSessionId}">
         <div class="row mt-2">
             <div class="col-md-6">
                 <div class="info-label">Sân vân động:</div>
@@ -603,6 +603,7 @@
                             th:text="${ticketTypeItem.typeTicket}"
                             th:value="${ticketTypeItem.id}"></option>
                 </select>
+                <p th:if="${messTicketType}" th:text="${messTicketType}"></p>
                 <div class="small-help mt-1">
                     Giá sẽ nhân với số ghế bạn chọn.
                 </div>
@@ -610,10 +611,12 @@
             <div class="col-md-6">
                 <label class="info-label">Số luợng vé: </label>
                 <input th:field="*{quantity}" type="number" min="1" id="quantityInput">
+                <p th:if="${messQuantity}" th:text="${messQuantity}"></p>
                 <div class="small-help mt-1">
                     Nhập số lượng ghế muốn mua cho khu đang chọn
                 </div>
             </div>
+
 
         </div>
 
@@ -654,9 +657,6 @@
             <!-- Panel thông tin -->
             <div class="stand-info-panel">
                 <div class="stand-info-title">Sơ đồ khán đài</div>
-                <div class="stand-info-sub">
-                    Chạm vào từng khu trên mặt sân để xem & chọn ghế tương ứng.
-                </div>
                 <div class="stand-info-current">
                     Khu đang chọn:
                     <span id="current-stand-label">Chưa chọn</span>
@@ -686,6 +686,7 @@
 </div>
 
 <script>
+
     function selectStandFromZone(el) {
         // bỏ active cũ
         document.querySelectorAll('.pitch-zone').forEach(z => z.classList.remove('active'));
@@ -715,21 +716,16 @@
         const standSessionInput = document.getElementById('standSession');
         const quantityInput = document.getElementById('quantityInput');
 
-        if (!ticketTypeSelect || !ticketTypeSelect.value) {
-            alert("Vui lòng chọn loại vé.");
-            return false;
-        }
+        // if (!ticketTypeSelect || !ticketTypeSelect.value) {
+        //     alert("Vui lòng chọn loại vé.");
+        //     return false;
+        // }
 
-        if (!standSessionInput || !standSessionInput.value.trim()) {
-            alert("Vui lòng chọn khu ghế trên sơ đồ sân.");
-            return false;
-        }
-
-        const quantity = parseInt(quantityInput.value, 10);
-        if (isNaN(quantity) || quantity <= 0) {
-            alert("Vui lòng nhập số lượng ghế hợp lệ.");
-            return false;
-        }
+        // const quantity = parseInt(quantityInput.value, 10);
+        // if (isNaN(quantity) || quantity <= 0) {
+        //     alert("Vui lòng nhập số lượng ghế hợp lệ.");
+        //     return false;
+        // }
 
         return true;
     }

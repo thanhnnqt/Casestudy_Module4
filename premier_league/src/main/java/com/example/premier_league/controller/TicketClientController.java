@@ -6,6 +6,7 @@ import com.example.premier_league.service.impl.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public class TicketClientController {
 
     @GetMapping("/create")
     public String tickets(Model model, @RequestParam(name = "id", required = false) Long id, @RequestParam(name = "quantity", required = false) Integer quantity, @RequestParam(name = "standSessionId", required = false) Integer standSessionId) {
+
         if (standSessionId != null && quantity != null && quantity > 0) {
             Session session = sessionService.findSessionById(standSessionId);
             System.out.println("standSessionId = " + standSessionId + ", quantity = " + quantity);
@@ -67,16 +69,29 @@ public class TicketClientController {
         model.addAttribute("ticketDto", ticketDto);
         model.addAttribute("sessionList", sessionList);
         model.addAttribute("matchId", matchSchedule.getId());
-
+        model.addAttribute("standSessionId", standSessionId);
+        model.addAttribute("sessionList", sessionList);
         return "ticket/clientCreate";
     }
 
     @PostMapping("/saveCreate")
-    public String saveCreate(@RequestParam(name = "matchId", required = false) Integer matchId, @ModelAttribute("ticketDto") TicketDto ticketDto, Model model, jakarta.servlet.http.HttpSession sessionHttp, @RequestParam(name = "standSessionId", required = false) Integer standSessionId) {
-        if (ticketDto.getStandSession() == null || ticketDto.getStandSession().isBlank()) {
-            model.addAttribute("mess", "Vui lòng chọn khu ghế.");
-            model.addAttribute("ticketDto", ticketDto);
-            return "ticket/infoTicketOfClient";
+    public String saveCreate(@RequestParam(name = "matchId", required = false) Integer matchId, @ModelAttribute("ticketDto") TicketDto ticketDto, Model model, jakarta.servlet.http.HttpSession sessionHttp, @RequestParam(name = "standSessionId", required = false) Integer standSessionId, RedirectAttributes redirectAttributes) {
+//        if (ticketDto.getStandSession() == null || ticketDto.getStandSession().isBlank()) {
+//            model.addAttribute("mess", "Vui lòng chọn khu ghế.");
+//            model.addAttribute("ticketDto", ticketDto);
+//            return "ticket/infoTicketOfClient";
+//        }
+        String messQuantity = "";
+        String messTicketType = "";
+        if (ticketDto.getQuantity() == null) {
+            messQuantity = "Vui lòng nhập số lượng vé";
+            redirectAttributes.addFlashAttribute("messQuantity", messQuantity);
+            return "redirect:/tickets/create?id=" + matchId;
+
+        } else if (ticketDto.getTicketType() == null) {
+            messTicketType = "Vui lòng chọn loại vé";
+            redirectAttributes.addFlashAttribute("messTicketType", messTicketType);;
+            return "redirect:/tickets/create?id=" + matchId;
         }
 
         if (standSessionId != null) {
