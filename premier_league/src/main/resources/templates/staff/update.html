@@ -1,102 +1,116 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Cập nhật nhân viên</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="container mt-4">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout('Cập nhật nhân viên', 'staffs', ~{::content})">
 
-<h2 class="text-center mb-4">Cập nhật thông tin nhân viên</h2>
+<th:block th:fragment="content">
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Cập nhật thông tin nhân viên</h2>
 
-<form th:action="@{/staffs/update}" th:object="${staffDto}" method="post" class="card p-4 shadow">
+        <!-- FORM CẬP NHẬT -->
+        <form th:object="${staffDto}"
+              th:action="@{'/admin/staffs/' + ${staffDto.id} + '/edit'}"
+              method="post"
+              class="card p-4 shadow">
 
-  <!-- hidden id -->
-  <input type="hidden" th:field="*{id}">
+            <!-- ID + TEAM ẨN -->
+            <input type="hidden" th:field="*{id}">
+            <!-- Nếu StaffDto có teamId thì giữ lại -->
+            <input type="hidden" th:field="*{teamId}"/>
 
-  <div class="mb-3">
-    <label class="form-label">Họ và tên</label>
-    <input type="text" class="form-control" th:field="*{fullName}">
-    <div class="text-danger" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
-  </div>
+            <div class="row">
+                <!-- CỘT TRÁI -->
+                <div class="col-md-6">
+                    <!-- Họ tên -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Họ và tên</label>
+                        <input type="text" class="form-control" th:field="*{fullName}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('fullName')}"
+                             th:errors="*{fullName}"></div>
+                    </div>
 
-  <div class="mb-3">
-    <label class="form-label">Ngày sinh</label>
-    <input type="date" class="form-control" th:field="*{dateOfBirth}">
-    <div class="text-danger" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></div>
-  </div>
+                    <!-- Ngày sinh -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ngày sinh</label>
+                        <input type="date" class="form-control" th:field="*{dateOfBirth}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('dateOfBirth')}"
+                             th:errors="*{dateOfBirth}"></div>
+                    </div>
 
-  <div class="mb-3">
-    <label class="form-label">Giới tính</label>
-    <select class="form-select" th:field="*{gender}">
-      <option value="">-- Chọn giới tính --</option>
-      <option value="Male">Nam</option>
-      <option value="Female">Nữ</option>
-      <option value="Other">Khác</option>
-    </select>
-    <div class="text-danger" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
-  </div>
+                    <!-- Giới tính -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Giới tính</label>
+                        <select class="form-select" th:field="*{gender}">
+                            <option value="Male">Nam</option>
+                            <option value="Female">Nữ</option>
+                            <option value="Other">Khác</option>
+                        </select>
+                    </div>
 
-  <div class="mb-3">
-    <label class="form-label">Quốc tịch</label>
-    <input type="text" class="form-control" th:field="*{nationality}">
-    <div class="text-danger" th:if="${#fields.hasErrors('nationality')}" th:errors="*{nationality}"></div>
-  </div>
+                    <!-- Quốc tịch -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Quốc tịch</label>
+                        <input type="text" class="form-control" th:field="*{nationality}">
+                    </div>
 
-  <div class="mb-3">
-    <label class="form-label">Vị trí công tác</label>
-    <input type="text" class="form-control" th:field="*{position}">
-    <div class="text-danger" th:if="${#fields.hasErrors('position')}" th:errors="*{position}"></div>
-  </div>
+                    <!-- SĐT -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Số điện thoại</label>
+                        <input type="text" class="form-control" th:field="*{phoneNumber}">
+                    </div>
+                </div>
 
-  <div class="mb-3">
-    <label class="form-label">Vai trò trong đội</label>
-    <input type="text" class="form-control" th:field="*{role}">
-    <div class="text-danger" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
-  </div>
+                <!-- CỘT PHẢI -->
+                <div class="col-md-6">
+                    <!-- Vị trí -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Vị trí</label>
+                        <input type="text" class="form-control" th:field="*{position}">
+                    </div>
 
-  <div class="mb-3">
-    <label class="form-label">Ngày gia nhập</label>
-    <input type="date" class="form-control" th:field="*{joinDate}">
-    <div class="text-danger" th:if="${#fields.hasErrors('joinDate')}" th:errors="*{joinDate}"></div>
-  </div>
+                    <!-- Vai trò -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Vai trò</label>
+                        <input type="text" class="form-control" th:field="*{role}">
+                    </div>
 
-  <div class="mb-3">
-    <label class="form-label">Số điện thoại</label>
-    <input type="text" class="form-control" th:field="*{phoneNumber}">
-    <div class="text-danger" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
-  </div>
+                    <!-- Ngày gia nhập -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ngày gia nhập</label>
+                        <input type="date" class="form-control" th:field="*{joinDate}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('joinDate')}"
+                             th:errors="*{joinDate}"></div>
+                    </div>
 
-  <div class="mb-3">
-    <label class="form-label">Email</label>
-    <input type="email" class="form-control" th:field="*{email}">
-    <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-  </div>
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email</label>
+                        <input type="email" class="form-control" th:field="*{email}">
+                    </div>
 
-  <div class="mb-3">
-    <label class="form-label">Trạng thái</label>
-    <select class="form-select" th:field="*{status}">
-      <option value="">-- Chọn trạng thái --</option>
-      <option value="Active">Đang làm việc</option>
-      <option value="Inactive">Nghỉ</option>
-      <option value="On Loan">Cho mượn</option>
-    </select>
-    <div class="text-danger" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
-  </div>
+                    <!-- Trạng thái -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Trạng thái</label>
+                        <select class="form-select" th:field="*{status}">
+                            <option value="Active">Đang làm việc</option>
+                            <option value="Inactive">Nghỉ</option>
+                            <option value="On Loan">Cho mượn</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-  <div class="mb-3">
-    <label class="form-label">Link ảnh đại diện</label>
-    <input type="text" class="form-control" th:field="*{avatarUrl}">
-    <div class="form-text">Nếu để trống, giữ nguyên ảnh cũ.</div>
-    <div class="text-danger" th:if="${#fields.hasErrors('avatarUrl')}" th:errors="*{avatarUrl}"></div>
-  </div>
+            <!-- Avatar -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Link ảnh đại diện</label>
+                <input type="text" class="form-control" th:field="*{avatarUrl}">
+            </div>
 
-  <div class="d-flex justify-content-between">
-    <a href="/staffs" class="btn btn-secondary">Quay lại</a>
-    <button type="submit" class="btn btn-success">Cập nhật</button>
-  </div>
-
-</form>
-
-</body>
+            <!-- NÚT -->
+            <div class="d-flex justify-content-between mt-3">
+                <a href="/admin/staffs" class="btn btn-secondary">Quay lại</a>
+                <button type="submit" class="btn btn-success px-4">Cập nhật</button>
+            </div>
+        </form>
+    </div>
+</th:block>
 </html>

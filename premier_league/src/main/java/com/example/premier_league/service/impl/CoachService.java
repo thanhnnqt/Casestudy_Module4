@@ -49,4 +49,9 @@ public class CoachService implements ICoachService {
             coachRepository.deleteById(id);
         }
     }
+
+    @Override
+    public boolean existsByRole(String role) {
+        return coachRepository.existsByRole(role);
+    }
 }

@@ -17,4 +17,6 @@ public interface ICoachService {
     void update(Coach coach);
 
     void delete(int id);
+
+    boolean existsByRole(String role);
 }

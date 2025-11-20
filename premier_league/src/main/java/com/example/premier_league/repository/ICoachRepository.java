@@ -8,4 +8,6 @@ import java.util.List;
 public interface ICoachRepository extends JpaRepository<Coach, Integer> {
 
     List<Coach> findByFullNameContainingIgnoreCase(String name);
+
+    boolean existsByRole(String role);
 }

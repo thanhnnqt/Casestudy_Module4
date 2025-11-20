@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/coaches")
+@RequestMapping("/admin/coaches")
 public class CoachController {
 
     private final ICoachService coachService;
@@ -35,57 +35,83 @@ public class CoachController {
             coaches = coachService.findAll();
         }
 
+        // Sắp xếp để Head Coach luôn lên đầu,
+        // sau đó tới các role khác (theo alphabet), trong mỗi role sắp xếp theo tên
         Map<String, List<Coach>> coachesByRole = coaches.stream()
-                .collect(Collectors.groupingBy(Coach::getRole,
+                .sorted((a, b) -> {
+                    // Ưu tiên Head Coach
+                    boolean aHead = "Head Coach".equalsIgnoreCase(a.getRole());
+                    boolean bHead = "Head Coach".equalsIgnoreCase(b.getRole());
+
+                    if (aHead && !bHead) return -1; // a trước b
+                    if (!aHead && bHead) return 1;  // b trước a
+
+                    // Nếu cùng loại (cùng role) thì sort theo tên
+                    int roleCompare = a.getRole().compareToIgnoreCase(b.getRole());
+                    if (roleCompare != 0) {
+                        return roleCompare;
+                    }
+                    return a.getFullName().compareToIgnoreCase(b.getFullName());
+                })
+                .collect(Collectors.groupingBy(
+                        Coach::getRole,
                         LinkedHashMap::new,
-                        Collectors.toList()));
+                        Collectors.toList()
+                ));
 
         model.addAttribute("coachesByRole", coachesByRole);
-        return "coach/list"; // templates/coaches.html
+        return "coach/list"; // templates/coach/list.html
     }
+
 
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
-        model.addAttribute("coach", new Coach());
+        Coach coach = new Coach();
+        model.addAttribute("coach", coach);
         model.addAttribute("formTitle", "Thêm huấn luyện viên");
-        return "coach/form"; // templates/coach-form.html
+
+        // Kiểm tra trong DB xem đã có Head Coach chưa
+        boolean headCoachExists = coachService.existsByRole("Head Coach");
+        model.addAttribute("headCoachExists", headCoachExists);
+
+        return "coach/form";
     }
+
 
     @PostMapping("/create")
     public String createCoach(@ModelAttribute("coach") Coach coach,
                               RedirectAttributes redirectAttributes) {
         coachService.save(coach);
         redirectAttributes.addFlashAttribute("message", "Đã thêm huấn luyện viên thành công");
-        return "redirect:/coaches";
+        return "redirect:/admin/coaches";
     }
 
 
+    // 4. Form Cập nhật (GET) -> URL dạng /14/edit
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable("id") int id,
+    public String showEditForm(@PathVariable("id") Integer id,
                                Model model,
-                               RedirectAttributes redirectAttributes) {
+                               RedirectAttributes redirect) {
         Coach coach = coachService.findById(id);
         if (coach == null) {
-            redirectAttributes.addFlashAttribute("message", "Không tìm thấy huấn luyện viên");
-            return "redirect:/coaches";
+            redirect.addFlashAttribute("message", "Không tìm thấy HLV!");
+            return "redirect:/admin/coaches";
         }
-
         model.addAttribute("coach", coach);
         model.addAttribute("formTitle", "Cập nhật huấn luyện viên");
         return "coach/form";
     }
 
-    @PostMapping("/{id}/edit")
-    public String updateCoach(@PathVariable("id") Integer id,
-                              @ModelAttribute("coach") Coach coach,
-                              RedirectAttributes redirectAttributes) {
-
-        coach.setId(id);
-        coachService.update(coach);
-
-        redirectAttributes.addFlashAttribute("message", "Đã cập nhật huấn luyện viên thành công");
-        return "redirect:/coaches";
+    // 5. Xử lý Cập nhật (POST) -> Gửi về /update
+    // Đây là chỗ sửa lỗi "POST not supported"
+    @PostMapping("/update")
+    public String updateCoach(@ModelAttribute("coach") Coach coach,
+                              RedirectAttributes redirect) {
+        // Khi submit form, ID đã nằm ẩn trong object coach
+        coachService.save(coach);
+        redirect.addFlashAttribute("message", "Cập nhật thành công!");
+        return "redirect:/admin/coaches";
     }
 
 
@@ -96,7 +122,7 @@ public class CoachController {
         Coach coach = coachService.findById(id);
         if (coach == null) {
             redirectAttributes.addFlashAttribute("message", "Không tìm thấy huấn luyện viên");
-            return "redirect:/coaches";
+            return "redirect:/admin/coaches";
         }
 
         model.addAttribute("coach", coach);
@@ -109,6 +135,6 @@ public class CoachController {
                               RedirectAttributes redirectAttributes) {
         coachService.delete(id);
         redirectAttributes.addFlashAttribute("message", "Đã xoá huấn luyện viên");
-        return "redirect:/coaches";
+        return "redirect:/admin/coaches";
     }
 }

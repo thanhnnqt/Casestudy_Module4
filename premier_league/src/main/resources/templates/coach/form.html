@@ -15,78 +15,83 @@
     <h2 class="page-title mb-3" th:text="${formTitle}">Thêm huấn luyện viên</h2>
 
     <form th:object="${coach}"
-          th:action="${#strings.contains(formTitle, 'Cập nhật') } ? @{'/coaches/' + ${coach.id} + '/edit'} : @{/coaches/create}"
+          th:action="${coach.id != null} ? @{/admin/coaches/update} : @{/admin/coaches/create}"
           method="post" class="row g-3">
 
-        <!-- Họ tên -->
+        <input type="hidden" th:field="*{id}">
+
         <div class="col-md-6">
             <label class="form-label">Họ và tên</label>
             <input type="text" class="form-control" th:field="*{fullName}" required>
         </div>
 
-        <!-- Chức vụ -->
         <div class="col-md-6">
             <label class="form-label">Chức vụ</label>
             <select class="form-select" th:field="*{role}" required>
                 <option value="">-- Chọn chức vụ --</option>
-                <option value="Head Coach">Head Coach</option>
+                <option value="Head Coach" th:if="${headCoachExists == false} or *{role == 'Head Coach'}">
+                    Head Coach
+                </option>
                 <option value="Assistant Coach">Assistant Coach</option>
                 <option value="First Team Coach">First Team Coach</option>
                 <option value="Goalkeeper Coach">Goalkeeper Coach</option>
                 <option value="Fitness Coach">Fitness Coach</option>
-                <option value="Technical Director">Technical Director</option>
                 <option value="Set-piece Coach">Set-piece Coach</option>
                 <option value="Tactical Coach">Tactical Coach</option>
                 <option value="Video Analyst">Video Analyst</option>
                 <option value="Analyst">Analyst</option>
-                <option value="Team Doctor">Team Doctor</option>
-                <option value="Physiotherapist">Physiotherapist</option>
             </select>
         </div>
 
-        <!-- Quốc tịch -->
         <div class="col-md-6">
             <label class="form-label">Quốc tịch</label>
             <input type="text" class="form-control" th:field="*{nationality}">
         </div>
 
-        <!-- Avatar -->
         <div class="col-md-6">
             <label class="form-label">Link avatar</label>
             <input type="text" class="form-control" th:field="*{avatarUrl}">
         </div>
 
-        <!-- Ngày sinh -->
         <div class="col-md-4">
             <label class="form-label">Ngày sinh</label>
-            <input type="date" class="form-control" th:field="*{dateOfBirth}">
+            <input type="date" class="form-control"
+                   name="dateOfBirth"
+                   th:value="${coach.dateOfBirth}">
         </div>
 
-        <!-- Ngày gia nhập -->
         <div class="col-md-4">
             <label class="form-label">Ngày gia nhập</label>
-            <input type="date" class="form-control" th:field="*{joinDate}">
+            <input type="date" class="form-control"
+                   name="joinDate"
+                   th:value="${coach.joinDate}">
         </div>
 
-        <!-- Kinh nghiệm -->
         <div class="col-md-4">
             <label class="form-label">Số năm kinh nghiệm</label>
             <input type="number" min="0" class="form-control" th:field="*{experienceYears}">
         </div>
 
-        <!-- Chứng chỉ -->
         <div class="col-md-6">
             <label class="form-label">Chứng chỉ huấn luyện</label>
-            <select class="form-select" th:field="*{licenseLevel}">
-                <option value="">-- Chọn --</option>
+            <select class="form-select"
+                    th:field="*{licenseLevels}"
+                    multiple
+                    id="licenseSelect">
                 <option value="UEFA Pro">UEFA Pro</option>
                 <option value="UEFA A">UEFA A</option>
                 <option value="UEFA B">UEFA B</option>
+                <option value="UEFA C">UEFA C</option>
+                <option value="FIFA Coaching">FIFA Coaching</option>
+                <option value="USSF A">USSF A</option>
+                <option value="USSF B">USSF B</option>
+                <option value="AFC Pro">AFC Pro</option>
+                <option value="AFC A">AFC A</option>
                 <option value="Khác">Khác</option>
             </select>
+            <small class="text-muted">Có thể chọn nhiều chứng chỉ.</small>
         </div>
 
-        <!-- Trạng thái -->
         <div class="col-md-3">
             <label class="form-label">Trạng thái</label>
             <select class="form-select" th:field="*{status}">
@@ -95,31 +100,45 @@
             </select>
         </div>
 
-        <!-- SĐT -->
         <div class="col-md-3">
             <label class="form-label">SĐT</label>
             <input type="text" class="form-control" th:field="*{phone}">
         </div>
 
-        <!-- Email -->
         <div class="col-md-6">
             <label class="form-label">Email</label>
             <input type="email" class="form-control" th:field="*{email}">
         </div>
 
-        <!-- Ghi chú -->
         <div class="col-12">
             <label class="form-label">Ghi chú</label>
             <textarea class="form-control" rows="3" th:field="*{note}"></textarea>
         </div>
 
-        <!-- Nút -->
         <div class="col-12 mt-3">
             <button type="submit" class="btn btn-primary">Lưu</button>
-            <a href="/coaches" class="btn btn-secondary ms-2">Quay lại</a>
+            <a th:href="@{/admin/coaches}" class="btn btn-secondary ms-2">Quay lại</a>
         </div>
 
     </form>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const el = document.getElementById('licenseSelect');
+            if (el) {
+                new Choices(el, {
+                    removeItemButton: true,
+                    placeholder: true,
+                    placeholderValue: 'Chọn chứng chỉ...',
+                    searchEnabled: true,
+                    shouldSort: false
+                });
+            }
+        });
+    </script>
 
 </th:block>
 </html>
