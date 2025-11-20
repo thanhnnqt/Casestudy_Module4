@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f7fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .result-box {
+            max-width: 500px;
+            margin: 60px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 90px;
+            height: 90px;
+            margin-bottom: 20px;
+        }
+
+        .message-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-back {
+            margin-top: 25px;
+            padding: 10px 22px;
+            font-size: 1rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="result-box">
+    <!-- Icon giống VNPAY -->
+    <img class="success-icon"
+         src="https://cdn-icons-png.flaticon.com/512/845/845646.png"
+         alt="success">
+
+    <p class="message-text" th:text="${mess}">Thanh toán thành công!</p>
+
+    <a href="/" class="btn btn-primary btn-back">Quay về trang chủ</a>
+</div>
+
+</body>
+</html>
