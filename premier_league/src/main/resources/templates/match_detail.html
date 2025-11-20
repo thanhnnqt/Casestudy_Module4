@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Chi tiết trận đấu (Realtime)</title>
 
     <!-- ẨN BODY CHO TỚI KHI LOAD XONG -->
     <style>
-        body { visibility: hidden; }
+        body {
+            visibility: hidden;
+        }
     </style>
     <script>
         window.addEventListener("load", () => {
@@ -18,7 +20,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { primary:"#38003c", secondary:"#00ff85" } } }
+            theme: {extend: {colors: {primary: "#38003c", secondary: "#00ff85"}}}
         }
     </script>
 
@@ -35,7 +37,9 @@
             text-align: center;
         }
 
-        .tab-btn.active { color: #38003c; }
+        .tab-btn.active {
+            color: #38003c;
+        }
 
         #tabHighlight {
             position: absolute;
@@ -59,8 +63,8 @@
 
         #eventsList li {
             min-height: 56px;
-            display:flex;
-            align-items:center;
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
 
@@ -68,14 +72,15 @@
             position: relative;
             padding-bottom: 56.25%;
             height: 0;
-            overflow:hidden;
-            border-radius:.5rem;
+            overflow: hidden;
+            border-radius: .5rem;
         }
+
         .video-embed iframe, .video-embed img {
-            position:absolute;
-            inset:0;
-            width:100%;
-            height:100%;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
         }
     </style>
 
@@ -143,10 +148,12 @@
         <div id="tabContainer" class="flex border-b relative">
 
             <button id="btnEvents" data-tab="eventsTab"
-                    class="tab-btn active">Diễn biến chính</button>
+                    class="tab-btn active">Diễn biến chính
+            </button>
 
             <button id="btnStats" data-tab="statsTab"
-                    class="tab-btn">Thống kê</button>
+                    class="tab-btn">Thống kê
+            </button>
 
             <div id="tabHighlight"></div>
         </div>
@@ -158,17 +165,22 @@
     </section>
 
     <!-- STATS -->
+    <!-- STATS -->
     <section id="statsTab" class="tab-panel hidden">
-        <div class="grid grid-cols-3 gap-10 text-lg font-semibold items-start">
 
-            <!-- HOME STATS -->
-            <ul id="homeStats" class="text-center text-primary space-y-5">
-                <!-- Home numbers will be rendered here (10 items) -->
+        <div class="text-center font-bold text-primary text-xl mb-6">
+            THỐNG KÊ ĐỘI TUYỂN
+        </div>
+
+        <div class="grid grid-cols-3 gap-8 text-lg font-semibold items-center">
+
+            <!-- LEFT: HOME -->
+            <ul id="homeStats" class="space-y-5 text-primary text-center">
+                <!-- Filled by JS -->
             </ul>
 
-            <!-- LABELS -->
-            <ul class="text-center text-gray-700 space-y-5">
-                <li class="font-bold text-primary">THỐNG KÊ ĐỘI TUYỂN</li>
+            <!-- CENTER LABELS -->
+            <ul class="space-y-5 text-gray-700 text-center">
                 <li>Số lần sút</li>
                 <li>Sút trúng đích</li>
                 <li>Kiểm soát bóng</li>
@@ -181,13 +193,15 @@
                 <li>Phạt góc</li>
             </ul>
 
-            <!-- AWAY STATS -->
-            <ul id="awayStats" class="text-center text-red-600 space-y-5">
-                <!-- Away numbers will be rendered here (10 items) -->
+            <!-- RIGHT: AWAY -->
+            <ul id="awayStats" class="space-y-5 text-red-600 text-center">
+                <!-- Filled by JS -->
             </ul>
 
         </div>
+
     </section>
+
 
     <!-- STADIUM -->
     <section class="mt-4 text-sm text-gray-600">
@@ -207,7 +221,7 @@
 
         /* ================= TAB (Fix giật 100%) ================ */
         const btnEvents = document.getElementById("btnEvents");
-        const btnStats  = document.getElementById("btnStats");
+        const btnStats = document.getElementById("btnStats");
         const highlight = document.getElementById("tabHighlight");
 
         const tabs = {
@@ -237,7 +251,7 @@
         }
 
         btnEvents.onclick = () => activate(btnEvents);
-        btnStats.onclick  = () => activate(btnStats);
+        btnStats.onclick = () => activate(btnStats);
 
         window.requestAnimationFrame(() => {
             setTimeout(() => moveHighlight(btnEvents), 200);
@@ -247,8 +261,13 @@
 
         /* ================= LOAD DATA ================= */
         async function safeJson(url) {
-            try { let r = await fetch(url); if (!r.ok) return null; return await r.json(); }
-            catch { return null; }
+            try {
+                let r = await fetch(url);
+                if (!r.ok) return null;
+                return await r.json();
+            } catch {
+                return null;
+            }
         }
 
         const matchId = document.getElementById("matchRoot").dataset.matchId;
@@ -283,37 +302,37 @@
 
         /* ================= RENDER STATS ================= */
         function updateStatsUI(s) {
-            // đảm bảo luôn có 10 items cho mỗi team để giữ hàng ngang
             homeStats.innerHTML = `
-                <li>${s.shotsHome ?? 0}</li>
-                <li>${s.shotsOnTargetHome ?? 0}</li>
-                <li>${s.possessionHome ? s.possessionHome + '%' : '0%'}</li>
-                <li>${s.passesHome ?? 0}</li>
-                <li>${s.accuracyHome ? s.accuracyHome + '%' : '0%'}</li>
-                <li>${s.foulsHome ?? 0}</li>
-                <li>${s.yellowCardsHome ?? 0}</li>
-                <li>${s.redCardsHome ?? 0}</li>
-                <li>${s.offsidesHome ?? 0}</li>
-                <li>${s.cornersHome ?? 0}</li>
-            `;
+        <li>${s.shotsHome ?? 0}</li>
+        <li>${s.shotsOnTargetHome ?? 0}</li>
+        <li>${(s.possessionHome ?? 0) + '%'}</li>
+        <li>${s.passesHome ?? 0}</li>
+        <li>${(s.accuracyHome ?? 0) + '%'}</li>
+        <li>${s.foulsHome ?? 0}</li>
+        <li class="text-yellow-500 font-bold">${s.yellowCardsHome ?? 0}</li>
+        <li class="text-red-600 font-bold">${s.redCardsHome ?? 0}</li>
+        <li>${s.offsidesHome ?? 0}</li>
+        <li>${s.cornersHome ?? 0}</li>
+    `;
 
             awayStats.innerHTML = `
-                <li>${s.shotsAway ?? 0}</li>
-                <li>${s.shotsOnTargetAway ?? 0}</li>
-                <li>${s.possessionAway ? s.possessionAway + '%' : '0%'}</li>
-                <li>${s.passesAway ?? 0}</li>
-                <li>${s.accuracyAway ? s.accuracyAway + '%' : '0%'}</li>
-                <li>${s.foulsAway ?? 0}</li>
-                <li>${s.yellowCardsAway ?? 0}</li>
-                <li>${s.redCardsAway ?? 0}</li>
-                <li>${s.offsidesAway ?? 0}</li>
-                <li>${s.cornersAway ?? 0}</li>
-            `;
+        <li>${s.shotsAway ?? 0}</li>
+        <li>${s.shotsOnTargetAway ?? 0}</li>
+        <li>${(s.possessionAway ?? 0) + '%'}</li>
+        <li>${s.passesAway ?? 0}</li>
+        <li>${(s.accuracyAway ?? 0) + '%'}</li>
+        <li>${s.foulsAway ?? 0}</li>
+        <li class="text-yellow-500 font-bold">${s.yellowCardsAway ?? 0}</li>
+        <li class="text-red-600 font-bold">${s.redCardsAway ?? 0}</li>
+        <li>${s.offsidesAway ?? 0}</li>
+        <li>${s.cornersAway ?? 0}</li>
+    `;
         }
+
 
         /* ================= RENDER EVENTS ================= */
         function renderEvents(list) {
-            list.sort((a,b)=> (a.minute??0)-(b.minute??0));
+            list.sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
             eventsList.innerHTML = "";
             goalsList.innerHTML = "";
             list.forEach(e => appendEvent(e));
@@ -321,13 +340,13 @@
 
         function appendEvent(ev) {
             const icon = {
-                GOAL:"⚽", YELLOW_CARD:"🟨", RED_CARD:"🟥", PENALTY:"🅿️"
+                GOAL: "⚽", YELLOW_CARD: "🟨", RED_CARD: "🟥", PENALTY: "🅿️"
             }[ev.type] ?? "•";
 
             const li = document.createElement("li");
-            const time = ev.minute!=null ? ev.minute+"'" : "";
+            const time = ev.minute != null ? ev.minute + "'" : "";
 
-            li.className="bg-gray-50 p-3 rounded-xl shadow-sm border flex items-center gap-3";
+            li.className = "bg-gray-50 p-3 rounded-xl shadow-sm border flex items-center gap-3";
             li.innerHTML = `
                 <span class="w-8 text-center">${icon}</span>
                 <div>
