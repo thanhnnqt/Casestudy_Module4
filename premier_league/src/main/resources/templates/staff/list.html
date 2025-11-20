@@ -3,166 +3,64 @@
       th:replace="layout :: layout('Danh sách nhân viên', 'staffs', ~{::content})">
 
 <th:block th:fragment="content">
-
   <style>
-    .page-title {
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .staff-card {
-      border-radius: 15px;
-      overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .staff-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
-    }
-
-    .staff-avatar-wrapper {
-      display: block;
-      overflow: hidden;
-    }
-
-    .staff-avatar {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-
-    .staff-card:hover .staff-avatar {
-      transform: scale(1.03);
-    }
-
-    .staff-name {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
-
+    .staff-card { border-radius: 15px; transition: all 0.3s; }
+    .staff-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .staff-avatar { height: 220px; object-fit: cover; width: 100%; }
     .staff-position-title {
-      font-weight: 700;
-      margin-bottom: 10px;
-      border-left: 4px solid #0d6efd;
-      padding-left: 8px;
-      text-transform: uppercase;
-      font-size: 0.95rem;
-      color: #0d6efd;
-    }
-
-    .staff-role {
-      font-size: 0.9rem;
-      color: #6c757d;
-    }
-
-    .staff-meta {
-      font-size: 0.85rem;
-    }
-
-    .badge-status {
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: 50px;
-    }
-
-    .empty-text {
-      text-align: center;
-      color: #999;
-      font-style: italic;
-      margin-top: 40px;
-    }
-
-    .position-block {
-      margin-bottom: 32px;
+      font-weight: 700; margin-bottom: 15px; border-left: 5px solid #0d6efd;
+      padding-left: 10px; text-transform: uppercase; color: #0d6efd; font-size: 1.1rem;
     }
   </style>
 
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="page-title mb-0">Danh sách nhân viên</h2>
-    <a href="/staffs/create" class="btn btn-primary">
-      + Thêm nhân viên
+    <h2 class="fw-bold text-uppercase">Danh sách nhân viên</h2>
+    <a href="/admin/staffs/create" class="btn btn-primary shadow-sm">
+      + Thêm mới
     </a>
   </div>
 
-  <!-- Thông báo flash -->
-  <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-
-  <!-- Nếu không có nhân viên -->
-  <div th:if="${#maps.isEmpty(staffByPosition)}" class="empty-text">
-    Chưa có nhân viên nào trong danh sách.
+  <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${message}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
 
-  <!-- Group theo chức vụ: mỗi position = 1 block / 1 hàng -->
-  <div th:each="entry : ${staffByPosition}" class="position-block">
+  <div th:if="${#maps.isEmpty(staffByPosition)}" class="text-center text-muted my-5">
+    <h4>Chưa có dữ liệu nhân viên.</h4>
+  </div>
 
-    <!-- Tiêu đề chức vụ (Head Coach, Assistant Coach, ...) -->
-    <div class="staff-position-title" th:text="${entry.key}">Head Coach</div>
+  <div th:each="entry : ${staffByPosition}" class="mb-5">
 
-    <!-- Hàng các thẻ nhân viên cùng chức vụ -->
+    <div class="staff-position-title" th:text="${entry.key}">Position Name</div>
+
     <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
       <div class="col" th:each="staff : ${entry.value}">
-        <div class="card staff-card h-100 shadow-sm">
+        <div class="card staff-card h-100 border-0 shadow-sm">
 
-          <!-- Avatar clickable → /staffs/{id} -->
-          <a th:href="@{'/staffs/' + ${staff.id}}" class="staff-avatar-wrapper">
-            <img class="staff-avatar"
-                 th:src="${staff.avatarUrl}"
-                 alt="avatar"
+          <a th:href="@{'/admin/staffs/' + ${staff.id}}">
+            <img class="staff-avatar card-img-top" th:src="${staff.avatarUrl}"
                  onerror="this.src='https://via.placeholder.com/400x300?text=No+Image';">
           </a>
 
           <div class="card-body d-flex flex-column">
-            <div class="mb-2">
-              <div class="staff-name" th:text="${staff.fullName}"></div>
-              <div class="staff-role" th:text="${staff.role}"></div>
+            <h5 class="card-title fw-bold mb-1" th:text="${staff.fullName}"></h5>
+            <p class="text-muted small mb-2" th:text="${staff.role}"></p>
+
+            <div class="small mb-3">
+              <div><strong>Đội: </strong> <span th:text="${staff.team != null ? staff.team.name : '-'}"></span></div>
+              <div><strong>Q.Tịch: </strong> <span th:text="${staff.nationality}"></span></div>
             </div>
 
-            <div class="staff-meta mb-2">
-              <div>
-                <strong>Đội: </strong>
-                <span th:text="${staff.team != null ? staff.team.name : 'Chưa gán đội'}"></span>
-              </div>
-              <div>
-                <strong>Quốc tịch: </strong>
-                <span th:text="${staff.nationality}"></span>
-              </div>
-              <div th:if="${staff.dateOfBirth != null}">
-                <strong>Ngày sinh: </strong>
-                <span th:text="${staff.dateOfBirth}"></span>
-              </div>
-              <div th:if="${staff.joinDate != null}">
-                <strong>Ngày gia nhập: </strong>
-                <span th:text="${staff.joinDate}"></span>
-              </div>
-            </div>
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+                <span th:class="${staff.status == 'Active' ? 'badge bg-success' : 'badge bg-secondary'}"
+                      th:text="${staff.status}"></span>
 
-            <div class="staff-meta mt-auto">
-              <div>
-                <strong>SĐT: </strong>
-                <span th:text="${staff.phoneNumber}"></span>
-              </div>
-              <div>
-                <strong>Email: </strong>
-                <span th:text="${staff.email}"></span>
-              </div>
-              <div class="mt-2">
-                <span class="badge badge-status bg-success"
-                      th:if="${staff.status == 'Active'}"
-                      th:text="${staff.status}"></span>
-                <span class="badge badge-status bg-secondary"
-                      th:if="${staff.status != 'Active'}"
-                      th:text="${staff.status}"></span>
-              </div>
+              <a th:href="@{'/admin/staffs/' + ${staff.id}}" class="btn btn-sm btn-outline-primary">Xem</a>
             </div>
           </div>
-
         </div>
       </div>
     </div>
-
   </div>
 
 </th:block>

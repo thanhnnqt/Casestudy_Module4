@@ -1,7 +1,9 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
+import com.example.premier_league.dto.PlayerShortDto;
 import com.example.premier_league.entity.Player;
 import com.example.premier_league.repository.IPlayerRepository;
+import com.example.premier_league.service.IPlayerService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -64,4 +66,23 @@ public class PlayerService implements IPlayerService {
             playerRepository.deleteById(id);
         }
     }
+
+
+    @Override
+    public List<PlayerShortDto> getPlayersByTeam(Long teamId) {
+        List<Player> players = playerRepository.findByTeamId(teamId);
+
+        return players.stream()
+                .map(p -> new PlayerShortDto(
+                        p.getId(),
+                        p.getName(),
+                        p.getPosition(),
+                        p.getAvatar(),
+                        p.getSeasonYellowCards(),         // Thẻ vàng mùa giải
+                        p.getSuspensionMatchesRemaining() // Số trận treo giò
+                ))
+                .toList();
+    }
 }
+
+

@@ -23,29 +23,29 @@ public class RankingsService implements IRankingsService {
     @Override
     @Transactional
     public void applyMatchResult(Match match) {
-        Team home = teamRepository.findById(match.getHomeTeam().getId())
-                .orElseThrow(() -> new RuntimeException("Home team not found"));
 
-        Team away = teamRepository.findById(match.getAwayTeam().getId())
-                .orElseThrow(() -> new RuntimeException("Away team not found"));
+        Team home = match.getHomeTeam();
+        Team away = match.getAwayTeam();
 
-        int homeGoals = match.getHomeScore() == null ? 0 : match.getHomeScore();
-        int awayGoals = match.getAwayScore() == null ? 0 : match.getAwayScore();
+        int hs = match.getHomeScore();
+        int as = match.getAwayScore();
 
-        home.setGoalsFor(home.getGoalsFor() + homeGoals);
-        home.setGoalsAgainst(home.getGoalsAgainst() + awayGoals);
+        // goals
+        home.setGoalsFor(home.getGoalsFor() + hs);
+        home.setGoalsAgainst(home.getGoalsAgainst() + as);
 
-        away.setGoalsFor(away.getGoalsFor() + awayGoals);
-        away.setGoalsAgainst(away.getGoalsAgainst() + homeGoals);
+        away.setGoalsFor(away.getGoalsFor() + as);
+        away.setGoalsAgainst(away.getGoalsAgainst() + hs);
 
         home.setGoalDifference(home.getGoalsFor() - home.getGoalsAgainst());
         away.setGoalDifference(away.getGoalsFor() - away.getGoalsAgainst());
 
-        if (homeGoals > awayGoals) {
+        // win/draw/loss
+        if (hs > as) {
             home.setWinCount(home.getWinCount() + 1);
             away.setLoseCount(away.getLoseCount() + 1);
             home.setPoints(home.getPoints() + 3);
-        } else if (homeGoals < awayGoals) {
+        } else if (hs < as) {
             away.setWinCount(away.getWinCount() + 1);
             home.setLoseCount(home.getLoseCount() + 1);
             away.setPoints(away.getPoints() + 3);

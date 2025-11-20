@@ -27,7 +27,7 @@
 
     <div th:if="${error}" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded" th:text="${error}"></div>
 
-    <form th:action="@{/owners/save}" th:object="${ownerDto}" method="post" class="space-y-6">
+    <form th:action="@{/admin/owners/save}" th:object="${ownerDto}" method="post" class="space-y-6">
       <input type="hidden" th:field="*{id}">
 
       <div>
@@ -88,7 +88,7 @@
         <button type="submit" class="flex-1 bg-primary hover:bg-[#500055] text-white font-bold py-3 rounded-lg shadow-md transition-colors">
           Lưu Thông Tin
         </button>
-        <a th:href="@{/owners}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg shadow-sm text-center transition-colors">
+        <a th:href="@{/admin/owners}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg shadow-sm text-center transition-colors">
           Hủy
         </a>
       </div>

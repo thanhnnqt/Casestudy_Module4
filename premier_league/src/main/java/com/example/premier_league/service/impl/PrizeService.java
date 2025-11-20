@@ -1,7 +1,8 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
 import com.example.premier_league.entity.Prize;
 import com.example.premier_league.repository.IPrizeRepository;
+import com.example.premier_league.service.IPrizeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

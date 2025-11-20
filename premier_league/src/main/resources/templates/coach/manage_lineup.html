@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Quản lý đội hình - <span th:text="${teamName}"></span></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         body {
             background-color: #f4f7f6;
@@ -208,7 +211,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h2 class_ ="mb-0">Đăng ký đội hình: <span class="text-primary" th:text="${teamName}"></span></h2>
+            <h2 class="mb-0">SƠ ĐỒ CHIẾN THUẬT: <span class="text-primary" th:text="${teamName}"></span></h2>
             <p class="fs-5 text-muted"
                th:text="'Trận: ' + ${match.homeTeam.name} + ' vs ' + ${match.awayTeam.name}">
                 Trận đấu
@@ -227,7 +230,7 @@
     </div>
 
     <form id="lineup-form"
-          th:action="@{/coach/team/{teamId}/match/{matchId}/lineup/save(teamId=${teamId}, matchId=${match.id})}"
+          th:action="@{/coach/team/{teamId}/match/{matchId}/tactics/save(teamId=${teamId}, matchId=${match.id})}"
           method="post">
 
         <div class="lineup-container">
@@ -295,7 +298,7 @@
         <div class="mt-4 d-flex justify-content-end gap-2">
             <a th:href="@{/coach/team/{teamId}/schedule(teamId=${teamId})}" class="btn btn-secondary btn-lg">Quay lại</a>
             <button type="button" id="save-button" class="btn btn-primary btn-lg" disabled>
-                Lưu đội hình
+                Phải có đủ 11 cầu thủ chính
             </button>
         </div>
 
@@ -307,6 +310,8 @@
     const initialMainPlayers = /*[[${mainPlayers}]]*/ [];
     const initialSubPlayers = /*[[${subPlayers}]]*/ [];
     const allFormations = /*[[${formations}]]*/ {};
+    // Lấy URL của trang lịch thi đấu để redirect sau khi lưu thành công
+    const redirectAfterSave = /*[[ @{/coach/team/{teamId}/schedule(teamId=${teamId})} ]]*/ '/';
     /*]]>*/
 </script>
 
@@ -320,10 +325,9 @@
         const allDropZones = [...pitchSlots, ...benchSlots, playerPool];
         const saveButton = document.getElementById('save-button');
         const formationSelect = document.getElementById('formation-select');
+        const formEl = document.getElementById('lineup-form');
 
-        // === 2. CÁC HÀM TẠO/XÓA CẦU THỦ TRỰC QUAN ===
-
-        /** Tạo một element cầu thủ (dạng kéo thả được) */
+        // === 2. HÀM HỖ TRỢ tạo/xóa cầu thủ & drag events (giữ nguyên) ===
         function createPlayerElement(id, name, pos) {
             const el = document.createElement('div');
             el.className = 'player-item';
@@ -335,8 +339,6 @@
             addDragEventsToPlayer(el);
             return el;
         }
-
-        /** Tạo một element cầu thủ (khi đã nằm trên sân) */
         function createFilledSlotElement(id, name, pos, slotLabel) {
             const el = document.createElement('div');
             el.className = 'player-item';
@@ -348,8 +350,6 @@
             addDragEventsToPlayer(el);
             return el;
         }
-
-        /** Tạo một element cầu thủ (khi đã nằm trên ghế dự bị) */
         function createFilledBenchElement(id, name, pos) {
             const el = document.createElement('div');
             el.className = 'player-item';
@@ -361,258 +361,216 @@
             addDragEventsToPlayer(el);
             return el;
         }
-
-        /** Xóa cầu thủ khỏi vị trí (slot) và trả về trạng thái rỗng */
         function clearSlot(slot) {
+            if (!slot) return;
             if(slot.classList.contains('bench-slot')) {
                 slot.innerHTML = `<span class="slot-label">Dự bị ${slot.dataset.slotPos.split('_')[1]}</span>`;
             } else {
-                const formationName = document.querySelector('.formation:not([style*="display: none"])').dataset.formation;
+                const activeFormation = document.querySelector('.formation:not([style*="display: none"])');
+                if (!activeFormation) return;
+                const formationName = activeFormation.dataset.formation;
                 const slotKey = slot.dataset.slotPos;
-                const slotLabel = allFormations[formationName].positions[slotKey];
+                const slotLabel = allFormations[formationName].positions[slotKey] || '';
                 slot.innerHTML = `<span class="slot-label">${slotLabel}</span>`;
             }
             slot.classList.remove('filled');
         }
 
-        // === 3. LOGIC KÉO THẢ (DRAG & DROP) ===
-
-        /** Gắn sự kiện kéo cho 1 cầu thủ */
+        // === 3. Drag & Drop ===
         function addDragEventsToPlayer(player) {
             player.addEventListener('dragstart', (e) => {
                 draggedItem = e.target;
                 setTimeout(() => e.target.classList.add('dragging'), 0);
             });
             player.addEventListener('dragend', () => {
-                if (draggedItem) { // Kiểm tra xem draggedItem có còn tồn tại không
-                    draggedItem.classList.remove('dragging');
-                }
+                if (draggedItem) { draggedItem.classList.remove('dragging'); }
                 draggedItem = null;
             });
         }
-
-        // Gắn sự kiện cho các cầu thủ có sẵn
         document.querySelectorAll('.player-item').forEach(addDragEventsToPlayer);
 
-        // Gắn sự kiện cho các khu vực thả
         allDropZones.forEach(zone => {
             zone.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                // Kiểm tra logic thả
-                if (canDrop(draggedItem, zone)) {
-                    zone.classList.add('drag-over');
-                }
+                if (canDrop(draggedItem, zone)) zone.classList.add('drag-over');
             });
-            zone.addEventListener('dragleave', () => {
-                zone.classList.remove('drag-over');
-            });
+            zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
             zone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 zone.classList.remove('drag-over');
-
                 if (!canDrop(draggedItem, zone)) return;
-
                 const data = {
                     id: draggedItem.dataset.playerId,
                     name: draggedItem.dataset.playerName,
                     pos: draggedItem.dataset.pos
                 };
-
-                // 1. Nếu cầu thủ đang được kéo từ 1 slot, xóa slot cũ
                 const originalSlot = draggedItem.closest('.player-slot, .bench-slot');
-                if (originalSlot) {
-                    clearSlot(originalSlot);
-                } else {
-                    draggedItem.remove(); // Xóa khỏi danh sách bên trái
-                }
+                if (originalSlot) clearSlot(originalSlot);
+                else draggedItem.remove();
 
-                // 2. Thả vào đâu?
-                if (zone.id === 'player-list-pool') {
-                    // Thả về danh sách
+                if (zone.id === 'available-players') {
                     zone.appendChild(createPlayerElement(data.id, data.name, data.pos));
-
                 } else if (zone.classList.contains('player-slot')) {
-                    // Thả vào sân
-                    const slotLabel = zone.querySelector('.slot-label').innerText;
+                    const slotLabel = zone.querySelector('.slot-label') ? zone.querySelector('.slot-label').innerText : '';
                     zone.innerHTML = '';
                     zone.appendChild(createFilledSlotElement(data.id, data.name, data.pos, slotLabel));
                     zone.classList.add('filled');
-
                 } else if (zone.classList.contains('bench-slot')) {
-                    // Thả vào ghế dự bị
                     zone.innerHTML = '';
                     zone.appendChild(createFilledBenchElement(data.id, data.name, data.pos));
                     zone.classList.add('filled');
                 }
-
-                // Cập nhật trạng thái
                 updateAllCounts();
             });
         });
 
-        /** Kiểm tra xem có được phép thả không */
         function canDrop(item, zone) {
             if (!item) return false;
-
-            // 1. Không thể thả vào vị trí đã có cầu thủ
             if (zone.classList.contains('filled')) return false;
-
-            // 2. Kiểm tra giới hạn ghế dự bị (9 người)
             if (zone.classList.contains('bench-slot')) {
                 const filledBenchSlots = document.querySelectorAll('.bench-slot.filled').length;
-                if (filledBenchSlots >= 9) {
-                    // Nếu kéo từ sân/pool -> bench (quá 9) -> cấm
-                    if (!item.closest('.bench-slot')) {
-                        return false;
-                    }
-                }
+                if (filledBenchSlots >= 9 && !item.closest('.bench-slot')) return false;
             }
-
-            // 3. Kiểm tra giới hạn sân (11 người)
             if (zone.classList.contains('player-slot')) {
                 const filledPitchSlots = document.querySelectorAll('.player-slot.filled').length;
                 const activeFormation = document.querySelector('.formation:not([style*="display: none"])');
-                if (activeFormation) { // Thêm kiểm tra null
-                    const totalSlotsInFormation = activeFormation.querySelectorAll('.player-slot').length; // Thường là 11
-
-                    if (filledPitchSlots >= totalSlotsInFormation) {
-                        // Nếu kéo từ bench/pool -> pitch (quá 11) -> cấm
-                        if (!item.closest('.player-slot')) {
-                            return false;
-                        }
-                    }
+                if (activeFormation) {
+                    const totalSlotsInFormation = activeFormation.querySelectorAll('.player-slot').length;
+                    if (filledPitchSlots >= totalSlotsInFormation && !item.closest('.player-slot')) return false;
                 }
             }
             return true;
         }
 
-        // === 4. LOGIC ĐỔI SƠ ĐỒ ===
+        // === 4. Change formation ===
         formationSelect.addEventListener('change', (e) => {
             const newFormationName = e.target.value;
-
-            // Ẩn tất cả sơ đồ
             document.querySelectorAll('.formation').forEach(f => f.style.display = 'none');
-
-            // Hiện sơ đồ được chọn
             const newFormationEl = document.getElementById('formation-' + newFormationName);
-            newFormationEl.style.display = 'block';
-
-            // Cập nhật lại nhãn cho các cầu thủ đang trên sân
+            if (newFormationEl) newFormationEl.style.display = 'block';
             newFormationEl.querySelectorAll('.player-slot.filled').forEach(slot => {
                 const slotKey = slot.dataset.slotPos;
                 const slotLabel = allFormations[newFormationName].positions[slotKey];
-                slot.querySelector('.slot-label').innerText = slotLabel;
+                const labelSpan = slot.querySelector('.slot-label');
+                if (labelSpan) labelSpan.innerText = slotLabel;
             });
         });
 
-        // === 5. LOGIC FILTER VỊ TRÍ ===
+        // === 5. Filter vị trí ===
         document.getElementById('pos-filter').addEventListener('click', (e) => {
             e.preventDefault();
             if (e.target.tagName !== 'A') return;
-
-            // Bỏ active cũ
             document.querySelectorAll('#pos-filter .nav-link').forEach(a => a.classList.remove('active'));
-            // Set active mới
             e.target.classList.add('active');
-
             const posFilter = e.target.dataset.pos;
-
-            // Lọc
             document.querySelectorAll('#available-players .player-item').forEach(playerEl => {
-                if (posFilter === 'ALL' || playerEl.dataset.pos === posFilter) {
-                    playerEl.style.display = 'flex';
-                } else {
-                    playerEl.style.display = 'none';
-                }
+                if (posFilter === 'ALL' || playerEl.dataset.pos === posFilter) playerEl.style.display = 'flex';
+                else playerEl.style.display = 'none';
             });
         });
 
-        // === 6. LOGIC VALIDATE VÀ SUBMIT ===
-
-        /** Cập nhật số lượng + kiểm tra nút Save */
+        // === 6. Validate & Submit (AJAX) ===
         function updateAllCounts() {
-            // Cầu thủ có sẵn
             const availableCount = document.querySelectorAll('#available-players .player-item').length;
             document.getElementById('available-count').innerText = availableCount;
-
-            // Cầu thủ trên sân (chính)
-            const mainCount = document.querySelectorAll('.player-slot.filled').length;
-
-            // Dòng gây lỗi đã bị xóa
-            // document.getElementById('main-count').innerText = mainCount;
-
-            // Cầu thủ dự bị
-            const subCount = document.querySelectorAll('.bench-slot.filled').length;
+            const mainCount = document.querySelectorAll('.player-slot.filled .player-item').length;
+            const subCount = document.querySelectorAll('.bench-slot.filled .player-item').length;
             document.getElementById('bench-count').innerText = subCount;
 
-            // Validate nút Save
-            if (mainCount === 11) {
+            // Enable only when mainCount === 11 AND at least 1 sub
+            if (mainCount === 11 && subCount >= 1) {
                 saveButton.disabled = false;
                 saveButton.innerText = `Lưu đội hình (${mainCount} chính, ${subCount} dự bị)`;
             } else {
                 saveButton.disabled = true;
-                saveButton.innerText = `Phải có đủ 11 cầu thủ chính`;
+                if (mainCount !== 11) saveButton.innerText = 'Phải có đủ 11 cầu thủ chính';
+                else saveButton.innerText = 'Cần ít nhất 1 cầu thủ dự bị';
             }
         }
 
-        /** Nút Save */
-        saveButton.addEventListener('click', () => {
-            const form = document.getElementById('lineup-form');
-            const hiddenInputs = document.getElementById('hidden-inputs');
-            hiddenInputs.innerHTML = ''; // Xóa input cũ
+        // AJAX submit handler
+        saveButton.addEventListener('click', async (e) => {
+            e.preventDefault(); // Chặn submit mặc định
 
-            // Lấy 11 cầu thủ chính
+            // double-check
             const mainPlayers = document.querySelectorAll('.player-slot.filled .player-item');
+            const subPlayers = document.querySelectorAll('.bench-slot.filled .player-item');
+
             if (mainPlayers.length !== 11) {
-                alert('Đội hình chính phải có đúng 11 cầu thủ!');
+                Swal.fire({ icon: 'error', title: 'Đội hình không hợp lệ', text: 'Đội hình chính phải có đúng 11 cầu thủ.'});
                 return;
             }
-            mainPlayers.forEach(p => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'mainPlayerIds';
-                input.value = p.dataset.playerId;
-                hiddenInputs.appendChild(input);
+            if (subPlayers.length < 1) {
+                Swal.fire({ icon: 'error', title: 'Thiếu dự bị', text: 'Phải có tối thiểu 1 cầu thủ dự bị.'});
+                return;
+            }
+
+            // Build FormData same structure as hidden inputs would
+            const fd = new FormData();
+            mainPlayers.forEach(p => fd.append('mainPlayerIds', p.dataset.playerId));
+            subPlayers.forEach(p => fd.append('subPlayerIds', p.dataset.playerId));
+
+            // Show loading modal
+            Swal.fire({
+                title: 'Đang lưu đội hình...',
+                html: 'Vui lòng chờ trong giây lát.',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
             });
 
-            // Lấy cầu thủ dự bị (tối đa 9)
-            const subPlayers = document.querySelectorAll('.bench-slot.filled .player-item');
-            subPlayers.forEach(p => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'subPlayerIds';
-                input.value = p.dataset.playerId;
-                hiddenInputs.appendChild(input);
-            });
+            try {
+                // Gửi request lên server
+                const response = await fetch(formEl.getAttribute('action'), {
+                    method: formEl.getAttribute('method') || 'post',
+                    body: fd
+                });
 
-            // Submit
-            form.submit();
+                // Xử lý kết quả
+                if (response.ok) {
+                    // Hiện thông báo thành công, sau đó redirect
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công',
+                        text: 'Đội hình đã được lưu!',
+                        confirmButtonText: 'Về lịch thi đấu'
+                    }).then((result) => {
+                        // Dù bấm nút hay đóng modal đều redirect
+                        if (redirectAfterSave) {
+                            window.location.href = redirectAfterSave;
+                        } else {
+                            window.location.reload();
+                        }
+                    });
+                } else {
+                    // Xử lý lỗi từ server
+                    const text = await response.text();
+                    Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lưu thất bại: ' + text });
+                }
+
+            } catch (err) {
+                console.error('Save error', err);
+                Swal.fire({ icon: 'error', title: 'Lỗi kết nối', text: 'Không thể kết nối tới máy chủ. Vui lòng thử lại.' });
+            }
         });
 
-        // === 7. KHỞI TẠO TRẠNG THÁI ===
-
-        /** Tải đội hình đã lưu (nếu có) */
+        // === 7. Khởi tạo trạng thái từ dữ liệu ban đầu ===
         function loadInitialLineup() {
-            // 1. Tải đội hình chính
             initialMainPlayers.forEach(player => {
                 const playerEl = document.querySelector(`#available-players .player-item[data-player-id="${player.id}"]`);
-                if (playerEl) playerEl.remove(); // Xóa khỏi danh sách chờ
-
-                // Tìm slot trống
+                if (playerEl) playerEl.remove();
                 const emptySlot = document.querySelector('.player-slot:not(.filled)');
                 if (emptySlot) {
-                    const slotLabel = emptySlot.querySelector('.slot-label').innerText;
+                    const slotLabelEl = emptySlot.querySelector('.slot-label');
+                    const slotLabel = slotLabelEl ? slotLabelEl.innerText : '';
                     emptySlot.innerHTML = '';
                     emptySlot.appendChild(createFilledSlotElement(player.id, player.name, player.position, slotLabel));
                     emptySlot.classList.add('filled');
                 }
             });
 
-            // 2. Tải đội hình dự bị
             initialSubPlayers.forEach(player => {
                 const playerEl = document.querySelector(`#available-players .player-item[data-player-id="${player.id}"]`);
-                if (playerEl) playerEl.remove(); // Xóa khỏi danh sách chờ
-
+                if (playerEl) playerEl.remove();
                 const emptyBenchSlot = document.querySelector('.bench-slot:not(.filled)');
                 if (emptyBenchSlot) {
                     emptyBenchSlot.innerHTML = '';
@@ -623,6 +581,21 @@
 
             updateAllCounts();
         }
+
+        // Observe DOM changes to re-attach drag listeners if needed
+        const pool = document.getElementById('available-players');
+        const observer = new MutationObserver(() => {
+            document.querySelectorAll('.player-item').forEach(el => {
+                if (!el.classList.contains('dragging') && !el.hasAttribute('data-listener')) {
+                    addDragEventsToPlayer(el);
+                    el.setAttribute('data-listener', '1');
+                }
+            });
+            updateAllCounts();
+        });
+        observer.observe(pool, { childList: true, subtree: true });
+        observer.observe(document.querySelector('.pitch-area'), { childList: true, subtree: true });
+        observer.observe(document.querySelector('.bench-slots'), { childList: true, subtree: true });
 
         loadInitialLineup();
     });

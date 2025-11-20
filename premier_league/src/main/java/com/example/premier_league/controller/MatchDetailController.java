@@ -1,5 +1,6 @@
 package com.example.premier_league.controller;
 
+import com.example.premier_league.dto.MatchEventResponse;
 import com.example.premier_league.entity.Match;
 import com.example.premier_league.entity.MatchEvent;
 import com.example.premier_league.service.IMatchEventService;
@@ -28,7 +29,16 @@ public class MatchDetailController {
 
     @GetMapping("/{id}")
     public String viewMatch(@PathVariable Long id, Model model) {
+
+        Match match = matchService.findById(id);   // lấy match
+        model.addAttribute("match", match);        // gửi match sang view
+
+        List<MatchEventResponse> events = eventService.getEventsByMatch(id);
+        model.addAttribute("events", events);
+        // sự kiện trận đấu nếu cần
+
         model.addAttribute("matchId", id);
-        return "match_detail";   // file match_detail.html realtime
+        return "match_detail";
     }
+
 }

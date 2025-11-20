@@ -31,7 +31,7 @@
       <h1 class="text-3xl font-bold text-primary">Danh sách Giải Thưởng</h1>
       <p class="text-gray-600 mt-1">Quản lý và trao giải thưởng mùa giải</p>
     </div>
-    <a th:href="@{/prize/create}" class="bg-primary hover:bg-[#500055] text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all flex items-center gap-2">
+    <a th:href="@{/admin/prize/create}" class="bg-primary hover:bg-[#500055] text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all flex items-center gap-2">
       <i data-lucide="plus-circle" class="w-5 h-5"></i> Tạo Giải Thưởng
     </a>
   </div>
@@ -87,15 +87,29 @@
 
         <td class="p-4">
           <div class="flex justify-center gap-2">
-            <a th:href="@{'/prize/award/' + ${p.id}}" class="bg-secondary/20 hover:bg-secondary text-green-800 hover:text-white p-2 rounded-lg transition-colors" title="Trao giải">
+
+            <a th:if="${p.player == null and p.team == null}"
+               th:href="@{'/admin/prize/award/' + ${p.id}}"
+               class="bg-secondary/20 hover:bg-secondary text-green-800 hover:text-white p-2 rounded-lg transition-colors"
+               title="Trao giải">
               <i data-lucide="trophy" class="w-4 h-4"></i>
             </a>
 
-            <a th:href="@{'/prize/create'}" class="bg-blue-50 hover:bg-blue-500 text-blue-600 hover:text-white p-2 rounded-lg transition-colors" title="Sửa thông tin">
+            <a th:if="${p.player != null or p.team != null}"
+               th:href="@{'/admin/prize/revoke/' + ${p.id}}"
+               onclick="return confirm('Bạn có chắc chắn muốn thu hồi giải thưởng này?')"
+               class="bg-yellow-50 hover:bg-yellow-500 text-yellow-600 hover:text-white p-2 rounded-lg transition-colors"
+               title="Thu hồi giải">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </a>
+
+            <a th:href="@{'/admin/prize/edit/' + ${p.id}}"
+               class="bg-blue-50 hover:bg-blue-500 text-blue-600 hover:text-white p-2 rounded-lg transition-colors"
+               title="Sửa thông tin">
               <i data-lucide="edit-2" class="w-4 h-4"></i>
             </a>
 
-            <a th:href="@{'/prize/delete/' + ${p.id}}"
+            <a th:href="@{'/admin/prize/delete/' + ${p.id}}"
                onclick="return confirm('Bạn có chắc chắn muốn xóa giải thưởng này?')"
                class="bg-red-50 hover:bg-red-500 text-red-600 hover:text-white p-2 rounded-lg transition-colors" title="Xóa">
               <i data-lucide="trash-2" class="w-4 h-4"></i>

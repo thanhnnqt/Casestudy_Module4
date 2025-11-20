@@ -4,7 +4,6 @@ import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.Team;
 import com.example.premier_league.repository.IMatchScheduleRepository;
 import com.example.premier_league.repository.ITeamRepository;
-import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
@@ -26,8 +25,10 @@ public class MatchScheduleGenerator {
         this.teamRepository = teamRepository;
     }
 
-    @PostConstruct
-    public void generateSchedule() {
+    /**
+     * Tạo lịch thi đấu dựa trên ngày người dùng chọn
+     */
+    public void generateSchedule(LocalDate seasonStartDate) {
 
         if (matchScheduleRepository.count() > 0) {
             System.out.println("✔ Lịch thi đấu đã tồn tại — bỏ qua việc tạo mới.");
@@ -43,21 +44,20 @@ public class MatchScheduleGenerator {
             return;
         }
 
-        // Random thứ tự đội bóng
+        // KHÔNG RANDOM thứ tự đội nữa
         List<Team> teamList = new ArrayList<>(teams);
-        Collections.shuffle(teamList);
 
-        int totalRounds = teamList.size() - 1;  // 19 vòng mỗi lượt
-        int matchesPerRound = teamList.size() / 2; // = 10 trận/vòng
+        int totalRounds = teamList.size() - 1;   // 19 vòng
+        int matchesPerRound = teamList.size() / 2; // 10 trận/vòng
 
-        LocalDate startDate = nextWeekend(LocalDate.now());
+        // Lấy cuối tuần gần nhất từ ngày người dùng chọn
+        LocalDate startDate = nextWeekend(seasonStartDate);
+
         List<MatchSchedule> allMatches = new ArrayList<>();
-
 
         /* ====================== LƯỢT ĐI ======================= */
         for (int round = 0; round < totalRounds; round++) {
 
-            // Tạo giờ thứ 7 & chủ nhật cho mỗi vòng (KHÔNG TRỘN NHAU)
             List<LocalTime> saturdayTimes = generateMatchTimesSaturday();
             List<LocalTime> sundayTimes = generateMatchTimesSunday();
 
@@ -69,11 +69,9 @@ public class MatchScheduleGenerator {
                 MatchSchedule m = new MatchSchedule();
 
                 if (match < 6) {
-                    // Thứ 7 – 6 trận
                     m.setMatchDate(startDate.plusWeeks(round));
                     m.setMatchTime(saturdayTimes.get(match));
                 } else {
-                    // Chủ nhật – 4 trận
                     m.setMatchDate(startDate.plusWeeks(round).plusDays(1));
                     m.setMatchTime(sundayTimes.get(match - 6));
                 }
@@ -86,15 +84,14 @@ public class MatchScheduleGenerator {
                 allMatches.add(m);
             }
 
-            // Xoay bảng trừ đội đầu tiên
+            // xoay bảng
             teamList.add(1, teamList.remove(teamList.size() - 1));
         }
 
-
         /* ====================== LƯỢT VỀ ======================= */
 
-        List<Team> reverseList = new ArrayList<>(teamList);
-        Collections.shuffle(reverseList);
+        // KHÔNG RANDOM lượt về nữa
+        List<Team> reverseList = new ArrayList<>(teams);
 
         for (int round = 0; round < totalRounds; round++) {
 
@@ -131,8 +128,6 @@ public class MatchScheduleGenerator {
         System.out.println("🎉 Lịch thi đấu tạo thành công! Tổng số trận: " + allMatches.size());
     }
 
-
-
     /* =================== GIỜ THI ĐẤU THỨ 7 =================== */
     private List<LocalTime> generateMatchTimesSaturday() {
         List<LocalTime> times = new ArrayList<>();
@@ -148,10 +143,9 @@ public class MatchScheduleGenerator {
             times.add(t);
         }
 
-        Collections.shuffle(times); // random 6 trận
+        Collections.shuffle(times);
         return times;
     }
-
 
     /* =================== GIỜ THI ĐẤU CHỦ NHẬT =================== */
     private List<LocalTime> generateMatchTimesSunday() {
@@ -167,19 +161,20 @@ public class MatchScheduleGenerator {
             times.add(t);
         }
 
-        Collections.shuffle(times); // random 4 trận
+        Collections.shuffle(times);
         return times;
     }
 
-
-    /* ====================== TÌM CUỐI TUẦN GẦN NHẤT ======================= */
+    /* ============= LẤY CUỐI TUẦN GẦN NHẤT ============= */
     private LocalDate nextWeekend(LocalDate date) {
         DayOfWeek dow = date.getDayOfWeek();
 
         if (dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY)
             return date;
 
-        int daysUntilSaturday = DayOfWeek.SATURDAY.getValue() - dow.getValue();
+        int daysUntilSaturday =
+                DayOfWeek.SATURDAY.getValue() - dow.getValue();
+
         return date.plusDays(daysUntilSaturday);
     }
 }

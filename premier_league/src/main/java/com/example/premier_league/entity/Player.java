@@ -33,11 +33,12 @@ public class Player {
     @Column(name = "avatar", length = 500)
     private String avatar;
 
-    @Transient // Không lưu vào DB, chỉ dùng để hiển thị trên giao diện
     private int yellowCards = 0;
 
-    @Transient
     private int redCards = 0;
+
+    private int seasonYellowCards = 0;     // thẻ vàng tích lũy
+    private int suspensionMatchesRemaining = 0; // số trận còn bị treo giò
 
     // Hàm tính tuổi (Sửa lỗi Property 'age' not found)
     public int getAge() {

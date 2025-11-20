@@ -46,9 +46,17 @@ public class HomeController {
     // 1. Trang Home
     @GetMapping("/")
     public String home(
+            @RequestParam(value = "success", required = false) String success,
             @RequestParam(value = "round", required = false, defaultValue = "1") Integer round,
             Model model
     ) {
+        // Logic hiển thị thông báo Toast khi Login thành công
+        if (success != null) {
+            model.addAttribute("toastTitle", "Xin chào!");
+            model.addAttribute("toastMessage", "Đăng nhập thành công.");
+            model.addAttribute("toastType", "success");
+        }
+
         Pageable pageable = PageRequest.of(0, 100);
         Page<MatchSchedule> matchPage = matchScheduleService.getAllMatches(pageable);
 
@@ -166,10 +174,10 @@ public class HomeController {
     }
 
     // 10. Đăng nhập
-    @GetMapping("/login")
-    public String login() {
-        return "home/login";
-    }
+//    @GetMapping("/login")
+//    public String login() {
+//        return "home/login";
+//    }
 
     // 11. Chi tiết vòng đấu
     @GetMapping("/tournaments-detail")
@@ -192,4 +200,6 @@ public class HomeController {
 
         return "home/tournaments-detail";
     }
+
+
 }
