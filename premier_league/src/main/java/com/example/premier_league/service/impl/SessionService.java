@@ -23,4 +23,15 @@ public class SessionService implements ISessionService {
     public List<Session> findAllByStadium_Id(Integer stadiumId) {
         return sessionRepository.findAllByStadium_Id(stadiumId);
     }
+
+    @Override
+    public boolean save(Session session) {
+        return sessionRepository.save(session) != null;
+    }
+
+
+    @Override
+    public Session findByNameAndStadiumName(String name, String stadiumName) {
+        return sessionRepository.findByNameAndStadium_Name(name, stadiumName);
+    }
 }
