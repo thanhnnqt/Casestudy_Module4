@@ -4,6 +4,7 @@ import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
 import com.example.premier_league.service.IMatchScheduleService;
 import com.example.premier_league.service.ITeamService;
+import com.example.premier_league.util.MatchScheduleGenerator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,10 +21,12 @@ public class MatchScheduleController {
 
     private final IMatchScheduleService matchScheduleService;
     private final ITeamService teamService;
+    private final MatchScheduleGenerator generator;
 
-    public MatchScheduleController(IMatchScheduleService matchScheduleService, ITeamService teamService) {
+    public MatchScheduleController(IMatchScheduleService matchScheduleService, ITeamService teamService, MatchScheduleGenerator generator) {
         this.matchScheduleService = matchScheduleService;
         this.teamService = teamService;
+        this.generator = generator;
     }
 
     /* ================= LIST + SEARCH + PAGINATION ================= */
@@ -52,15 +55,12 @@ public class MatchScheduleController {
         if (team != null && !team.isEmpty()) {
             matchPage = matchScheduleService.searchByTeam(team, pageable);
             model.addAttribute("team", team);
-        }
-        else if (date != null) {
+        } else if (date != null) {
             matchPage = matchScheduleService.searchByDate(date, pageable);
             model.addAttribute("date", date);
-        }
-        else if (roundValue != null) {
+        } else if (roundValue != null) {
             matchPage = matchScheduleService.searchByRound(roundValue, pageable);
-        }
-        else {
+        } else {
             matchPage = matchScheduleService.getAllMatches(pageable);
         }
 
@@ -68,7 +68,7 @@ public class MatchScheduleController {
         int currentPage = page;
 
         int startPage = Math.max(0, currentPage - 1);     // 1 trang trước
-        int endPage   = Math.min(totalPages - 1, currentPage + 1); // 1 trang sau
+        int endPage = Math.min(totalPages - 1, currentPage + 1); // 1 trang sau
 
         model.addAttribute("matches", matchPage.getContent());
         model.addAttribute("currentPage", currentPage);
@@ -76,8 +76,7 @@ public class MatchScheduleController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("teamsList", teamService.findAll());
-
-
+        model.addAttribute("hasSchedule", matchScheduleService.hasSchedule());
         return "match/list";
     }
 
@@ -119,33 +118,52 @@ public class MatchScheduleController {
         return "match/reschedule";
     }
 
-//    @PostMapping("/matches/reschedule/save/{id}")
+    //    @PostMapping("/matches/reschedule/save/{id}")
 //    public String saveReschedule(@PathVariable Long id,
 //                                 @RequestParam LocalDate newDate,
 //                                 @RequestParam String newTime) {
 //        matchScheduleService.reschedule(id, newDate, newTime);
 //        return "redirect:/admin/matches";
 //    }
-@PostMapping("/matches/reschedule/save/{id}")
-public String saveReschedule(
-        @PathVariable Long id,
-        @RequestParam("newDate") String newDateStr,
-        @RequestParam("newTime") String newTime,
-        Model model) {
+    @PostMapping("/matches/reschedule/save/{id}")
+    public String saveReschedule(
+            @PathVariable Long id,
+            @RequestParam("newDate") String newDateStr,
+            @RequestParam("newTime") String newTime,
+            Model model) {
 
-    try {
-        LocalDate newDate = LocalDate.parse(newDateStr); // expects yyyy-MM-dd
-        matchScheduleService.reschedule(id, newDate, newTime);
-    } catch (DateTimeParseException e) {
-        model.addAttribute("match", matchScheduleService.findById(id));
-        model.addAttribute("error", "Định dạng ngày không hợp lệ");
-        return "match/reschedule";
-    } catch (IllegalArgumentException ex) {
-        model.addAttribute("match", matchScheduleService.findById(id));
-        model.addAttribute("error", ex.getMessage());
-        return "match/reschedule";
+        try {
+            LocalDate newDate = LocalDate.parse(newDateStr); // expects yyyy-MM-dd
+            matchScheduleService.reschedule(id, newDate, newTime);
+        } catch (DateTimeParseException e) {
+            model.addAttribute("match", matchScheduleService.findById(id));
+            model.addAttribute("error", "Định dạng ngày không hợp lệ");
+            return "match/reschedule";
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("match", matchScheduleService.findById(id));
+            model.addAttribute("error", ex.getMessage());
+            return "match/reschedule";
+        }
+
+        return "redirect:/admin/matches";
     }
 
-    return "redirect:/admin/matches";
-}
+    @GetMapping("/schedule/create")
+    public String showCreateForm(Model model) {
+        return "match/create";
+    }
+
+    @PostMapping("/schedule/create")
+    public String create(@RequestParam("startDate") String startDate, Model model) {
+
+        LocalDate date = LocalDate.parse(startDate);
+
+        if (date.isBefore(LocalDate.now())) {
+            model.addAttribute("error", "Ngày bắt đầu mùa giải không được nhỏ hơn ngày hiện tại!");
+            return "match/create";
+        }
+
+        generator.generateSchedule(date);
+        return "redirect:/admin/matches";
+    }
 }
