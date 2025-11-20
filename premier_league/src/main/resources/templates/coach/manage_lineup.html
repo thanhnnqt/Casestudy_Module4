@@ -41,7 +41,11 @@
             border: 1px solid #eee;
         }
         .player-item:hover {
-            background-color: #f0f0f0;
+            background-color: #2c0030 !important; /* Đổi nền sang màu tím rất đậm */
+            color: #00ff85 !important;           /* Đổi chữ sang màu xanh neon cho dễ đọc */
+            border-color: #00ff85 !important;    /* Viền sáng lên */
+            transform: scale(1.05);              /* Phóng to nhẹ tạo hiệu ứng */
+            z-index: 100;
         }
         .player-item[draggable="true"]:active {
             cursor: grabbing;
@@ -67,32 +71,100 @@
         .player-item[data-pos="MF"] .position { background: #0275d8; }
         .player-item[data-pos="FW"] .position { background: #d9534f; }
 
-        /* 2. SÂN BÓNG BÊN PHẢI */
+        /* --- 2. SÂN BÓNG BÊN PHẢI (VẼ BẰNG CSS) --- */
         .pitch-area {
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Football_field_with_metric_distances.svg/1024px-Football_field_with_metric_distances.svg.png');
-            background-size: cover;
-            background-position: center;
-            background-color: #538d32;
+            /* Nền cỏ xanh */
+            background-color: #438a38;
+            background-image: repeating-linear-gradient(to right, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px);
+
             height: 600px;
             border-radius: 8px;
             position: relative;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border: 5px solid #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 4px solid #fff; /* Đường biên bao quanh */
+            overflow: hidden; /* Cắt các phần dư */
+            user-select: none;
         }
+
+        /* Vạch kẻ sân (Màu trắng mờ) */
+        .pitch-marking {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            pointer-events: none; /* Để không chặn click vào cầu thủ */
+        }
+
+        /* Đường giữa sân */
+        .pitch-halfway-line {
+            top: 0; bottom: 0; left: 50%;
+            width: 0;
+            border-left: 2px solid rgba(255, 255, 255, 0.8);
+            transform: translateX(-50%);
+        }
+
+        /* Vòng tròn trung tâm */
+        .pitch-center-circle {
+            top: 50%; left: 50%;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Chấm giao bóng */
+        .pitch-center-spot {
+            top: 50%; left: 50%;
+            width: 8px; height: 8px;
+            background: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Khu cấm địa (Vòng 16m50) - Trái */
+        .pitch-penalty-left {
+            top: 50%; left: 0;
+            width: 16%; height: 55%;
+            transform: translateY(-50%);
+            border-left: none;
+        }
+
+        /* Khu cấm địa (Vòng 16m50) - Phải */
+        .pitch-penalty-right {
+            top: 50%; right: 0;
+            width: 16%; height: 55%;
+            transform: translateY(-50%);
+            border-right: none;
+        }
+
+        /* Khu cầu môn (Vòng 5m50) - Trái */
+        .pitch-goal-area-left {
+            top: 50%; left: 0;
+            width: 6%; height: 25%;
+            transform: translateY(-50%);
+            border-left: none;
+        }
+
+        /* Khu cầu môn (Vòng 5m50) - Phải */
+        .pitch-goal-area-right {
+            top: 50%; right: 0;
+            width: 6%; height: 25%;
+            transform: translateY(-50%);
+            border-right: none;
+        }
+
+        /* Cầu thủ trên sân */
         .player-slot {
             position: absolute;
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border: 2px dashed rgba(255, 255, 255, 0.6);
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.2);
             transition: all 0.2s;
+            z-index: 10;
         }
-        /* CSS cho slot khi kéo thả */
         .player-slot.drag-over {
             background: rgba(0, 255, 133, 0.7);
             border: 2px solid #fff;
@@ -100,68 +172,82 @@
         }
         .player-slot.filled {
             border: 2px solid #00ff85;
-            background: rgba(56, 0, 60, 0.8);
+            background: rgba(56, 0, 60, 0.9);
             color: white;
             border-radius: 8px;
-            width: 100px;
+            width: 110px;
             height: auto;
-            padding: 8px 5px;
+            padding: 6px 4px;
             font-size: 0.85rem;
             text-align: center;
             cursor: grab;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         .player-slot.filled:active { cursor: grabbing; }
         .player-slot.filled .slot-label {
             font-size: 0.7rem;
             font-weight: bold;
             color: #00ff85;
+            text-transform: uppercase;
+            margin-bottom: 2px;
         }
         .player-slot .slot-label {
             font-weight: bold;
             color: #fff;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
-        /* Vị trí các slot 4-4-2 */
-        .formation[data-formation="4-4-2"] .slot-GK  { top: 50%; left: 10%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-4-2"] .slot-RB  { top: 80%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-4-2"] .slot-RCB { top: 60%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-4-2"] .slot-LCB { top: 40%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-4-2"] .slot-LB  { top: 20%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-4-2"] .slot-RM  { top: 80%; left: 60%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-4-2"] .slot-RCM { top: 60%; left: 55%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-4-2"] .slot-LCM { top: 40%; left: 55%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-4-2"] .slot-LM  { top: 20%; left: 60%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-4-2"] .slot-RST { top: 60%; left: 85%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-4-2"] .slot-LST { top: 40%; left: 85%; transform: translate(-50%, -50%); }
+        /* VỊ TRÍ CẦU THỦ TRÊN SÂN (Horizontal Layout) */
+        /* 4-4-2 */
+        .formation[data-formation="4-4-2"] .slot-GK  { top: 50%; left: 8%; transform: translate(-50%, -50%); }
 
-        /* Vị trí các slot 4-3-3 */
-        .formation[data-formation="4-3-3"] .slot-GK  { top: 50%; left: 10%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-3-3"] .slot-RB  { top: 80%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-3-3"] .slot-RCB { top: 60%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-3-3"] .slot-LCB { top: 40%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-3-3"] .slot-LB  { top: 20%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-3-3"] .slot-RCM { top: 70%; left: 55%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-3-3"] .slot-CM  { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-3-3"] .slot-LCM { top: 30%; left: 55%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-3-3"] .slot-RW  { top: 80%; left: 80%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-3-3"] .slot-ST  { top: 50%; left: 85%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-3-3"] .slot-LW  { top: 20%; left: 80%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-LB  { top: 15%; left: 25%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-LCB { top: 38%; left: 22%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-RCB { top: 62%; left: 22%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-RB  { top: 85%; left: 25%; transform: translate(-50%, -50%); }
 
-        /* Vị trí các slot 4-2-3-1 */
-        .formation[data-formation="4-2-3-1"] .slot-GK  { top: 50%; left: 10%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-2-3-1"] .slot-RB  { top: 80%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-2-3-1"] .slot-RCB { top: 60%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-2-3-1"] .slot-LCB { top: 40%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-2-3-1"] .slot-LB  { top: 20%; left: 30%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-2-3-1"] .slot-RDM { top: 65%; left: 50%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-2-3-1"] .slot-LDM { top: 35%; left: 50%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-2-3-1"] .slot-RAM { top: 80%; left: 70%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-2-3-1"] .slot-CAM { top: 50%; left: 70%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-2-3-1"] .slot-LAM { top: 20%; left: 70%; transform: translate(-50%, -50%); }
-        .formation[data-formation="4-2-3-1"] .slot-ST  { top: 50%; left: 90%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-LM  { top: 15%; left: 50%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-LCM { top: 38%; left: 45%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-RCM { top: 62%; left: 45%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-RM  { top: 85%; left: 50%; transform: translate(-50%, -50%); }
 
-        /* 3. GHẾ DỰ BỊ */
+        .formation[data-formation="4-4-2"] .slot-LST { top: 35%; left: 75%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-4-2"] .slot-RST { top: 65%; left: 75%; transform: translate(-50%, -50%); }
+
+        /* 4-3-3 */
+        .formation[data-formation="4-3-3"] .slot-GK  { top: 50%; left: 8%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-LB  { top: 15%; left: 25%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-LCB { top: 38%; left: 22%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-RCB { top: 62%; left: 22%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-RB  { top: 85%; left: 25%; transform: translate(-50%, -50%); }
+
+        .formation[data-formation="4-3-3"] .slot-LCM { top: 30%; left: 48%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-CM  { top: 50%; left: 40%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-RCM { top: 70%; left: 48%; transform: translate(-50%, -50%); }
+
+        .formation[data-formation="4-3-3"] .slot-LW  { top: 20%; left: 75%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-ST  { top: 50%; left: 80%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-3-3"] .slot-RW  { top: 80%; left: 75%; transform: translate(-50%, -50%); }
+
+        /* 4-2-3-1 */
+        .formation[data-formation="4-2-3-1"] .slot-GK  { top: 50%; left: 8%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-LB  { top: 15%; left: 25%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-LCB { top: 38%; left: 22%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-RCB { top: 62%; left: 22%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-RB  { top: 85%; left: 25%; transform: translate(-50%, -50%); }
+
+        .formation[data-formation="4-2-3-1"] .slot-LDM { top: 35%; left: 42%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-RDM { top: 65%; left: 42%; transform: translate(-50%, -50%); }
+
+        .formation[data-formation="4-2-3-1"] .slot-LAM { top: 20%; left: 65%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-CAM { top: 50%; left: 60%; transform: translate(-50%, -50%); }
+        .formation[data-formation="4-2-3-1"] .slot-RAM { top: 80%; left: 65%; transform: translate(-50%, -50%); }
+
+        .formation[data-formation="4-2-3-1"] .slot-ST  { top: 50%; left: 82%; transform: translate(-50%, -50%); }
+
+
+        /* --- 3. GHẾ DỰ BỊ --- */
         .bench-area {
             background: #fff;
             border-radius: 8px;
@@ -261,6 +347,14 @@
 
             <div class="pitch-and-bench">
                 <div class="pitch-area">
+                    <div class="pitch-marking pitch-halfway-line"></div>
+                    <div class="pitch-marking pitch-center-circle"></div>
+                    <div class="pitch-marking pitch-center-spot"></div>
+                    <div class="pitch-marking pitch-penalty-left"></div>
+                    <div class="pitch-marking pitch-penalty-right"></div>
+                    <div class="pitch-marking pitch-goal-area-left"></div>
+                    <div class="pitch-marking pitch-goal-area-right"></div>
+
                     <div th:each="f : ${formations}"
                          th:id="'formation-' + ${f.key}"
                          class="formation"
@@ -318,7 +412,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // === 1. KHAI BÁO BIẾN ===
-        let draggedItem = null; // Cầu thủ đang được kéo
+        let draggedItem = null;
         const playerPool = document.getElementById('available-players');
         const pitchSlots = document.querySelectorAll('.player-slot');
         const benchSlots = document.querySelectorAll('.bench-slot');
@@ -327,7 +421,13 @@
         const formationSelect = document.getElementById('formation-select');
         const formEl = document.getElementById('lineup-form');
 
-        // === 2. HÀM HỖ TRỢ tạo/xóa cầu thủ & drag events (giữ nguyên) ===
+        // CSRF detection
+        const csrfMeta = document.querySelector('meta[name="_csrf"]');
+        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+        const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : null;
+        const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.getAttribute('content') : (csrfToken ? 'X-CSRF-TOKEN' : null);
+
+        // === 2. HÀM HỖ TRỢ ===
         function createPlayerElement(id, name, pos) {
             const el = document.createElement('div');
             el.className = 'player-item';
@@ -522,10 +622,12 @@
                 // Gửi request lên server
                 const response = await fetch(formEl.getAttribute('action'), {
                     method: formEl.getAttribute('method') || 'post',
-                    body: fd
+                    body: fd,
+                    headers: {
+                        // Optional: Thêm CSRF nếu cần thiết
+                    }
                 });
 
-                // Xử lý kết quả
                 if (response.ok) {
                     // Hiện thông báo thành công, sau đó redirect
                     Swal.fire({
