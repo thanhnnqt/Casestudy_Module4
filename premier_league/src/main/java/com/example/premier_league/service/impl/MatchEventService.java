@@ -109,31 +109,60 @@ public class MatchEventService implements IMatchEventService {
         }
 
         // handle MATCH_END event (khi admin gửi loại này)
-        // handle MATCH_END event (khi admin gửi loại này)
-        // handle MATCH_END event
         if ("MATCH_END".equalsIgnoreCase(saved.getType())) {
 
+            // tránh cập nhật BXH nhiều lần nếu trận đã FINISHED trước đó
+            boolean alreadyFinished = match.getStatus() == MatchStatus.FINISHED;
+
+            // cập nhật trạng thái trận
             match.setStatus(MatchStatus.FINISHED);
 
             int home = match.getHomeScore() == null ? 0 : match.getHomeScore();
             int away = match.getAwayScore() == null ? 0 : match.getAwayScore();
 
-            Team homeTeam = teamRepo.findById(match.getHomeTeam().getId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đội nhà"));
-            Team awayTeam = teamRepo.findById(match.getAwayTeam().getId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đội khách"));
+            // nếu trận chưa được xử lý FINISH trước đó => cập nhật thống kê đội
+            if (!alreadyFinished) {
+                Team homeTeam = teamRepo.findById(match.getHomeTeam().getId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy đội nhà"));
+                Team awayTeam = teamRepo.findById(match.getAwayTeam().getId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy đội khách"));
 
-            if (home > away) {
-                homeTeam.setPoints(homeTeam.getPoints() + 3);
-            } else if (home < away) {
-                awayTeam.setPoints(awayTeam.getPoints() + 3);
-            } else {
-                homeTeam.setPoints(homeTeam.getPoints() + 1);
-                awayTeam.setPoints(awayTeam.getPoints() + 1);
+                // Cập nhật bàn thắng / bàn thua mùa giải
+                homeTeam.setGoalsFor(homeTeam.getGoalsFor() + home);
+                homeTeam.setGoalsAgainst(homeTeam.getGoalsAgainst() + away);
+
+                awayTeam.setGoalsFor(awayTeam.getGoalsFor() + away);
+                awayTeam.setGoalsAgainst(awayTeam.getGoalsAgainst() + home);
+
+                // Cập nhật thắng/hòa/thua và điểm
+                if (home > away) {
+                    homeTeam.setWinCount(homeTeam.getWinCount() + 1);
+                    homeTeam.setPoints(homeTeam.getPoints() + 3);
+
+                    awayTeam.setLoseCount(awayTeam.getLoseCount() + 1);
+                } else if (home < away) {
+                    awayTeam.setWinCount(awayTeam.getWinCount() + 1);
+                    awayTeam.setPoints(awayTeam.getPoints() + 3);
+
+                    homeTeam.setLoseCount(homeTeam.getLoseCount() + 1);
+                } else {
+                    homeTeam.setDrawCount(homeTeam.getDrawCount() + 1);
+                    awayTeam.setDrawCount(awayTeam.getDrawCount() + 1);
+
+                    homeTeam.setPoints(homeTeam.getPoints() + 1);
+                    awayTeam.setPoints(awayTeam.getPoints() + 1);
+                }
+
+                // Cập nhật hiệu số
+                homeTeam.setGoalDifference(homeTeam.getGoalsFor() - homeTeam.getGoalsAgainst());
+                awayTeam.setGoalDifference(awayTeam.getGoalsFor() - awayTeam.getGoalsAgainst());
+
+                // Lưu 2 đội
+                teamRepo.save(homeTeam);
+                teamRepo.save(awayTeam);
             }
 
-            teamRepo.save(homeTeam);
-            teamRepo.save(awayTeam);
+            // Lưu trận (trạng thái + tỉ số)
             matchRepo.save(match);
 
             // gửi realtime cập nhật status + score
@@ -145,6 +174,9 @@ public class MatchEventService implements IMatchEventService {
 
             // gửi realtime sự kiện MATCH_END
             messaging.convertAndSend("/topic/match/" + matchId + "/events", toDto(saved));
+
+            // Optionally: broadcast ranking update (if frontend listens)
+            // messaging.convertAndSend("/topic/rankings", ...); // nếu có DTO BXH
 
             // return luôn để không chạy xuống dưới nữa
             return saved;
