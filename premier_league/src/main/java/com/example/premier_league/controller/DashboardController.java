@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class DashboardController {
@@ -27,55 +29,24 @@ public class DashboardController {
     public String dashboard() {
         return "owner/dashboard";
     }
+
     @GetMapping("/admin/owner/matches")
-    public String matches(Model model,
-                          @RequestParam(required = false) String team,
-                          @RequestParam(required = false) LocalDate date,
-                          @RequestParam(required = false) String round,
-                          @RequestParam(defaultValue = "0") int page) {
+    public String matches(
+            @RequestParam(value = "round", required = false, defaultValue = "1") Integer round,
+            Model model
+    ) {
+        Pageable pageable = PageRequest.of(0, 100);
+        Page<MatchSchedule> matchPage = matchScheduleService.getAllMatches(pageable);
 
-        Pageable pageable = PageRequest.of(page, 5);
-
-        Page<MatchSchedule> matchPage;
-
-        Integer roundValue = null;
-        if (round != null && !round.isEmpty()) {
-            try {
-                roundValue = Integer.parseInt(round);
-                model.addAttribute("round", round);
-            } catch (Exception e) {
-                model.addAttribute("message", "Vòng đấu phải là số!");
+        List<MatchSchedule> roundMatches = new ArrayList<>();
+        for (MatchSchedule m : matchPage.getContent()) {
+            if (m != null && m.getRound() != null && m.getRound().equals(round)) {
+                roundMatches.add(m);
             }
         }
 
-        if (team != null && !team.isEmpty()) {
-            matchPage = matchScheduleService.searchByTeam(team, pageable);
-            model.addAttribute("team", team);
-        }
-        else if (date != null) {
-            matchPage = matchScheduleService.searchByDate(date, pageable);
-            model.addAttribute("date", date);
-        }
-        else if (roundValue != null) {
-            matchPage = matchScheduleService.searchByRound(roundValue, pageable);
-        }
-        else {
-            matchPage = matchScheduleService.getAllMatches(pageable);
-        }
-
-        int totalPages = matchPage.getTotalPages();
-        int currentPage = page;
-
-        int startPage = Math.max(0, currentPage - 1);     // 1 trang trước
-        int endPage   = Math.min(totalPages - 1, currentPage + 1); // 1 trang sau
-
-        model.addAttribute("matches", matchPage.getContent());
-        model.addAttribute("currentPage", currentPage);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
-        model.addAttribute("teamsList", teamService.findAll());
-
+        model.addAttribute("upcomingMatches", roundMatches);
+        model.addAttribute("selectedRound", round);
 
         return "owner/matches";
     }

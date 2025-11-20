@@ -251,10 +251,10 @@
 
         <div class="text-uppercase small fw-bold mt-3 mb-2 px-3" style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Giải đấu</div>
 
-        <a href="/admin/owner/matches"
+        <a th:href="@{/admin/owner/matches}"
            class="nav-link"
-           th:classappend="${activeMenu} == 'matches' ? ' active'">
-            <i class="bi bi-calendar-week"></i> Lịch thi đấu
+           th:classappend="${activeMenu} == 'standings' ? ' active'">
+            <i class="bi bi-trophy"></i> BXH & Lịch đấu
         </a>
     </div>
 

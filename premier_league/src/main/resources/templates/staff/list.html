@@ -3,59 +3,112 @@
       th:replace="layout :: layout('Danh sách nhân viên', 'staffs', ~{::content})">
 
 <th:block th:fragment="content">
+
   <style>
-    .staff-card { border-radius: 15px; transition: all 0.3s; }
-    .staff-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-    .staff-avatar { height: 220px; object-fit: cover; width: 100%; }
-    .staff-position-title {
-      font-weight: 700; margin-bottom: 15px; border-left: 5px solid #0d6efd;
-      padding-left: 10px; text-transform: uppercase; color: #0d6efd; font-size: 1.1rem;
+    :root { --pl-purple: #38003c; --pl-pink: #ff0050; }
+
+    /* Buttons */
+    .btn-primary-pl {
+      background-color: var(--pl-pink); border-color: var(--pl-pink); color: white;
+      font-weight: 600; padding: 0.5rem 1.2rem; border-radius: 0.5rem; transition: all 0.2s;
     }
+    .btn-primary-pl:hover {
+      background-color: #d10042; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 0, 80, 0.3);
+    }
+
+    /* Group Title Separator */
+    .role-separator { display: flex; align-items: center; margin: 2.5rem 0 1.5rem 0; }
+    .role-separator span {
+      background: var(--pl-purple); color: white; padding: 0.5rem 1.5rem;
+      border-radius: 50px; font-weight: 700; font-size: 0.9rem;
+      box-shadow: 0 4px 10px rgba(56, 0, 60, 0.2); z-index: 1; text-transform: uppercase;
+    }
+    .role-separator::after { content: ''; flex-grow: 1; height: 2px; background: #e9ecef; margin-left: 1rem; }
+
+    /* Staff Card */
+    .staff-card {
+      border: none; border-radius: 1rem; background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: all 0.3s ease; overflow: hidden; height: 100%;
+    }
+    .staff-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+
+    .staff-avatar-wrapper { position: relative; height: 240px; overflow: hidden; background: #f8f9fa; display: block; }
+    .staff-avatar { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+    .staff-card:hover .staff-avatar { transform: scale(1.05); }
+
+    .card-body { padding: 1.25rem; display: flex; flex-direction: column; }
+    .staff-name { font-size: 1.1rem; font-weight: 700; color: var(--pl-purple); margin-bottom: 0.25rem; text-decoration: none; }
+    .staff-role { font-size: 0.85rem; color: #6c757d; font-weight: 600; margin-bottom: 1rem; }
+
+    .info-row { font-size: 0.85rem; color: #495057; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px; }
+    .info-row i { color: var(--pl-pink); width: 16px; }
+
+    /* Status Badge */
+    .badge-status { padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; }
+    .bg-status-active { background-color: #e6f8e9; color: #0f5132; }
+    .bg-status-inactive { background-color: #f2f2f2; color: #595959; }
   </style>
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-uppercase">Danh sách nhân viên</h2>
-    <a href="/admin/staffs/create" class="btn btn-primary shadow-sm">
-      + Thêm mới
-    </a>
-  </div>
+  <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <a th:href="@{/admin/staffs/create}" class="btn btn-primary-pl">
+        <i class="bi bi-plus-lg me-2"></i>Thêm Nhân Viên
+      </a>
+    </div>
 
-  <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-    <span th:text="${message}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i><span th:text="${message}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
-  <div th:if="${#maps.isEmpty(staffByPosition)}" class="text-center text-muted my-5">
-    <h4>Chưa có dữ liệu nhân viên.</h4>
-  </div>
+    <div th:if="${#maps.isEmpty(staffByPosition)}" class="text-center py-5 text-muted">
+      <i class="bi bi-person-badge display-4 d-block mb-3"></i>
+      Chưa có dữ liệu nhân viên.
+    </div>
 
-  <div th:each="entry : ${staffByPosition}" class="mb-5">
+    <div th:each="entry : ${staffByPosition}">
 
-    <div class="staff-position-title" th:text="${entry.key}">Position Name</div>
+      <div class="role-separator">
+        <span th:text="${entry.key}">Position Name</span>
+      </div>
 
-    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-      <div class="col" th:each="staff : ${entry.value}">
-        <div class="card staff-card h-100 border-0 shadow-sm">
+      <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        <div class="col" th:each="staff : ${entry.value}">
+          <div class="card staff-card">
 
-          <a th:href="@{'/admin/staffs/' + ${staff.id}}">
-            <img class="staff-avatar card-img-top" th:src="${staff.avatarUrl}"
-                 onerror="this.src='https://via.placeholder.com/400x300?text=No+Image';">
-          </a>
+            <a th:href="@{'/admin/staffs/' + ${staff.id}}" class="staff-avatar-wrapper">
+              <img class="staff-avatar"
+                   th:src="${staff.avatarUrl}"
+                   alt="avatar"
+                   onerror="this.onerror=null; this.src='https://via.placeholder.com/300x300?text=No+Image';">
+            </a>
 
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title fw-bold mb-1" th:text="${staff.fullName}"></h5>
-            <p class="text-muted small mb-2" th:text="${staff.role}"></p>
+            <div class="card-body">
+              <div class="mb-2">
+                <a th:href="@{'/admin/staffs/' + ${staff.id}}" class="staff-name d-block" th:text="${staff.fullName}">Name</a>
+                <div class="staff-role" th:text="${staff.role}">Role</div>
+              </div>
 
-            <div class="small mb-3">
-              <div><strong>Đội: </strong> <span th:text="${staff.team != null ? staff.team.name : '-'}"></span></div>
-              <div><strong>Q.Tịch: </strong> <span th:text="${staff.nationality}"></span></div>
-            </div>
+              <div class="mt-auto">
+                <div class="info-row">
+                  <i class="bi bi-shield-shaded"></i>
+                  <span th:text="${staff.team != null ? staff.team.name : 'Chưa gán đội'}">Team</span>
+                </div>
+                <div class="info-row">
+                  <i class="bi bi-globe"></i>
+                  <span th:text="${staff.nationality}">Nation</span>
+                </div>
+              </div>
 
-            <div class="mt-auto d-flex justify-content-between align-items-center">
-                <span th:class="${staff.status == 'Active' ? 'badge bg-success' : 'badge bg-secondary'}"
-                      th:text="${staff.status}"></span>
-
-              <a th:href="@{'/admin/staffs/' + ${staff.id}}" class="btn btn-sm btn-outline-primary">Xem</a>
+              <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
+                <span class="badge badge-status"
+                      th:classappend="${staff.status == 'Active' ? 'bg-status-active' : 'bg-status-inactive'}"
+                      th:text="${staff.status}">
+                </span>
+                <a th:href="@{'/admin/staffs/' + ${staff.id}}" class="btn btn-sm btn-light rounded-circle" title="Chi tiết">
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </div>
             </div>
           </div>
         </div>

@@ -1,192 +1,279 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="layout :: layout('Dashboard chủ đội bóng', 'dashboard', ~{::content})">
+      th:replace="layout :: layout('Tổng quan CLB', 'dashboard', ~{::content})">
+
 <th:block th:fragment="content">
 
   <style>
+    :root {
+      --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+      --card-hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    /* KPI Card Styling */
     .kpi-card {
       border-radius: 1rem;
-      padding: 1.2rem 1.3rem;
+      padding: 1.75rem;
       color: #fff;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+      height: 100%;
     }
-    .kpi-card:hover { transform: translateY(-5px); }
-    .kpi-card .icon { font-size: 1.6rem; opacity: 0.9; position: absolute; right: 1.2rem; top: 1.2rem;}
-    .kpi-card small { font-size: .8rem; opacity: .9; }
-    .kpi-card .value { font-size: 1.6rem; font-weight: 700; margin-top: 5px; }
-    .kpi-card .trend { font-size: .8rem; }
+    .kpi-card:hover { transform: translateY(-5px); box-shadow: var(--card-hover-shadow); }
 
-    .bg-gradient-blue { background: linear-gradient(135deg,#3b82f6,#2563eb); }
-    .bg-gradient-green { background: linear-gradient(135deg,#22c55e,#16a34a); }
-    .bg-gradient-purple { background: linear-gradient(135deg,#8b5cf6,#6366f1); }
-    .bg-gradient-pink { background: linear-gradient(135deg,#ec4899,#f97316); }
-
-    .card { border-radius: 1rem; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-
-    .chart-placeholder {
-      height: 220px;
-      border-radius: .75rem;
-      background: repeating-linear-gradient(-45deg, #f8f9fa, #f8f9fa 6px, #e9ecef 6px, #e9ecef 12px);
-      display: flex; align-items: center; justify-content: center;
-      color: #6c757d; font-style: italic;
+    .kpi-card .icon-bg {
+      position: absolute; right: -15px; bottom: -15px;
+      font-size: 6rem; opacity: 0.12; transform: rotate(-15deg);
+      transition: all 0.3s ease;
     }
+    .kpi-card:hover .icon-bg { opacity: 0.2; transform: rotate(0deg) scale(1.1); }
 
-    .pill {
-      display: inline-flex; align-items: center; gap: .25rem;
-      padding: .25rem .6rem; border-radius: 999px; font-size: .75rem;
-      background: #eef2ff; color: #4f46e5;
+    .kpi-card small { font-size: 0.8rem; opacity: 0.9; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 0.5rem; }
+    .kpi-card .value { font-size: 2.2rem; font-weight: 800; line-height: 1.2; }
+    .kpi-card .trend { font-size: 0.85rem; font-weight: 500; margin-top: 0.5rem; display: flex; align-items: center; gap: 5px; }
+
+    /* Gradients */
+    .bg-gradient-purple { background: linear-gradient(135deg, #38003c 0%, #6a0572 100%); }
+    .bg-gradient-pink { background: linear-gradient(135deg, #ff0050 0%, #ff4d80 100%); }
+    .bg-gradient-blue { background: linear-gradient(135deg, #00b860 0%, #00ff85 100%); color: #064e3b !important; }
+    .bg-gradient-dark { background: linear-gradient(135deg, #111827 0%, #374151 100%); }
+
+    /* Common Card Styling */
+    .card-dashboard {
+      border: none; border-radius: 1rem;
+      box-shadow: var(--card-shadow);
+      background: #fff; height: 100%;
+      display: flex; flex-direction: column;
     }
+    .card-header-custom {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex; justify-content: space-between; align-items: center;
+      background-color: #fff;
+      border-radius: 1rem 1rem 0 0;
+    }
+    .card-title-custom { font-weight: 700; font-size: 1.05rem; color: #1e293b; margin: 0; }
+
+    /* List Items */
+    .list-item-custom {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex; align-items: center; gap: 1rem;
+      transition: background-color 0.2s;
+    }
+    .list-item-custom:last-child { border-bottom: none; border-radius: 0 0 1rem 1rem; }
+    .list-item-custom:hover { background-color: #f8fafc; }
+
+    /* Progress Bar */
+    .progress-thin { height: 8px; border-radius: 10px; background-color: #f1f5f9; margin-top: 8px; }
   </style>
 
-  <div class="row g-4 mb-4">
-    <div class="col-md-3 col-sm-6">
-      <div class="kpi-card bg-gradient-blue">
-        <small>Tổng số cầu thủ</small>
-        <div class="value" th:text="${totalPlayers ?: '28'}">28</div>
-        <div class="trend mt-2"><i class="bi bi-arrow-up-short"></i> +2 so với mùa trước</div>
-        <div class="icon"><i class="bi bi-people-fill"></i></div>
+  <div class="container-fluid pb-5">
+
+    <div class="row g-4 mb-5">
+      <div class="col-xl-3 col-md-6">
+        <div class="kpi-card bg-gradient-purple">
+          <small>Thứ hạng hiện tại</small>
+          <div class="value">#2</div>
+          <div class="trend text-white-50"><i class="bi bi-arrow-up-circle-fill text-warning"></i> Đang cạnh tranh vô địch</div>
+          <i class="bi bi-trophy-fill icon-bg"></i>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="kpi-card bg-gradient-blue">
+          <small>Ngân sách chuyển nhượng</small>
+          <div class="value">£120M</div>
+          <div class="trend" style="color: #064e3b;"><i class="bi bi-check-circle-fill"></i> Dư giả cho kỳ đông</div>
+          <i class="bi bi-wallet2 icon-bg"></i>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="kpi-card bg-gradient-pink">
+          <small>Tổng quỹ lương / Tuần</small>
+          <div class="value">£3.2M</div>
+          <div class="trend"><i class="bi bi-exclamation-circle-fill"></i> Cần cắt giảm 10%</div>
+          <i class="bi bi-cash-stack icon-bg"></i>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="kpi-card bg-gradient-dark">
+          <small>Giá trị đội hình</small>
+          <div class="value">€1.1B</div>
+          <div class="trend text-success"><i class="bi bi-graph-up-arrow"></i> Tăng 15% so với đầu mùa</div>
+          <i class="bi bi-gem icon-bg"></i>
+        </div>
       </div>
     </div>
 
-    <div class="col-md-3 col-sm-6">
-      <div class="kpi-card bg-gradient-green">
-        <small>Điểm hiện tại</small>
-        <div class="value" th:text="${currentPoints ?: '63'}">63</div>
-        <div class="trend mt-2 text-white-50">Top 2 trên BXH</div>
-        <div class="icon"><i class="bi bi-trophy-fill"></i></div>
-      </div>
-    </div>
+    <div class="row g-4">
 
-    <div class="col-md-3 col-sm-6">
-      <div class="kpi-card bg-gradient-purple">
-        <small>Tỷ lệ thắng</small>
-        <div class="value">71%</div>
-        <div class="trend mt-2"><i class="bi bi-arrow-up-short"></i> +5% phong độ</div>
-        <div class="icon"><i class="bi bi-graph-up-arrow"></i></div>
-      </div>
-    </div>
+      <div class="col-lg-8">
 
-    <div class="col-md-3 col-sm-6">
-      <div class="kpi-card bg-gradient-pink">
-        <small>Giá trị đội hình</small>
-        <div class="value">€890M</div>
-        <div class="trend mt-2 text-white-75">Transfermarkt ước tính</div>
-        <div class="icon"><i class="bi bi-cash-coin"></i></div>
+        <div class="card card-dashboard mb-4">
+          <div class="card-header-custom">
+            <h5 class="card-title-custom"><i class="bi bi-bar-chart-line-fill text-primary me-2"></i>Hiệu suất tài chính</h5>
+            <select class="form-select form-select-sm w-auto border-0 bg-light fw-bold text-muted shadow-none">
+              <option>Mùa giải này</option>
+              <option>6 tháng qua</option>
+            </select>
+          </div>
+          <div class="card-body p-4">
+            <div id="revenueChart" style="min-height: 380px;"></div>
+          </div>
+        </div>
+
+        <div class="card card-dashboard">
+          <div class="card-header-custom">
+            <h5 class="card-title-custom"><i class="bi bi-file-earmark-person-fill text-warning me-2"></i>Hợp đồng sắp hết hạn</h5>
+            <a href="/admin/players" class="btn btn-sm btn-light text-primary fw-bold border-0">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-item-custom">
+              <img src="https://resources.premierleague.com/premierleague/photos/players/250x250/p223340.png" class="rounded-circle border" width="48" height="48" alt="Saka">
+              <div class="flex-grow-1">
+                <h6 class="mb-0 fw-bold text-dark">Bukayo Saka</h6>
+                <small class="text-muted">Hết hạn: <span class="text-danger fw-bold">06/2025</span> &bull; Giá trị: £100M</small>
+              </div>
+              <button class="btn btn-sm btn-warning fw-bold text-dark shadow-sm">Đàm phán ngay</button>
+            </div>
+            <div class="list-item-custom">
+              <img src="https://resources.premierleague.com/premierleague/photos/players/250x250/p85955.png" class="rounded-circle border" width="48" height="48" alt="Jorginho">
+              <div class="flex-grow-1">
+                <h6 class="mb-0 fw-bold text-dark">Jorginho</h6>
+                <small class="text-muted">Hết hạn: <span class="text-danger fw-bold">06/2024</span> &bull; Giá trị: £15M</small>
+              </div>
+              <button class="btn btn-sm btn-light border text-muted fw-bold">Gia hạn 1 năm</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="col-lg-4">
+
+        <div class="card card-dashboard mb-4">
+          <div class="card-header-custom border-0 pb-0">
+            <h5 class="card-title-custom">Trận đấu tiếp theo</h5>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Premier League</span>
+          </div>
+          <div class="card-body text-center pt-0 pb-4">
+            <div class="d-flex justify-content-center align-items-center gap-4 mt-4 mb-4">
+              <div class="text-center">
+                <img src="https://resources.premierleague.com/premierleague/badges/t3.svg" width="70" class="mb-2">
+                <div class="fw-bold fs-5">ARS</div>
+              </div>
+              <div class="h1 fw-black text-muted opacity-25">VS</div>
+              <div class="text-center">
+                <img src="https://resources.premierleague.com/premierleague/badges/t43.svg" width="70" class="mb-2">
+                <div class="fw-bold fs-5">MCI</div>
+              </div>
+            </div>
+
+            <div class="bg-light rounded-3 p-3 mb-3">
+              <div class="fw-bold text-dark mb-1"><i class="bi bi-calendar-event me-2"></i>Chủ Nhật, 23/03</div>
+              <div class="fw-bold text-primary fs-5">19:30</div>
+              <div class="small text-muted mt-1"><i class="bi bi-geo-alt-fill me-1"></i>Etihad Stadium</div>
+            </div>
+
+            <button class="btn btn-dark w-100 fw-bold py-2">Xem phân tích đối thủ</button>
+          </div>
+        </div>
+
+        <div class="card card-dashboard">
+          <div class="card-header-custom">
+            <h5 class="card-title-custom"><i class="bi bi-activity text-success me-2"></i>Sức khỏe CLB</h5>
+          </div>
+          <div class="card-body p-4 d-flex flex-column gap-4">
+            <div>
+              <div class="d-flex justify-content-between mb-1">
+                <small class="fw-bold text-muted">Độ hài lòng BHL</small>
+                <small class="fw-bold text-success">95%</small>
+              </div>
+              <div class="progress progress-thin">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 95%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="d-flex justify-content-between mb-1">
+                <small class="fw-bold text-muted">Tài chính</small>
+                <small class="fw-bold text-warning">Ổn định</small>
+              </div>
+              <div class="progress progress-thin">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 70%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="d-flex justify-content-between mb-1">
+                <small class="fw-bold text-muted">Lấp đầy sân</small>
+                <small class="fw-bold text-danger">99.8%</small>
+              </div>
+              <div class="progress progress-thin">
+                <div class="progress-bar bg-danger" role="progressbar" style="width: 99%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
-  <div class="row g-4 mb-4">
-    <div class="col-lg-8">
-      <div class="card p-4 h-100">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div>
-            <h6 class="mb-0 fw-bold">Phong độ 10 trận gần nhất</h6>
-            <small class="text-muted">Thống kê thắng thua</small>
-          </div>
-          <span class="pill"><i class="bi bi-lightning-charge-fill"></i> Live Data</span>
-        </div>
-        <div class="chart-placeholder">
-          [Biểu đồ phong độ sẽ hiển thị ở đây]
-        </div>
-      </div>
-    </div>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var options = {
+        series: [{
+          name: 'Doanh thu',
+          data: [44, 55, 57, 56, 61, 58, 63, 60, 66]
+        }, {
+          name: 'Chi phí',
+          data: [76, 85, 101, 98, 87, 105, 91, 114, 94]
+        }, {
+          name: 'Lợi nhuận',
+          data: [35, 41, 36, 26, 45, 48, 52, 53, 41]
+        }],
+        chart: {
+          type: 'bar',
+          height: 350,
+          fontFamily: 'Inter, sans-serif',
+          toolbar: { show: false }
+        },
+        colors: ['#38003c', '#ff0050', '#00ff85'],
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '45%',
+            borderRadius: 6,
+            endingShape: 'rounded'
+          },
+        },
+        dataLabels: { enabled: false },
+        stroke: { show: true, width: 2, colors: ['transparent'] },
+        xaxis: {
+          categories: ['T8', 'T9', 'T10', 'T11', 'T12', 'T1', 'T2', 'T3', 'T4'],
+        },
+        yaxis: {
+          title: { text: 'Triệu Bảng (£)' }
+        },
+        fill: { opacity: 1 },
+        tooltip: {
+          y: { formatter: function (val) { return "£ " + val + " M" } }
+        },
+        legend: { position: 'top', horizontalAlign: 'left' },
+        grid: { borderColor: '#f1f5f9' }
+      };
 
-    <div class="col-lg-4">
-      <div class="card p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="mb-0 fw-bold">Trận đấu tiếp theo</h6>
-          <span class="badge bg-primary-subtle text-primary rounded-pill">Premier League</span>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-          <div class="text-center bg-light rounded p-2">
-            <div class="fw-bold fs-5 text-danger">SAT</div>
-            <div class="text-muted small" style="font-size: 0.7rem;">23 MAR</div>
-          </div>
-          <div class="flex-grow-1 border-start ps-3">
-            <div class="fw-bold">Arsenal vs Man City</div>
-            <div class="small text-muted"><i class="bi bi-geo-alt-fill"></i> Emirates Stadium</div>
-            <div class="small text-primary fw-bold mt-1">19:30 (GMT+7)</div>
-          </div>
-        </div>
-        <hr class="my-3 opacity-10">
-        <div class="d-flex justify-content-between small text-muted">
-          <span><i class="bi bi-activity"></i> Sẵn sàng: <strong class="text-success">96%</strong></span>
-          <span><i class="bi bi-bandaid"></i> Chấn thương: <strong>2</strong></span>
-        </div>
-      </div>
-
-      <div class="card p-4">
-        <h6 class="mb-3 fw-bold">Việc cần làm ưu tiên</h6>
-        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
-          <li class="d-flex gap-2 align-items-start">
-            <i class="bi bi-check-circle-fill text-success mt-1"></i>
-            <span>Gia hạn hợp đồng với <strong>Bukayo Saka</strong></span>
-          </li>
-          <li class="d-flex gap-2 align-items-start">
-            <i class="bi bi-exclamation-circle-fill text-warning mt-1"></i>
-            <span>Đàm phán lương tân binh mùa hè</span>
-          </li>
-          <li class="d-flex gap-2 align-items-start">
-            <i class="bi bi-clock-fill text-primary mt-1"></i>
-            <span>Duyệt ngân sách chuyển nhượng Q2</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="card p-4 h-100">
-        <h6 class="fw-bold mb-3">Tình hình y tế</h6>
-        <div class="d-flex justify-content-between small mb-2">
-          <span class="text-muted">Ca chấn thương</span><strong>3</strong>
-        </div>
-        <div class="d-flex justify-content-between small mb-3">
-          <span class="text-muted">Hồi phục trung bình</span><strong>12 ngày</strong>
-        </div>
-        <div class="progress" style="height: 6px;">
-          <div class="progress-bar bg-danger" style="width: 18%;"></div>
-        </div>
-        <small class="text-muted d-block mt-2 fst-italic">18% đội hình đang điều trị</small>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card p-4 h-100">
-        <h6 class="fw-bold mb-3">Tài chính sơ bộ</h6>
-        <div class="d-flex justify-content-between small mb-2">
-          <span class="text-muted">Doanh thu</span><strong>€420M</strong>
-        </div>
-        <div class="d-flex justify-content-between small mb-2">
-          <span class="text-muted">Quỹ lương</span><strong>€210M</strong>
-        </div>
-        <hr class="my-2">
-        <div class="d-flex justify-content-between small">
-          <span class="text-muted">Còn lại</span><strong class="text-success">€95M</strong>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card p-4 h-100">
-        <h6 class="fw-bold mb-3">Phòng thay đồ</h6>
-        <div class="d-flex justify-content-between small mb-2">
-          <span class="text-muted">Chỉ số hài lòng</span><strong>8.7 / 10</strong>
-        </div>
-        <div class="d-flex justify-content-between small mb-3">
-          <span class="text-muted">Xung đột nội bộ</span><strong class="text-success">Không</strong>
-        </div>
-        <div class="alert alert-success py-2 px-3 small mb-0 border-0">
-          <i class="bi bi-check2-all"></i> Tinh thần toàn đội đang rất tốt.
-        </div>
-      </div>
-    </div>
-  </div>
+      var chart = new ApexCharts(document.querySelector("#revenueChart"), options);
+      chart.render();
+    });
+  </script>
 
 </th:block>
 </html>

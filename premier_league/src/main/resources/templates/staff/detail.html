@@ -4,74 +4,124 @@
 
 <th:block th:fragment="content">
 
-  <div class="container mt-4">
-    <h2 class="mb-4 text-uppercase fw-bold" style="letter-spacing: 1px;">Thông tin chi tiết</h2>
+  <style>
+    :root { --pl-purple: #38003c; --pl-pink: #ff0050; }
+    .card-profile { border: none; border-radius: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); background: #fff; overflow: hidden; }
+    .profile-img { width: 100%; height: 300px; object-fit: cover; object-position: top; }
+    .profile-name { color: var(--pl-purple); font-weight: 800; letter-spacing: -0.5px; }
 
-    <div class="row">
-      <div class="col-md-4">
-        <div class="card mb-3 shadow-sm">
-          <img class="card-img-top"
+    .label-text { color: #6c757d; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.2rem; }
+    .value-text { color: #212529; font-weight: 600; font-size: 1.05rem; }
+
+    .btn-edit { background: var(--pl-purple); color: white; border: none; } .btn-edit:hover { background: #2a002d; color: white; }
+    .btn-delete { background: #fee2e2; color: #dc2626; border: none; } .btn-delete:hover { background: #fecaca; color: #b91c1c; }
+  </style>
+
+  <div class="container-fluid">
+    <div class="mb-4">
+      <a href="/admin/staffs" class="text-decoration-none text-muted fw-bold small">
+        <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+      </a>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card card-profile h-100">
+          <img class="profile-img"
                th:src="${staff.avatarUrl}"
                alt="avatar"
-               style="max-height: 400px; object-fit: cover;"
-               onerror="this.src='https://via.placeholder.com/400x400?text=No+Image';">
+               onerror="this.onerror=null; this.src='https://via.placeholder.com/400x400?text=No+Image';">
+
+          <div class="card-body text-center p-4">
+            <h3 class="profile-name mb-1" th:text="${staff.fullName}">Full Name</h3>
+            <span class="badge bg-info-subtle text-info-emphasis rounded-pill px-3 py-2 mb-3" th:text="${staff.role}">Role</span>
+
+            <div class="d-flex justify-content-center gap-2 mt-2">
+              <a th:href="@{'/admin/staffs/update/' + ${staff.id}}" class="btn btn-edit px-4 py-2 rounded-3">
+                <i class="bi bi-pencil-square me-2"></i>Sửa
+              </a>
+              <button type="button" class="btn btn-delete px-3 py-2 rounded-3"
+                      data-bs-toggle="modal" data-bs-target="#deleteStaffModal" title="Xóa">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="card-footer bg-white p-4 border-top">
+            <div class="mb-3">
+              <div class="label-text"><i class="bi bi-envelope me-2"></i>Email</div>
+              <div class="value-text" th:text="${staff.email}">email@example.com</div>
+            </div>
+            <div>
+              <div class="label-text"><i class="bi bi-telephone me-2"></i>Số điện thoại</div>
+              <div class="value-text" th:text="${staff.phoneNumber}">0123456789</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="col-md-8">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h3 class="mb-0 text-primary" th:text="${staff.fullName}">Tên nhân viên</h3>
+      <div class="col-lg-8">
+        <div class="card card-profile p-4">
+          <h5 class="fw-bold mb-4 pb-2 border-bottom" style="color: var(--pl-purple);">Thông tin chi tiết</h5>
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="label-text">Ngày sinh</div>
+              <div class="value-text" th:text="${#temporals.format(staff.dateOfBirth, 'dd/MM/yyyy')}"></div>
+            </div>
+            <div class="col-md-6">
+              <div class="label-text">Giới tính</div>
+              <div class="value-text" th:text="${staff.gender}"></div>
+            </div>
+            <div class="col-md-6">
+              <div class="label-text">Quốc tịch</div>
+              <div class="value-text"><i class="bi bi-globe me-1 text-muted"></i> <span th:text="${staff.nationality}"></span></div>
+            </div>
+            <div class="col-md-6">
+              <div class="label-text">Ngày gia nhập</div>
+              <div class="value-text" th:text="${#temporals.format(staff.joinDate, 'dd/MM/yyyy')}"></div>
+            </div>
+          </div>
 
-          <div>
-            <a th:href="@{'/admin/staffs/update/' + ${staff.id}}" class="btn btn-primary">
-              <i class="bi bi-pencil"></i> Sửa
-            </a>
-
-            <form th:action="@{/admin/staffs/delete/{id}(id=${staff.id})}" method="post" style="display:inline;">
-              <button type="submit" class="btn btn-danger"
-                      onclick="return confirm('Hành động này không thể hoàn tác. Bạn chắc chứ?')">
-                <i class="bi bi-trash"></i> Xóa
-              </button>
-            </form>
+          <h5 class="fw-bold mb-4 pb-2 border-bottom mt-5" style="color: var(--pl-purple);">Công việc & Trạng thái</h5>
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="label-text">Vị trí công tác</div>
+              <div class="value-text text-primary" th:text="${staff.position}"></div>
+            </div>
+            <div class="col-md-6">
+              <div class="label-text">Đội bóng</div>
+              <div class="value-text" th:text="${staff.team != null ? staff.team.name : 'Chưa gán'}"></div>
+            </div>
+            <div class="col-md-6">
+              <div class="label-text">Trạng thái</div>
+              <span class="badge" th:classappend="${staff.status == 'Active' ? 'bg-success' : 'bg-secondary'}" th:text="${staff.status}"></span>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <hr>
-
-        <div class="row g-3">
-          <div class="col-md-6">
-            <p><strong>Ngày sinh: </strong> <span th:text="${staff.dateOfBirth}"></span></p>
-            <p><strong>Giới tính: </strong> <span th:text="${staff.gender}"></span></p>
-            <p><strong>Quốc tịch: </strong> <span th:text="${staff.nationality}"></span></p>
-            <p><strong>Ngày gia nhập: </strong> <span th:text="${staff.joinDate}"></span></p>
-          </div>
-
-          <div class="col-md-6">
-            <p><strong>Vị trí: </strong> <span th:text="${staff.position}"></span></p>
-            <p><strong>Vai trò: </strong> <span th:text="${staff.role}"></span></p>
-            <p><strong>Đội bóng: </strong>
-              <span class="badge bg-info text-dark" th:text="${staff.team != null ? staff.team.name : 'Chưa gán'}"></span>
-            </p>
-            <p><strong>Trạng thái: </strong>
-              <span th:class="${staff.status == 'Active' ? 'badge bg-success' : 'badge bg-secondary'}"
-                    th:text="${staff.status}"></span>
-            </p>
-          </div>
+  <div class="modal fade" id="deleteStaffModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header text-white" style="background-color: var(--pl-purple);">
+          <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-
-        <hr>
-
-        <div class="row">
-          <div class="col-md-6">
-            <p><strong>Số điện thoại: </strong> <span th:text="${staff.phoneNumber}"></span></p>
-          </div>
-          <div class="col-md-6">
-            <p><strong>Email: </strong> <span th:text="${staff.email}"></span></p>
-          </div>
+        <div class="modal-body p-4 text-center">
+          <p class="mb-2">Bạn có chắc chắn muốn xóa nhân viên này không?</p>
+          <h5 class="fw-bold text-danger" th:text="${staff.fullName}">Tên NV</h5>
+          <p class="text-muted small mb-0">Hành động này không thể hoàn tác.</p>
         </div>
+        <div class="modal-footer bg-light border-0 justify-content-center">
+          <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Hủy bỏ</button>
 
-        <div class="mt-4">
-          <a href="/admin/staffs" class="btn btn-secondary">Quay lại danh sách</a>
+          <form th:action="@{/admin/staffs/delete/{id}(id=${staff.id})}" method="post">
+            <button type="submit" class="btn btn-danger fw-bold px-4">
+              <i class="bi bi-trash me-2"></i>Xóa ngay
+            </button>
+          </form>
         </div>
       </div>
     </div>

@@ -22,4 +22,8 @@ public interface IPlayerService {
 
     void delete(Long id);
 
-    List<PlayerShortDto> getPlayersByTeam(Long teamId);}
+    List<PlayerShortDto> getPlayersByTeam(Long teamId);
+
+
+}
+

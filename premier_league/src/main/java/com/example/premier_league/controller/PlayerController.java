@@ -121,7 +121,7 @@ public class PlayerController {
     }
 
     // ====== DELETE ======
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     public String delete(@PathVariable Long id, RedirectAttributes redirect) {
         Player player = playerService.findById(id);
         if (player == null) {
