@@ -52,9 +52,17 @@
 
     <header class="bg-white h-16 border-b flex items-center justify-between px-6 shadow-sm shrink-0">
         <h1 class="text-xl font-bold text-primary">Tổng Quan Giải Đấu</h1>
-        <div class="flex items-center gap-2">
-            <span class="text-sm font-semibold">Admin</span>
-            <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">A</div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold">Admin</span>
+                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">A</div>
+            </div>
+
+            <form th:action="@{/admin/logout}" method="post" class="border-l pl-4 border-gray-200">
+                <button type="submit" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors" title="Đăng xuất">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </form>
         </div>
     </header>
 
@@ -62,7 +70,6 @@
         <div class="max-w-7xl mx-auto space-y-6">
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <!-- Số trận vòng này -->
                 <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="bg-purple-100 p-3 rounded-lg text-purple-600">
@@ -75,7 +82,6 @@
                     </div>
                 </div>
 
-                <!-- Tổng số đội bóng (fix cứng 20) -->
                 <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="bg-green-100 p-3 rounded-lg text-green-600">
@@ -88,7 +94,6 @@
                     </div>
                 </div>
 
-                <!-- Tổng số trận đấu (fix cứng 380) -->
                 <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="bg-blue-100 p-3 rounded-lg text-blue-600">
