@@ -84,10 +84,6 @@
                                 <p class="font-semibold"><span th:text="${headCoach.experienceYears}">10</span> năm</p>
                             </div>
                             <div>
-                                <p class="text-gray-500 text-xs">Chứng chỉ</p>
-                                <p class="font-semibold" th:text="${headCoach.licenseLevel}">UEFA Pro</p>
-                            </div>
-                            <div>
                                 <p class="text-gray-500 text-xs">Tuổi</p>
                                 <p class="font-semibold" th:text="${T(java.time.Period).between(headCoach.dateOfBirth, T(java.time.LocalDate).now()).getYears()}">42</p>
                             </div>
