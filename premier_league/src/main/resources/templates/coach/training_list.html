@@ -27,6 +27,13 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- CSRF meta (Spring Security sẽ cung cấp biến _csrf nếu bật CSRF) -->
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
+
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -116,7 +123,7 @@
                     </td>
                 </tr>
 
-                <tr th:each="s : ${schedules}" class="hover:bg-purple-50/50 transition-colors group">
+                <tr th:each="s : ${schedules}" class="hover:bg-purple-50/50 transition-colors group" th:attr="data-training-id=${s.id}">
 
                     <td class="p-5 align-top">
                         <div class="flex items-start gap-3">
@@ -159,9 +166,10 @@
                                 <i data-lucide="edit-3" class="w-5 h-5"></i>
                             </a>
 
+                            <!-- Delete button: có href (fallback) + data-url để AJAX sử dụng -->
                             <a th:href="@{/coach/team/{teamId}/training/delete/{trainingId}(teamId=${teamId}, trainingId=${s.id})}"
-                               class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                               onclick="return confirm('Bạn có chắc muốn xóa lịch tập này?')"
+                               th:attr="data-url=@{/coach/team/{teamId}/training/delete/{trainingId}(teamId=${teamId}, trainingId=${s.id})}"
+                               class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors delete-training"
                                title="Xóa">
                                 <i data-lucide="trash-2" class="w-5 h-5"></i>
                             </a>
@@ -178,6 +186,116 @@
 
 <script>
     lucide.createIcons();
+</script>
+
+<!-- AJAX Delete script with SweetAlert2 -->
+<script>
+    (function () {
+        // Lấy CSRF token và header nếu có (Spring Security cung cấp _csrf trong model)
+        const csrfMeta = document.querySelector('meta[name="_csrf"]');
+        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+        const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : null;
+        const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.getAttribute('content') : null;
+
+        function showSuccessToast(message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: message,
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                customClass: { popup: 'rounded-xl' }
+            });
+        }
+
+        function showErrorAlert(title, message) {
+            Swal.fire({
+                icon: 'error',
+                title: title,
+                text: message,
+                customClass: { popup: 'rounded-xl' }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.delete-training').forEach(function (el) {
+                el.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Lấy URL xóa từ data-url hoặc href (fallback)
+                    const url = el.getAttribute('data-url') || el.getAttribute('href');
+                    if (!url) {
+                        console.error('Delete URL không hợp lệ.');
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Xác nhận xóa',
+                        html: "<strong>Bạn có chắc chắn muốn xóa lịch tập này?</strong><br/>Hành động sẽ không thể hoàn tác.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy',
+                        reverseButtons: true,
+                        focusCancel: true,
+                        customClass: {
+                            popup: 'rounded-xl',
+                        }
+                    }).then((result) => {
+                        if (!result.isConfirmed) return;
+
+                        // Thực hiện request DELETE bằng fetch
+                        const headers = {
+                            'Accept': 'application/json'
+                        };
+                        // Nếu có CSRF, gắn header thích hợp
+                        if (csrfToken && csrfHeaderName) {
+                            headers[csrfHeaderName] = csrfToken;
+                        } else if (csrfToken) {
+                            // fallback header name
+                            headers['X-CSRF-TOKEN'] = csrfToken;
+                        }
+
+                        fetch(url, {
+                            method: 'DELETE',
+                            headers: headers,
+                            credentials: 'same-origin' // gửi cookie nếu cần
+                        })
+                            .then(async (response) => {
+                                // Nếu server trả json với thông tin, cố parse
+                                let body = null;
+                                try { body = await response.json(); } catch (err) { /* không phải json */ }
+
+                                if (response.ok) {
+                                    // Xóa hàng tương ứng khỏi DOM
+                                    const row = el.closest('tr');
+                                    if (row) {
+                                        row.style.transition = 'opacity 300ms ease, transform 300ms ease';
+                                        row.style.opacity = '0';
+                                        row.style.transform = 'translateY(-8px)';
+                                        setTimeout(() => row.remove(), 320);
+                                    }
+
+                                    // Hiển thị thông tin (dùng message server trả về nếu có)
+                                    const msg = (body && body.message) ? body.message : 'Xóa lịch tập thành công.';
+                                    showSuccessToast(msg);
+                                } else {
+                                    // Lấy message lỗi nếu server gửi
+                                    const errMsg = (body && (body.error || body.message)) ? (body.error || body.message) : ('Có lỗi khi xóa. Mã: ' + response.status);
+                                    showErrorAlert('Không thể xóa', errMsg);
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Fetch error:', error);
+                                showErrorAlert('Lỗi kết nối', 'Không thể liên hệ máy chủ. Vui lòng thử lại sau.');
+                            });
+                    });
+                });
+            });
+        });
+    })();
 </script>
 
 </body>
