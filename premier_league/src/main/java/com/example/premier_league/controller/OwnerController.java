@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/owners")
+@RequestMapping("/admin/owners")
 @RequiredArgsConstructor
 public class OwnerController {
 

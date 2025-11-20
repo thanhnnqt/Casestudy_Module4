@@ -181,7 +181,7 @@
                 </form>
 
                 <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).LIVE}"
-                   th:href="@{'/admin/matches/live/' + ${match.id}}"
+                   th:href="@{'/admin/events?matchId=' + ${match.id}}"
                    class="btn btn-danger btn-sm">Xem trận</a>
 
                 <form th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).LIVE}"
