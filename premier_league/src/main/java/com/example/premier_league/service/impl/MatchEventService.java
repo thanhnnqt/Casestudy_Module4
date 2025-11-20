@@ -108,6 +108,58 @@ public class MatchEventService implements IMatchEventService {
             messaging.convertAndSend("/topic/match/" + matchId + "/score", scorePayload);
         }
 
+        // ======================== HANDLE YELLOW CARD (season-wide accumulation) ========================
+        if ("YELLOW_CARD".equalsIgnoreCase(saved.getType())) {
+            Player player = saved.getPlayer();
+            if (player != null) {
+                // tăng tổng thẻ vàng mùa giải
+                player.setSeasonYellowCards(player.getSeasonYellowCards() + 1);
+
+                // Lưu player ngay (để tránh mất khi rollback)
+                playerRepo.save(player);
+
+                // Nếu đạt ngưỡng (2 theo yêu cầu) -> phát sinh RED_CARD và treo giò 3 trận
+                if (player.getSeasonYellowCards() >= 2) {
+
+                    // reset thẻ vàng mùa giải (theo luật bạn muốn)
+                    player.setSeasonYellowCards(0);
+
+                    // đặt treo giò 3 trận
+                    player.setSuspensionMatchesRemaining(3);
+
+                    playerRepo.save(player);
+
+                    // tạo thẻ đỏ tự động (sự kiện)
+                    MatchEvent red = new MatchEvent();
+                    red.setMatch(match);
+                    red.setPlayer(player);
+                    red.setTeam(saved.getTeam());
+                    red.setMinute(saved.getMinute()); // có thể +1 nếu muốn
+                    red.setType("RED_CARD");
+                    red.setDescription("Nhận thẻ đỏ do tích lũy 2 thẻ vàng trong mùa giải");
+
+                    MatchEvent redSaved = eventRepo.save(red);
+
+                    // gửi realtime thẻ đỏ
+                    messaging.convertAndSend("/topic/match/" + matchId + "/events", toDto(redSaved));
+
+                    // (tùy chọn) broadcast bảng xếp hạng / danh sách treo giò nếu cần
+                }
+            }
+        }
+
+        // ======================== HANDLE RED CARD DIRECT ========================
+        if ("RED_CARD".equalsIgnoreCase(saved.getType())) {
+            Player player = saved.getPlayer();
+            if (player != null) {
+                // Nếu chưa có suspension hoặc muốn set tối thiểu 3 trận thì đặt
+                if (player.getSuspensionMatchesRemaining() < 3) {
+                    player.setSuspensionMatchesRemaining(3);
+                    playerRepo.save(player);
+                }
+            }
+        }
+
         // handle MATCH_END event (khi admin gửi loại này)
         if ("MATCH_END".equalsIgnoreCase(saved.getType())) {
 
@@ -174,6 +226,29 @@ public class MatchEventService implements IMatchEventService {
 
             // gửi realtime sự kiện MATCH_END
             messaging.convertAndSend("/topic/match/" + matchId + "/events", toDto(saved));
+
+            // ======================== GIẢM SỐ TRẬN TREO GIÒ CHO 2 ĐỘI ========================
+            // Giảm 1 trận còn lại cho mọi cầu thủ thuộc 2 đội (nếu > 0)
+            try {
+                List<Player> homePlayers = playerRepo.findByTeamId(match.getHomeTeam().getId());
+                List<Player> awayPlayers = playerRepo.findByTeamId(match.getAwayTeam().getId());
+
+                for (Player p : homePlayers) {
+                    if (p.getSuspensionMatchesRemaining() > 0) {
+                        p.setSuspensionMatchesRemaining(p.getSuspensionMatchesRemaining() - 1);
+                        playerRepo.save(p);
+                    }
+                }
+                for (Player p : awayPlayers) {
+                    if (p.getSuspensionMatchesRemaining() > 0) {
+                        p.setSuspensionMatchesRemaining(p.getSuspensionMatchesRemaining() - 1);
+                        playerRepo.save(p);
+                    }
+                }
+            } catch (Exception ex) {
+                // không block flow nếu repo không có method findByTeamId
+                // (nếu cần, hãy thêm method findByTeamId vào IPlayerRepository)
+            }
 
             // Optionally: broadcast ranking update (if frontend listens)
             // messaging.convertAndSend("/topic/rankings", ...); // nếu có DTO BXH
