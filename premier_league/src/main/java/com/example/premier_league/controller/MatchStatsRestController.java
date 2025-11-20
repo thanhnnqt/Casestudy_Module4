@@ -9,28 +9,26 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/matches")
+@RequiredArgsConstructor
 public class MatchStatsRestController {
 
     private final IMatchStatsService statsService;
-    private final SimpMessagingTemplate ws;
 
-    @PostMapping("/{matchId}/stats")
+    // ===== GET stats FE gọi để hiển thị =====
+    @GetMapping("/{matchId}/stats")
+    public MatchStatsDto getStats(@PathVariable Long matchId) {
+        return statsService.getStatsByMatchId(matchId);
+    }
+
+    // ===== UPDATE stats Admin gửi =====
+    @PutMapping("/{matchId}/stats")
     public ResponseEntity<?> updateStats(
             @PathVariable Long matchId,
             @RequestBody MatchStatsDto dto
     ) {
-        MatchStats saved = statsService.updateStats(matchId, dto);
-
-        // bắn realtime ra FE
-        ws.convertAndSend("/topic/match/" + matchId + "/stats", saved);
-
-        return ResponseEntity.ok(saved);
-    }
-
-    @GetMapping("/{matchId}/stats")
-    public ResponseEntity<?> getStats(@PathVariable Long matchId) {
-        return ResponseEntity.ok(statsService.getStats(matchId));
+        statsService.updateStats(matchId, dto);
+        return ResponseEntity.ok("updated");
     }
 }
+

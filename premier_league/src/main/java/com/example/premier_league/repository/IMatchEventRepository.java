@@ -6,7 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface IMatchEventRepository extends JpaRepository<MatchEvent, Long> {
-    List<MatchEvent> findByMatchIdOrderByCreatedAtAsc(Long matchId);
-
-    List<MatchEvent> findByMatchIdOrderByMinuteAsc(Long matchId);
+        List<MatchEvent> findByMatchIdOrderByMinuteAsc(Long matchId);
 }

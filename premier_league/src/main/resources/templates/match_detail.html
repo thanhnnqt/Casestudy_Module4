@@ -31,7 +31,7 @@
             padding: 0.6rem 1.25rem;
             cursor: pointer;
             font-weight: 600;
-            width: 50%;          /* FIX CHẶT 2 NÚT */
+            width: 50%;
             text-align: center;
         }
 
@@ -50,7 +50,6 @@
             height: 600px;
             overflow-y: auto;
         }
-
 
         #matchRoot, #tabContainer {
             width: 100%;
@@ -163,31 +162,32 @@
         <div class="grid grid-cols-3 gap-10 text-lg font-semibold items-start">
 
             <!-- HOME STATS -->
-            <div id="homeStats" class="text-center text-primary space-y-3"></div>
+            <ul id="homeStats" class="text-center text-primary space-y-5">
+                <!-- Home numbers will be rendered here (10 items) -->
+            </ul>
 
             <!-- LABELS -->
-            <div class="text-center text-gray-700">
-                <h3 class="font-bold text-primary">THỐNG KÊ ĐỘI TUYỂN</h3>
-                <ul class="space-y-5 mt-4 text-base">
-                    <li>Số lần sút</li>
-                    <li>Sút trúng đích</li>
-                    <li>Kiểm soát bóng</li>
-                    <li>Lượt chuyền bóng</li>
-                    <li>Tỷ lệ chuyền bóng</li>
-                    <li>Phạm lỗi</li>
-                    <li>Thẻ vàng</li>
-                    <li>Thẻ đỏ</li>
-                    <li>Việt vị</li>
-                    <li>Phạt góc</li>
-                </ul>
-            </div>
+            <ul class="text-center text-gray-700 space-y-5">
+                <li class="font-bold text-primary">THỐNG KÊ ĐỘI TUYỂN</li>
+                <li>Số lần sút</li>
+                <li>Sút trúng đích</li>
+                <li>Kiểm soát bóng</li>
+                <li>Lượt chuyền bóng</li>
+                <li>Tỷ lệ chuyền bóng</li>
+                <li>Phạm lỗi</li>
+                <li>Thẻ vàng</li>
+                <li>Thẻ đỏ</li>
+                <li>Việt vị</li>
+                <li>Phạt góc</li>
+            </ul>
 
             <!-- AWAY STATS -->
-            <div id="awayStats" class="text-center text-red-600 space-y-3"></div>
+            <ul id="awayStats" class="text-center text-red-600 space-y-5">
+                <!-- Away numbers will be rendered here (10 items) -->
+            </ul>
 
         </div>
     </section>
-
 
     <!-- STADIUM -->
     <section class="mt-4 text-sm text-gray-600">
@@ -247,7 +247,7 @@
 
         /* ================= LOAD DATA ================= */
         async function safeJson(url) {
-            try { let r = await fetch(url); return await r.json(); }
+            try { let r = await fetch(url); if (!r.ok) return null; return await r.json(); }
             catch { return null; }
         }
 
@@ -283,25 +283,32 @@
 
         /* ================= RENDER STATS ================= */
         function updateStatsUI(s) {
+            // đảm bảo luôn có 10 items cho mỗi team để giữ hàng ngang
             homeStats.innerHTML = `
-                <ul class="space-y-2 text-base">
-                    <li>${s.shotsHome}</li>
-                    <li>${s.shotsOnTargetHome}</li>
-                    <li>${s.possessionHome}%</li>
-                    <li>${s.passesHome}</li>
-                    <li>${s.accuracyHome}%</li>
-                    <li>${s.foulsHome}</li>
-                </ul>`;
+                <li>${s.shotsHome ?? 0}</li>
+                <li>${s.shotsOnTargetHome ?? 0}</li>
+                <li>${s.possessionHome ? s.possessionHome + '%' : '0%'}</li>
+                <li>${s.passesHome ?? 0}</li>
+                <li>${s.accuracyHome ? s.accuracyHome + '%' : '0%'}</li>
+                <li>${s.foulsHome ?? 0}</li>
+                <li>${s.yellowCardsHome ?? 0}</li>
+                <li>${s.redCardsHome ?? 0}</li>
+                <li>${s.offsidesHome ?? 0}</li>
+                <li>${s.cornersHome ?? 0}</li>
+            `;
 
             awayStats.innerHTML = `
-                <ul class="space-y-2 text-base">
-                    <li>${s.shotsAway}</li>
-                    <li>${s.shotsOnTargetAway}</li>
-                    <li>${s.possessionAway}%</li>
-                    <li>${s.passesAway}</li>
-                    <li>${s.accuracyAway}%</li>
-                    <li>${s.foulsAway}</li>
-                </ul>`;
+                <li>${s.shotsAway ?? 0}</li>
+                <li>${s.shotsOnTargetAway ?? 0}</li>
+                <li>${s.possessionAway ? s.possessionAway + '%' : '0%'}</li>
+                <li>${s.passesAway ?? 0}</li>
+                <li>${s.accuracyAway ? s.accuracyAway + '%' : '0%'}</li>
+                <li>${s.foulsAway ?? 0}</li>
+                <li>${s.yellowCardsAway ?? 0}</li>
+                <li>${s.redCardsAway ?? 0}</li>
+                <li>${s.offsidesAway ?? 0}</li>
+                <li>${s.cornersAway ?? 0}</li>
+            `;
         }
 
         /* ================= RENDER EVENTS ================= */
