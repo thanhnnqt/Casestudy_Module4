@@ -23,11 +23,11 @@ public class DashboardController {
         this.teamService = teamService;
     }
 
-    @GetMapping("/admin/owner")
+    @GetMapping("/owner/{teamId}")
     public String dashboard() {
         return "owner/dashboard";
     }
-    @GetMapping("/admin/owner/matches")
+    @GetMapping("owner/matches")
     public String matches(Model model,
                           @RequestParam(required = false) String team,
                           @RequestParam(required = false) LocalDate date,

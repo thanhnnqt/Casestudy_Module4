@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/admin/players")
+@RequestMapping("/owner/players")
 public class PlayerController {
 
     private final IPlayerService playerService;

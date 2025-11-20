@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/admin/staffs")
+@RequestMapping("/owner/staffs")
 public class StaffController {
 
     private final IStaffService staffService;
