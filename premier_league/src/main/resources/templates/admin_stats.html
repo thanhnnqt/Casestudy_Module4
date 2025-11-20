@@ -168,6 +168,40 @@
             payload[f + "Away"] = Number(document.getElementById(f + "Away").value);
         });
 
+        /* =====================================================
+           VALIDATE %
+           possessionHome + possessionAway = 100
+           accuracyHome + accuracyAway     = 100
+        ===================================================== */
+
+        const pHome = payload.possessionHome;
+        const pAway = payload.possessionAway;
+
+        const aHome = payload.accuracyHome;
+        const aAway = payload.accuracyAway;
+
+        // reset màu border
+        document.getElementById("possessionHome").classList.remove("border-red-500");
+        document.getElementById("possessionAway").classList.remove("border-red-500");
+        document.getElementById("accuracyHome").classList.remove("border-red-500");
+        document.getElementById("accuracyAway").classList.remove("border-red-500");
+
+        // Kiểm soát bóng %
+        if (pHome + pAway !== 100) {
+            document.getElementById("possessionHome").classList.add("border-red-500");
+            document.getElementById("possessionAway").classList.add("border-red-500");
+            return alert("⚠ Kiểm soát bóng của 2 đội phải cộng lại đúng 100%!");
+        }
+
+        // Tỷ lệ chuyền bóng %
+        if (aHome + aAway !== 100) {
+            document.getElementById("accuracyHome").classList.add("border-red-500");
+            document.getElementById("accuracyAway").classList.add("border-red-500");
+            return alert("⚠ Tỷ lệ chuyền bóng của 2 đội phải cộng lại đúng 100%!");
+        }
+
+        /* ===================================================== */
+
         let resp = await fetch(`/api/matches/${id}/stats`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -176,6 +210,7 @@
 
         alert(resp.ok ? "Cập nhật thành công!" : "Lỗi server");
     }
+
 
 </script>
 
