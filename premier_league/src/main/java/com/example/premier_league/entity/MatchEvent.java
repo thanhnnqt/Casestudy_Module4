@@ -1,31 +1,34 @@
 package com.example.premier_league.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import java.time.Instant;
+import lombok.Getter;
+import lombok.Setter;
 
-@Entity
-@Table(name = "match_events")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
+@Table(name = "match_events")
 public class MatchEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long matchId;
+    private Integer minute;
 
-    private Long teamId; // nullable
+    private String type;
 
-    private Integer minute; // phút xảy ra
-
-    private String type; // GOAL, YELLOW_CARD, RED_CARD, PENALTY, MATCH_END, ...
-
-    @Column(length = 1000)
     private String description;
 
-    private Instant createdAt = Instant.now();
+    @ManyToOne
+    @JoinColumn(name = "match_id")
+    private Match match;
+
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
+
+    @ManyToOne
+    @JoinColumn(name = "player_id")
+    private Player player;
 }

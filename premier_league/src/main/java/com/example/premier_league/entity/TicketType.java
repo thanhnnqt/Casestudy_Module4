@@ -17,6 +17,7 @@ import lombok.Setter;
 public class TicketType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String typeTicket;
+    private Integer price;
 }

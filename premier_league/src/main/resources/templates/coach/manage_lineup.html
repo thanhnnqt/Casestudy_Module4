@@ -384,7 +384,9 @@
                 setTimeout(() => e.target.classList.add('dragging'), 0);
             });
             player.addEventListener('dragend', () => {
-                draggedItem.classList.remove('dragging');
+                if (draggedItem) { // Kiểm tra xem draggedItem có còn tồn tại không
+                    draggedItem.classList.remove('dragging');
+                }
                 draggedItem = null;
             });
         }
@@ -470,12 +472,14 @@
             if (zone.classList.contains('player-slot')) {
                 const filledPitchSlots = document.querySelectorAll('.player-slot.filled').length;
                 const activeFormation = document.querySelector('.formation:not([style*="display: none"])');
-                const totalSlotsInFormation = activeFormation.querySelectorAll('.player-slot').length; // Thường là 11
+                if (activeFormation) { // Thêm kiểm tra null
+                    const totalSlotsInFormation = activeFormation.querySelectorAll('.player-slot').length; // Thường là 11
 
-                if (filledPitchSlots >= totalSlotsInFormation) {
-                    // Nếu kéo từ bench/pool -> pitch (quá 11) -> cấm
-                    if (!item.closest('.player-slot')) {
-                        return false;
+                    if (filledPitchSlots >= totalSlotsInFormation) {
+                        // Nếu kéo từ bench/pool -> pitch (quá 11) -> cấm
+                        if (!item.closest('.player-slot')) {
+                            return false;
+                        }
                     }
                 }
             }
@@ -533,7 +537,9 @@
 
             // Cầu thủ trên sân (chính)
             const mainCount = document.querySelectorAll('.player-slot.filled').length;
-            document.getElementById('main-count').innerText = mainCount;
+
+            // Dòng gây lỗi đã bị xóa
+            // document.getElementById('main-count').innerText = mainCount;
 
             // Cầu thủ dự bị
             const subCount = document.querySelectorAll('.bench-slot.filled').length;
@@ -589,11 +595,10 @@
         function loadInitialLineup() {
             // 1. Tải đội hình chính
             initialMainPlayers.forEach(player => {
-                const playerEl = document.querySelector(`.player-item[data-player-id="${player.id}"]`);
-                if(playerEl) playerEl.remove(); // Xóa khỏi danh sách chờ
+                const playerEl = document.querySelector(`#available-players .player-item[data-player-id="${player.id}"]`);
+                if (playerEl) playerEl.remove(); // Xóa khỏi danh sách chờ
 
-                // Tìm slot trống (chỉ là để xếp tạm, không đúng 100% vị trí)
-                // Một logic tốt hơn sẽ cần lưu cả vị trí (slot_key) trong DB
+                // Tìm slot trống
                 const emptySlot = document.querySelector('.player-slot:not(.filled)');
                 if (emptySlot) {
                     const slotLabel = emptySlot.querySelector('.slot-label').innerText;
@@ -605,8 +610,8 @@
 
             // 2. Tải đội hình dự bị
             initialSubPlayers.forEach(player => {
-                const playerEl = document.querySelector(`.player-item[data-player-id="${player.id}"]`);
-                if(playerEl) playerEl.remove(); // Xóa khỏi danh sách chờ
+                const playerEl = document.querySelector(`#available-players .player-item[data-player-id="${player.id}"]`);
+                if (playerEl) playerEl.remove(); // Xóa khỏi danh sách chờ
 
                 const emptyBenchSlot = document.querySelector('.bench-slot:not(.filled)');
                 if (emptyBenchSlot) {

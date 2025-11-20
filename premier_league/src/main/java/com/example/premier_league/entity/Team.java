@@ -1,52 +1,66 @@
-package com.example.premier_league.entity;
+    package com.example.premier_league.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import java.util.List;
+    import com.fasterxml.jackson.annotation.JsonIgnore;
+    import com.fasterxml.jackson.annotation.JsonManagedReference;
+    import jakarta.persistence.*;
+    import lombok.*;
 
-@Entity
-@Table(name = "teams")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class Team {
+    import java.util.HashSet;
+    import java.util.List;
+    import java.util.Set;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Entity
+    @Table(name = "teams")
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public class Team {
 
-    private String name;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
 
-    private String shortName; // Tên viết tắt
+        private String name;
 
-    private String country; // Quốc gia
+        private String shortName; // Tên viết tắt
 
-    private String city; // Thành phố
+        private String country; // Quốc gia
 
-    private String stadium; // Sân vận động chính
+        private String city; // Thành phố
 
-    private String coachName; // Huấn luyện viên
+        private String stadium; // Sân vận động chính
 
-    private String logoUrl; // Logo đội
+        private String coachName; // Huấn luyện viên
 
-    @Column(length = 1000)
-    private String description;
+        private String logoUrl; // Logo đội
 
-    private int totalPlayers;
+        @Column(length = 1000)
+        private String description;
 
-    // Thống kê mùa giải
-    private int winCount;
-    private int drawCount;
-    private int loseCount;
+        private int totalPlayers;
 
-    private int goalsFor;       // bàn thắng
-    private int goalsAgainst;   // bàn thua
-    private int goalDifference; // hiệu số (goalsFor - goalsAgainst)
+        // Thống kê mùa giải
+        private int winCount;
+        private int drawCount;
+        private int loseCount;
 
-    private int points; // điểm số (3 thắng - 1 hòa - 0 thua)
+        private int goalsFor;       // bàn thắng
+        private int goalsAgainst;   // bàn thua
+        private int goalDifference; // hiệu số (goalsFor - goalsAgainst)
 
-    //quan hệ với Account
-    @OneToOne(mappedBy = "team")
-    private Account admin;
-}
+        private int points; // điểm số (3 thắng - 1 hòa - 0 thua)
+
+        //quan hệ với Account
+        @OneToOne(mappedBy = "team")
+        private Account admin;
+
+        @JsonIgnore // Dùng @JsonIgnore để tránh lỗi vòng lặp vô hạn khi dùng API
+        @ManyToMany(mappedBy = "teams")
+        private Set<Tournament> tournaments = new HashSet<>();
+        @OneToMany(mappedBy = "team")
+        @JsonManagedReference
+        private List<Coach> coaches;
+
+
+    }

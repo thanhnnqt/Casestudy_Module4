@@ -1,12 +1,12 @@
 package com.example.premier_league.service.impl;
 
-import com.example.premier_league.entity.Match;
-import com.example.premier_league.entity.MatchEvent;
-import com.example.premier_league.entity.MatchStatus;
+import com.example.premier_league.dto.MatchEventDto;
+import com.example.premier_league.entity.*;
 import com.example.premier_league.repository.IMatchEventRepository;
 import com.example.premier_league.repository.IMatchRepository;
+import com.example.premier_league.repository.IPlayerRepository;
+import com.example.premier_league.repository.ITeamRepository;
 import com.example.premier_league.service.IMatchEventService;
-import com.example.premier_league.service.IRankingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -20,84 +20,122 @@ public class MatchEventService implements IMatchEventService {
 
     private final IMatchEventRepository eventRepo;
     private final IMatchRepository matchRepo;
-    private final SimpMessagingTemplate simpMessagingTemplate;
-    private final IRankingService rankingService;
-    private final IMatchEventRepository eventRepository;
+    private final SimpMessagingTemplate messaging;
+    private final ITeamRepository teamRepo;
+    private final IPlayerRepository playerRepo;
 
 
     @Override
     @Transactional
     public MatchEvent createEvent(MatchEvent event) {
-        // load match
-        Match match = matchRepo.findById(event.getMatchId()).orElseThrow(() -> new RuntimeException("Match not found"));
 
-        // block events if match is POSTPONED or FINISHED (except maybe administrative flow)
-        if (match.getStatus() == MatchStatus.POSTPONED) {
-            throw new RuntimeException("Match is postponed. Cannot add events.");
+        // Lấy id trận đấu từ entity Match
+        if (event.getMatch() == null || event.getMatch().getId() == null) {
+            throw new RuntimeException("Thiếu matchId trong sự kiện");
         }
-        if (match.getStatus() == MatchStatus.FINISHED) {
-            throw new RuntimeException("Match already finished. Cannot add events.");
+        Long matchId = event.getMatch().getId();
+
+        // Lấy trận đấu từ DB
+        Match match = matchRepo.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu"));
+
+        // Nếu có đội -> lấy đội từ DB
+        if (event.getTeam() != null && event.getTeam().getId() != null) {
+            Team team = teamRepo.findById(event.getTeam().getId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đội bóng"));
+            event.setTeam(team);
         }
 
-        // persist event (append-only)
+        // Nếu có cầu thủ -> lấy cầu thủ từ DB
+        if (event.getPlayer() != null && event.getPlayer().getId() != null) {
+            Player player = playerRepo.findById(event.getPlayer().getId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy cầu thủ"));
+            event.setPlayer(player);
+        }
+
+        // Gán match managed (từ DB) vào event
+        event.setMatch(match);
+
+        // Lưu sự kiện
         MatchEvent saved = eventRepo.save(event);
 
-        // handle types
-        String type = event.getType() == null ? "" : event.getType().trim().toUpperCase();
+        // Nếu là bàn thắng thì cập nhật tỉ số
+        if ("GOAL".equalsIgnoreCase(saved.getType())) {
 
-        if ("GOAL".equals(type)) {
-            // only update score if match is LIVE
             if (match.getStatus() != MatchStatus.LIVE) {
-                throw new RuntimeException("Match is not LIVE. Cannot add GOAL.");
+                throw new RuntimeException("Trận đấu chưa LIVE, không thể thêm bàn thắng");
             }
 
-            if (event.getTeamId() != null) {
-                Long teamId = event.getTeamId();
-                if (teamId.equals(match.getHomeTeam().getId())) {
-                    match.setHomeScore((match.getHomeScore() == null ? 0 : match.getHomeScore()) + 1);
-                } else if (teamId.equals(match.getAwayTeam().getId())) {
-                    match.setAwayScore((match.getAwayScore() == null ? 0 : match.getAwayScore()) + 1);
-                }
+            Long teamId = saved.getTeam().getId();
+
+            if (teamId.equals(match.getHomeTeam().getId())) {
+                match.setHomeScore(match.getHomeScore() + 1);
+            } else if (teamId.equals(match.getAwayTeam().getId())) {
+                match.setAwayScore(match.getAwayScore() + 1);
+            } else {
+                throw new RuntimeException("Đội này không thuộc trận đấu");
             }
+
             matchRepo.save(match);
 
-            // broadcast
-            simpMessagingTemplate.convertAndSend("/topic/events", saved);
-            simpMessagingTemplate.convertAndSend("/topic/match/" + match.getId() + "/score", match);
-            return saved;
+            // Gửi realtime cập nhật tỉ số
+            messaging.convertAndSend("/topic/match/" + matchId + "/score", match);
         }
 
-        if ("MATCH_END".equals(type)) {
-            // only allowed if match is LIVE
-            if (match.getStatus() != MatchStatus.LIVE) {
-                throw new RuntimeException("Match is not LIVE. Cannot end match.");
-            }
+        // Gửi realtime sự kiện mới
+        messaging.convertAndSend("/topic/match/" + matchId + "/events", saved);
 
-            match.setStatus(MatchStatus.FINISHED);
-            matchRepo.save(match);
-
-            // apply ranking changes (points and stats)
-            rankingService.applyMatchResult(match);
-
-            // broadcast event, final score and updated ranking
-            simpMessagingTemplate.convertAndSend("/topic/events", saved);
-            simpMessagingTemplate.convertAndSend("/topic/match/" + match.getId() + "/score", match);
-            simpMessagingTemplate.convertAndSend("/topic/rankings", rankingService.getRanking());
-
-            return saved;
-        }
-
-        // default: other events (YELLOW_CARD, RED_CARD, PENALTY, ...)
-        // If event indicates match start (optional) -> change status to LIVE (we won't auto-change for UPCOMING per requirement)
-        // We simply broadcast the event.
-        simpMessagingTemplate.convertAndSend("/topic/events", saved);
         return saved;
     }
 
+
     @Override
     public List<MatchEvent> listEvents(Long matchId) {
-        return eventRepo.findByMatchIdOrderByCreatedAtAsc(matchId);
+        return eventRepo.findByMatchIdOrderByMinuteAsc(matchId);
     }
+
+    @Override
+    public List<MatchEvent> getEventsByMatch(Long matchId) {
+        return eventRepo.findByMatchIdOrderByMinuteAsc(matchId);
+    }
+
+    @Override
+    @Transactional
+    public void addEvent(Long matchId, MatchEventDto dto) {
+
+        var match = matchRepo.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found"));
+
+        MatchEvent event = new MatchEvent();
+        event.setMatch(match);
+        event.setMinute(dto.getMinute());
+        event.setType(dto.getType());
+        event.setDescription(dto.getDescription());
+
+        // set team
+        if (dto.getTeamId() != null) {
+            var team = teamRepo.findById(dto.getTeamId())
+                    .orElseThrow(() -> new RuntimeException("Team not found"));
+            // kiểm tra team thuộc match
+            if (!team.getId().equals(match.getHomeTeam().getId()) &&
+                    !team.getId().equals(match.getAwayTeam().getId())) {
+                throw new RuntimeException("Team does not belong to this match");
+            }
+            event.setTeam(team);
+        }
+
+        // set player nếu có
+        if (dto.getPlayerId() != null) {
+            var player = playerRepo.findById(dto.getPlayerId())
+                    .orElseThrow(() -> new RuntimeException("Player not found"));
+            event.setPlayer(player);
+        }
+
+        // tái sử dụng createEvent để lưu + update score + websocket
+        createEvent(event);
+    }
+
+
 
     @Override
     public Match findMatchById(Long matchId) {
@@ -106,11 +144,7 @@ public class MatchEventService implements IMatchEventService {
 
     @Override
     public MatchEvent getEvent(Long id) {
-        return eventRepo.findById(id).orElse(null);
-    }
-
-    @Override
-    public List<MatchEvent> getEventsByMatch(Long matchId) {
-        return eventRepository.findByMatchIdOrderByMinuteAsc(matchId);
+        return null;
     }
 }
+

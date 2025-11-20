@@ -1,170 +1,377 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Chi tiết trận đấu</title>
+    <meta charset="UTF-8" />
+    <title>Chi tiết trận đấu (Realtime)</title>
 
+    <!-- ẨN BODY CHO TỚI KHI LOAD XONG -->
+    <style>
+        body { visibility: hidden; }
+    </style>
+    <script>
+        window.addEventListener("load", () => {
+            document.body.style.visibility = "visible";
+        });
+    </script>
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#38003c',
-                        secondary: '#00ff85',
-                        homeRed: '#ff2c2c',
-                        awayBlue: '#00a2ff'
-                    }
-                }
-            }
+            theme: { extend: { colors: { primary:"#38003c", secondary:"#00ff85" } } }
         }
     </script>
 
+    <style>
+        /* ------- TAB STYLE ------- */
+        .tab-btn {
+            color: #555;
+            background: transparent;
+            border: 0;
+            padding: 0.6rem 1.25rem;
+            cursor: pointer;
+            font-weight: 600;
+            width: 50%;
+            text-align: center;
+        }
+
+        .tab-btn.active { color: #38003c; }
+
+        #tabHighlight {
+            position: absolute;
+            bottom: 0;
+            height: 3px;
+            background: #38003c;
+            transition: all .22s ease;
+        }
+
+        .tab-panel {
+            min-height: 600px;
+            height: 600px;
+            overflow-y: auto;
+        }
+
+        #matchRoot, #tabContainer {
+            width: 100%;
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        #eventsList li {
+            min-height: 56px;
+            display:flex;
+            align-items:center;
+            gap: 10px;
+        }
+
+        .video-embed {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow:hidden;
+            border-radius:.5rem;
+        }
+        .video-embed iframe, .video-embed img {
+            position:absolute;
+            inset:0;
+            width:100%;
+            height:100%;
+        }
+    </style>
+
+    <!-- WebSocket Libs -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
+<!-- NAVBAR -->
 <div th:replace="layout/navbar :: header"></div>
 
-<div class="max-w-5xl mx-auto p-4 mt-6">
+<main id="matchRoot" th:attr="data-match-id=${matchId}"
+      class="max-w-4xl mx-auto p-6 bg-white mt-10 rounded-2xl shadow-xl border border-gray-200">
 
-    <!-- Header -->
-    <div class="bg-black text-white rounded-2xl p-6 shadow-lg">
+    <!-- HEADER -->
+    <section class="text-center mb-6">
+        <p class="text-gray-500 text-sm">
+            Ngoại hạng Anh • <span id="matchDate">-</span>
+        </p>
+        <p id="matchStatus" class="text-green-600 font-semibold text-sm">-</p>
 
-        <div class="flex justify-between text-gray-300 text-sm mb-4">
-            <span>Premier League</span>
-            <span th:text="${#temporals.format(match.matchDate, 'E, dd/MM')}">Cn, 9/11</span>
-        </div>
-
-        <div class="flex justify-between items-center mb-6">
-            <!-- HOME -->
-            <div class="w-1/3 text-center">
-                <img th:src="${match.homeTeam.logoUrl}" class="w-14 mx-auto mb-2">
-                <h2 class="font-bold text-lg" th:text="${match.homeTeam.name}"></h2>
+        <div class="flex items-center justify-center gap-10 my-6">
+            <div class="text-center">
+                <img id="homeLogo" class="w-20 h-20 mx-auto mb-2 object-contain bg-white rounded"/>
+                <p id="homeName" class="font-bold text-xl">-</p>
             </div>
 
-            <!-- SCORE -->
-            <div class="w-1/3 text-center">
-                <div class="text-6xl font-black">
-                    <span id="homeScore" th:text="${match.homeScore}">0</span>
-                    <span class="mx-4">-</span>
-                    <span id="awayScore" th:text="${match.awayScore}">0</span>
-                </div>
-                <p class="text-gray-400 mt-1" th:text="${match.status}"></p>
+            <div class="text-6xl font-extrabold flex items-center gap-6">
+                <span id="homeScore">0</span>
+                <span class="text-gray-500">-</span>
+                <span id="awayScore">0</span>
             </div>
 
-            <!-- AWAY -->
-            <div class="w-1/3 text-center">
-                <img th:src="${match.awayTeam.logoUrl}" class="w-14 mx-auto mb-2">
-                <h2 class="font-bold text-lg" th:text="${match.awayTeam.name}"></h2>
+            <div class="text-center">
+                <img id="awayLogo" class="w-20 h-20 mx-auto mb-2 object-contain bg-white rounded"/>
+                <p id="awayName" class="font-bold text-xl">-</p>
             </div>
         </div>
-    </div>
+
+        <!-- TIMELINE -->
+        <div id="timelineContainer"
+             class="w-full bg-gray-200 rounded-full h-3 mt-4 overflow-hidden hidden">
+            <div id="timelineBar"
+                 class="h-full bg-secondary transition-all duration-500"></div>
+        </div>
+        <p id="timelineMinute"
+           class="text-center text-sm text-gray-600 mt-2 hidden">0'</p>
+    </section>
+
+    <!-- GOALS -->
+    <section id="goalsList" class="text-center mb-6 text-gray-800 space-y-1"></section>
+
+    <!-- HIGHLIGHT -->
+    <section class="mb-6">
+        <div id="videoContainer" class="video-embed bg-gray-100"></div>
+    </section>
 
     <!-- TABS -->
-    <div class="flex mt-8 border-b">
-        <button id="tabEvents"
-                class="px-6 py-3 border-b-4 border-primary text-primary font-semibold">Diễn biến chính</button>
+    <div class="tab-wrap mt-4 mb-4">
+        <div id="tabContainer" class="flex border-b relative">
 
-        <button id="tabStats"
-                class="px-6 py-3 hover:text-primary font-semibold text-gray-600">Thống kê</button>
+            <button id="btnEvents" data-tab="eventsTab"
+                    class="tab-btn active">Diễn biến chính</button>
+
+            <button id="btnStats" data-tab="statsTab"
+                    class="tab-btn">Thống kê</button>
+
+            <div id="tabHighlight"></div>
+        </div>
     </div>
 
-    <!-- CONTENT WRAPPER -->
-    <div class="mt-6">
+    <!-- EVENTS -->
+    <section id="eventsTab" class="tab-panel">
+        <ul id="eventsList" class="space-y-3 text-gray-700"></ul>
+    </section>
 
-        <!-- Diễn biến chính -->
-        <div id="eventsSection" class="bg-white rounded-xl p-6 shadow space-y-4">
+    <!-- STATS -->
+    <section id="statsTab" class="tab-panel hidden">
+        <div class="grid grid-cols-3 gap-10 text-lg font-semibold items-start">
 
-            <h3 class="text-xl font-bold mb-4 text-primary">Diễn biến chính</h3>
-
-            <ul id="eventList" class="space-y-3">
-                <li th:each="ev : ${events}"
-                    class="bg-gray-50 p-3 rounded-lg border shadow-sm flex justify-between">
-
-                    <span class="font-semibold" th:text="${ev.minute + `'`}"></span>
-                    <span th:text="${ev.description}"></span>
-                </li>
+            <!-- HOME STATS -->
+            <ul id="homeStats" class="text-center text-primary space-y-5">
+                <!-- Home numbers will be rendered here (10 items) -->
             </ul>
+
+            <!-- LABELS -->
+            <ul class="text-center text-gray-700 space-y-5">
+                <li class="font-bold text-primary">THỐNG KÊ ĐỘI TUYỂN</li>
+                <li>Số lần sút</li>
+                <li>Sút trúng đích</li>
+                <li>Kiểm soát bóng</li>
+                <li>Lượt chuyền bóng</li>
+                <li>Tỷ lệ chuyền bóng</li>
+                <li>Phạm lỗi</li>
+                <li>Thẻ vàng</li>
+                <li>Thẻ đỏ</li>
+                <li>Việt vị</li>
+                <li>Phạt góc</li>
+            </ul>
+
+            <!-- AWAY STATS -->
+            <ul id="awayStats" class="text-center text-red-600 space-y-5">
+                <!-- Away numbers will be rendered here (10 items) -->
+            </ul>
+
         </div>
+    </section>
 
-        <!-- Thống kê -->
-        <div id="statsSection" class="hidden bg-black text-white rounded-2xl p-6 shadow-xl mt-6">
+    <!-- STADIUM -->
+    <section class="mt-4 text-sm text-gray-600">
+        <p><span class="font-bold text-primary">Địa điểm:</span>
+            <span id="stadium">-</span></p>
+    </section>
 
-            <h3 class="text-center text-gray-300 mb-6 tracking-wider">THỐNG KÊ ĐỘI TUYỂN</h3>
+</main>
 
-            <div class="space-y-6">
-
-                <div class="grid grid-cols-3 text-center items-center">
-                    <div class="text-homeRed text-xl font-bold" th:text="${stats.shotsHome}">14</div>
-                    <div class="text-gray-300 text-sm">Số lần sút</div>
-                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.shotsAway}">4</div>
-                </div>
-
-                <div class="grid grid-cols-3 text-center items-center">
-                    <div class="text-homeRed text-xl font-bold" th:text="${stats.shotsOnTargetHome}">8</div>
-                    <div class="text-gray-300 text-sm">Sút trúng đích</div>
-                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.shotsOnTargetAway}">1</div>
-                </div>
-
-                <div class="grid grid-cols-3 text-center items-center">
-                    <div class="text-homeRed text-xl font-bold" th:text="${stats.possessionHome + '%'}"></div>
-                    <div class="text-gray-300 text-sm">Kiểm soát bóng</div>
-                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.possessionAway + '%'}"></div>
-                </div>
-
-                <div class="grid grid-cols-3 text-center items-center">
-                    <div class="text-homeRed text-xl font-bold" th:text="${stats.passesHome}">368</div>
-                    <div class="text-gray-300 text-sm">Chuyền bóng</div>
-                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.passesAway}">414</div>
-                </div>
-
-                <div class="grid grid-cols-3 text-center items-center">
-                    <div class="text-homeRed text-xl font-bold" th:text="${stats.accuracyHome + '%'}">80%</div>
-                    <div class="text-gray-300 text-sm">Chuyền chính xác</div>
-                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.accuracyAway + '%'}">88%</div>
-                </div>
-
-                <div class="grid grid-cols-3 text-center items-center">
-                    <div class="text-homeRed text-xl font-bold" th:text="${stats.foulsHome}">11</div>
-                    <div class="text-gray-300 text-sm">Phạm lỗi</div>
-                    <div class="text-awayBlue text-xl font-bold" th:text="${stats.foulsAway}">12</div>
-                </div>
-
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<div th:replace="layout/footer :: footer" class="mt-auto"></div>
+<!-- FOOTER -->
+<div th:replace="layout/footer :: footer"></div>
 
 <script>
-    lucide.createIcons();
+    document.addEventListener("DOMContentLoaded", () => {
 
-    const tabEvents = document.getElementById("tabEvents");
-    const tabStats = document.getElementById("tabStats");
+        lucide.createIcons();
 
-    const eventsSection = document.getElementById("eventsSection");
-    const statsSection = document.getElementById("statsSection");
+        /* ================= TAB (Fix giật 100%) ================ */
+        const btnEvents = document.getElementById("btnEvents");
+        const btnStats  = document.getElementById("btnStats");
+        const highlight = document.getElementById("tabHighlight");
 
-    // switch tab
-    tabEvents.onclick = () => {
-        tabEvents.classList.add("border-primary", "text-primary");
-        tabStats.classList.remove("border-primary", "text-primary");
+        const tabs = {
+            eventsTab: document.getElementById("eventsTab"),
+            statsTab: document.getElementById("statsTab")
+        };
 
-        eventsSection.classList.remove("hidden");
-        statsSection.classList.add("hidden");
-    };
+        function moveHighlight(btn) {
+            const wrap = document.getElementById("tabContainer");
+            const r1 = wrap.getBoundingClientRect();
+            const r2 = btn.getBoundingClientRect();
 
-    tabStats.onclick = () => {
-        tabStats.classList.add("border-primary", "text-primary");
-        tabEvents.classList.remove("border-primary", "text-primary");
+            highlight.style.width = r2.width + "px";
+            highlight.style.left = (r2.left - r1.left) + "px";
+        }
 
-        statsSection.classList.remove("hidden");
-        eventsSection.classList.add("hidden");
-    };
+        function activate(btn) {
+            btnEvents.classList.remove("active");
+            btnStats.classList.remove("active");
+            tabs.eventsTab.classList.add("hidden");
+            tabs.statsTab.classList.add("hidden");
+
+            btn.classList.add("active");
+            tabs[btn.dataset.tab].classList.remove("hidden");
+
+            moveHighlight(btn);
+        }
+
+        btnEvents.onclick = () => activate(btnEvents);
+        btnStats.onclick  = () => activate(btnStats);
+
+        window.requestAnimationFrame(() => {
+            setTimeout(() => moveHighlight(btnEvents), 200);
+        });
+
+        window.onresize = () => moveHighlight(document.querySelector(".tab-btn.active"));
+
+        /* ================= LOAD DATA ================= */
+        async function safeJson(url) {
+            try { let r = await fetch(url); if (!r.ok) return null; return await r.json(); }
+            catch { return null; }
+        }
+
+        const matchId = document.getElementById("matchRoot").dataset.matchId;
+
+        async function loadAll() {
+
+            /* ==== SCORE / MATCH INFO ==== */
+            const m = await safeJson(`/api/matches/${matchId}/score`);
+            if (m) {
+                homeName.textContent = m.homeTeam?.name ?? "-";
+                awayName.textContent = m.awayTeam?.name ?? "-";
+                homeLogo.src = m.homeTeam?.logoUrl ?? "/images/default-team.png";
+                awayLogo.src = m.awayTeam?.logoUrl ?? "/images/default-team.png";
+
+                homeScore.textContent = m.homeScore ?? 0;
+                awayScore.textContent = m.awayScore ?? 0;
+
+                matchStatus.textContent = m.status ?? "-";
+                stadium.textContent = m.stadium ?? "-";
+                matchDate.textContent = m.matchDate
+                    ? new Date(m.matchDate).toLocaleString("vi-VN") : "-";
+            }
+
+            /* ==== EVENTS ==== */
+            const ev = await safeJson(`/api/matches/${matchId}/events`);
+            if (Array.isArray(ev)) renderEvents(ev);
+
+            /* ==== STATS (MatchStatsDto) ==== */
+            const stats = await safeJson(`/api/matches/${matchId}/stats`);
+            if (stats) updateStatsUI(stats);
+        }
+
+        /* ================= RENDER STATS ================= */
+        function updateStatsUI(s) {
+            // đảm bảo luôn có 10 items cho mỗi team để giữ hàng ngang
+            homeStats.innerHTML = `
+                <li>${s.shotsHome ?? 0}</li>
+                <li>${s.shotsOnTargetHome ?? 0}</li>
+                <li>${s.possessionHome ? s.possessionHome + '%' : '0%'}</li>
+                <li>${s.passesHome ?? 0}</li>
+                <li>${s.accuracyHome ? s.accuracyHome + '%' : '0%'}</li>
+                <li>${s.foulsHome ?? 0}</li>
+                <li>${s.yellowCardsHome ?? 0}</li>
+                <li>${s.redCardsHome ?? 0}</li>
+                <li>${s.offsidesHome ?? 0}</li>
+                <li>${s.cornersHome ?? 0}</li>
+            `;
+
+            awayStats.innerHTML = `
+                <li>${s.shotsAway ?? 0}</li>
+                <li>${s.shotsOnTargetAway ?? 0}</li>
+                <li>${s.possessionAway ? s.possessionAway + '%' : '0%'}</li>
+                <li>${s.passesAway ?? 0}</li>
+                <li>${s.accuracyAway ? s.accuracyAway + '%' : '0%'}</li>
+                <li>${s.foulsAway ?? 0}</li>
+                <li>${s.yellowCardsAway ?? 0}</li>
+                <li>${s.redCardsAway ?? 0}</li>
+                <li>${s.offsidesAway ?? 0}</li>
+                <li>${s.cornersAway ?? 0}</li>
+            `;
+        }
+
+        /* ================= RENDER EVENTS ================= */
+        function renderEvents(list) {
+            list.sort((a,b)=> (a.minute??0)-(b.minute??0));
+            eventsList.innerHTML = "";
+            goalsList.innerHTML = "";
+            list.forEach(e => appendEvent(e));
+        }
+
+        function appendEvent(ev) {
+            const icon = {
+                GOAL:"⚽", YELLOW_CARD:"🟨", RED_CARD:"🟥", PENALTY:"🅿️"
+            }[ev.type] ?? "•";
+
+            const li = document.createElement("li");
+            const time = ev.minute!=null ? ev.minute+"'" : "";
+
+            li.className="bg-gray-50 p-3 rounded-xl shadow-sm border flex items-center gap-3";
+            li.innerHTML = `
+                <span class="w-8 text-center">${icon}</span>
+                <div>
+                    <div class="text-sm font-semibold">${ev.description ?? ev.type}</div>
+                    <div class="text-xs text-gray-500">${time}</div>
+                </div>
+            `;
+            eventsList.appendChild(li);
+        }
+
+        /* ================= WEBSOCKET ================= */
+        let stompClient = null;
+
+        function connectWs() {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.debug = null;
+
+            stompClient.connect({}, () => {
+
+                stompClient.subscribe(`/topic/match/${matchId}/events`, msg => {
+                    appendEvent(JSON.parse(msg.body));
+                });
+
+                stompClient.subscribe(`/topic/match/${matchId}/score`, msg => {
+                    const s = JSON.parse(msg.body);
+                    homeScore.textContent = s.homeScore;
+                    awayScore.textContent = s.awayScore;
+                    matchStatus.textContent = s.status;
+                });
+
+                stompClient.subscribe(`/topic/match/${matchId}/stats`, msg => {
+                    updateStatsUI(JSON.parse(msg.body));
+                });
+            });
+        }
+
+        /* ================= START ================= */
+        (async () => {
+            await loadAll();
+            connectWs();
+        })();
+
+    });
 </script>
 
 </body>

@@ -1,7 +1,9 @@
-package com.example.premier_league.service;
+package com.example.premier_league.service.impl;
 
+import com.example.premier_league.dto.PlayerShortDto;
 import com.example.premier_league.entity.Player;
 import com.example.premier_league.repository.IPlayerRepository;
+import com.example.premier_league.service.IPlayerService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,12 +19,13 @@ public class PlayerService implements IPlayerService {
 
     @Override
     public List<Player> findByTeamId(Long teamId) {
-        return List.of();
+
+        return playerRepository.findByTeamId(teamId);
     }
 
     @Override
     public List<Player> findAllByIds(List<Long> playerIds) {
-        return List.of();
+        return playerRepository.findAllById(playerIds);
     }
 
     @Override
@@ -62,5 +65,19 @@ public class PlayerService implements IPlayerService {
         if (playerRepository.existsById(id)) {
             playerRepository.deleteById(id);
         }
+    }
+
+    @Override
+    public List<PlayerShortDto> getPlayersByTeam(Long teamId) {
+        return playerRepository.findByTeamId(teamId)
+                .stream()
+                .map(p -> {
+                    PlayerShortDto dto = new PlayerShortDto();
+                    dto.setId(p.getId());
+                    dto.setName(p.getName());
+                    dto.setPosition(p.getPosition());
+                    return dto;
+                })
+                .toList();
     }
 }

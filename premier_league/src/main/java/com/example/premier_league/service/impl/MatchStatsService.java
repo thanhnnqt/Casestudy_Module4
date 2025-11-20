@@ -1,95 +1,95 @@
 package com.example.premier_league.service.impl;
 
 import com.example.premier_league.dto.MatchStatsDto;
-import com.example.premier_league.entity.Match;
-import com.example.premier_league.entity.MatchEvent;
-import com.example.premier_league.repository.IMatchEventRepository;
-import com.example.premier_league.repository.IMatchRepository;
+import com.example.premier_league.entity.MatchStats;
+import com.example.premier_league.repository.IMatchStatsRepository;
 import com.example.premier_league.service.IMatchStatsService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MatchStatsService implements IMatchStatsService {
 
-    private final IMatchEventRepository eventRepo;
-    private final IMatchRepository matchRepo;
+    private final IMatchStatsRepository statsRepo;
+    private final SimpMessagingTemplate messaging;
 
     @Override
-    public MatchStatsDto getStats(Long matchId) {
-
-        Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Match not found: " + matchId));
-
-        Long homeId = match.getHomeTeam().getId();
-        Long awayId = match.getAwayTeam().getId();
-
-        List<MatchEvent> events = eventRepo.findByMatchIdOrderByMinuteAsc(matchId);
-
-        int shotsHome = 0, shotsAway = 0;
-        int shotsOnTargetHome = 0, shotsOnTargetAway = 0;
-        int foulsHome = 0, foulsAway = 0;
-
-        int possessionHome = 0, possessionAway = 0;
-
-        for (MatchEvent ev : events) {
-
-            Long teamId = ev.getTeamId();
-
-            boolean isHome = teamId != null && teamId.equals(homeId);
-            boolean isAway = teamId != null && teamId.equals(awayId);
-
-            String type = ev.getType();
-
-            switch (type) {
-
-                case "GOAL":
-                case "SHOT":
-                    if (isHome) shotsHome++;
-                    else if (isAway) shotsAway++;
-                    break;
-
-                case "SHOT_ON_TARGET":
-                case "PENALTY":
-                    if (isHome) shotsOnTargetHome++;
-                    else if (isAway) shotsOnTargetAway++;
-                    break;
-
-                case "YELLOW_CARD":
-                case "RED_CARD":
-                case "FOUL":
-                    if (isHome) foulsHome++;
-                    else if (isAway) foulsAway++;
-                    break;
-
-                default:
-                    break;
-            }
-
-            // tính kiểm soát bóng
-            if (teamId != null) {
-                if (isHome) possessionHome++;
-                if (isAway) possessionAway++;
-            }
-        }
-
-        // Phần trăm kiểm soát
-        int total = possessionHome + possessionAway;
-        int homePercent = (total == 0 ? 50 : possessionHome * 100 / total);
-        int awayPercent = 100 - homePercent;
-
-        return MatchStatsDto.builder()
-                .shotsHome(shotsHome)
-                .shotsAway(shotsAway)
-                .shotsOnTargetHome(shotsOnTargetHome)
-                .shotsOnTargetAway(shotsOnTargetAway)
-                .foulsHome(foulsHome)
-                .foulsAway(foulsAway)
-                .possessionHome(homePercent)
-                .possessionAway(awayPercent)
-                .build();
+    public MatchStatsDto getStatsByMatchId(Long matchId) {
+        return statsRepo.findByMatchId(matchId)
+                .map(this::toDto)
+                .orElse(new MatchStatsDto());
     }
+
+    @Override
+    @Transactional
+    public MatchStatsDto updateStats(Long matchId, MatchStatsDto dto) {
+
+        MatchStats stats = statsRepo.findByMatchId(matchId)
+                .orElse(new MatchStats(matchId));
+
+        // --- SET GIÁ TRỊ ---
+        stats.setShotsHome(dto.getShotsHome());
+        stats.setShotsAway(dto.getShotsAway());
+        stats.setShotsOnTargetHome(dto.getShotsOnTargetHome());
+        stats.setShotsOnTargetAway(dto.getShotsOnTargetAway());
+        stats.setPossessionHome(dto.getPossessionHome());
+        stats.setPossessionAway(dto.getPossessionAway());
+        stats.setPassesHome(dto.getPassesHome());
+        stats.setPassesAway(dto.getPassesAway());
+        stats.setAccuracyHome(dto.getAccuracyHome());
+        stats.setAccuracyAway(dto.getAccuracyAway());
+        stats.setFoulsHome(dto.getFoulsHome());
+        stats.setFoulsAway(dto.getFoulsAway());
+        stats.setYellowCardsHome(dto.getYellowCardsHome());
+        stats.setYellowCardsAway(dto.getYellowCardsAway());
+        stats.setRedCardsHome(dto.getRedCardsHome());
+        stats.setRedCardsAway(dto.getRedCardsAway());
+        stats.setOffsidesHome(dto.getOffsidesHome());
+        stats.setOffsidesAway(dto.getOffsidesAway());
+        stats.setCornersHome(dto.getCornersHome());
+        stats.setCornersAway(dto.getCornersAway());
+
+        MatchStats saved = statsRepo.save(stats);
+
+        // 🔥 Gửi realtime FE
+        messaging.convertAndSend("/topic/match/" + matchId + "/stats", toDto(saved));
+
+        return toDto(saved);
+    }
+
+
+    // ==========================
+    // HÀM toDto
+    // ==========================
+    private MatchStatsDto toDto(MatchStats s) {
+        MatchStatsDto dto = new MatchStatsDto();
+
+        dto.setShotsHome(s.getShotsHome());
+        dto.setShotsAway(s.getShotsAway());
+        dto.setShotsOnTargetHome(s.getShotsOnTargetHome());
+        dto.setShotsOnTargetAway(s.getShotsOnTargetAway());
+        dto.setPossessionHome(s.getPossessionHome());
+        dto.setPossessionAway(s.getPossessionAway());
+        dto.setPassesHome(s.getPassesHome());
+        dto.setPassesAway(s.getPassesAway());
+        dto.setAccuracyHome(s.getAccuracyHome());
+        dto.setAccuracyAway(s.getAccuracyAway());
+        dto.setFoulsHome(s.getFoulsHome());
+        dto.setFoulsAway(s.getFoulsAway());
+        dto.setYellowCardsHome(s.getYellowCardsHome());
+        dto.setYellowCardsAway(s.getYellowCardsAway());
+        dto.setRedCardsHome(s.getRedCardsHome());
+        dto.setRedCardsAway(s.getRedCardsAway());
+        dto.setOffsidesHome(s.getOffsidesHome());
+        dto.setOffsidesAway(s.getOffsidesAway());
+        dto.setCornersHome(s.getCornersHome());
+        dto.setCornersAway(s.getCornersAway());
+
+        return dto;
+    }
+
 }
+
