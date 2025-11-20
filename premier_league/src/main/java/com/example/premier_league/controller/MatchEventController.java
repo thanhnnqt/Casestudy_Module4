@@ -9,11 +9,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class MatchEventController {
 
     @GetMapping("/admin/events")
-    public String adminEventsPage(@RequestParam Long matchId, Model model) {
+    public String adminEventsPage(@RequestParam(required = false) Long matchId,
+                                  Model model) {
+
         model.addAttribute("matchId", matchId);
         return "admin_event";
     }
-
-
-
 }

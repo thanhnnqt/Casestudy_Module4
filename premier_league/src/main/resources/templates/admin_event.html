@@ -93,9 +93,18 @@
                    placeholder="Ví dụ: 'Ghi bàn đẹp mắt từ ngoài vòng cấm'"/>
         </div>
 
+        <!-- BUTTON GỬI SỰ KIỆN -->
         <button id="send"
                 class="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-secondary hover:text-primary transition">
             Gửi Sự Kiện
+        </button>
+
+        <!-- BUTTON CHUYỂN TRANG STATS -->
+        <button type="button"
+                onclick="goToStats()"
+                class="w-full py-3 flex items-center justify-center gap-2 bg-primary text-white font-bold rounded-lg hover:bg-secondary hover:text-primary transition">
+            <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+            Cập Nhật Thống Kê Trận Đấu
         </button>
     </div>
 </div>
@@ -177,7 +186,6 @@
             description: desc
         };
 
-        // gửi sự kiện
         const resp = await fetch(`/api/matches/${matchId}/events`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -189,12 +197,8 @@
             return alert("❌ Lỗi: " + msg);
         }
 
-        // nếu MATCH_END → cập nhật trạng thái luôn
         if (type === "MATCH_END") {
-            await fetch(`/admin/matches/finish/${matchId}`, {
-                method: "POST"
-            });
-
+            await fetch(`/admin/matches/finish/${matchId}`, { method: "POST" });
             alert("🏁 Trận đấu đã kết thúc!");
             window.location.href = "/admin/matches";
             return;
@@ -203,6 +207,17 @@
         alert("✅ Thành công!");
     });
 
+    /* ===========================
+       NÚT CHUYỂN SANG ADMIN_STATS
+    ============================ */
+    function goToStats() {
+        const matchId = document.getElementById("matchId").value;
+        if (!matchId) {
+            alert("⚠️ Vui lòng nhập Match ID trước!");
+            return;
+        }
+        window.location.href = `/admin/stats/${matchId}`;
+    }
 
 </script>
 
