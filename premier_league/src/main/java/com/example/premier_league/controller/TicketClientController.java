@@ -28,7 +28,18 @@ public class TicketClientController {
     }
 
     @GetMapping("/create")
-    public String tickets(Model model, @RequestParam(name = "id") Long id) {
+    public String tickets(Model model, @RequestParam(name = "id", required = false) Long id, @RequestParam(name = "quantity", required = false) Integer quantity, @RequestParam(name = "standSessionId", required = false) Integer standSessionId) {
+        if (standSessionId != null && quantity != null && quantity > 0) {
+            Session session = sessionService.findSessionById(standSessionId);
+            System.out.println("standSessionId = " + standSessionId + ", quantity = " + quantity);
+
+            if (session != null) {
+                session.setLastAssignedSeat(session.getLastAssignedSeat() - quantity);
+                sessionService.save(session);
+            }
+            return "redirect:/tickets/create?id=" + matchScheduleService.findById(id).getId();
+        }
+
         MatchSchedule matchSchedule = matchScheduleService.findById(id);
         List<TicketType> ticketTypeList = ticketTypeService.findAll();
 
@@ -36,7 +47,6 @@ public class TicketClientController {
                 matchSchedule.getHomeTeam().getName(),
                 matchSchedule.getAwayTeam().getName()
         );
-
         if (ticket == null) {
             model.addAttribute("mess", "Chưa mở bán vé, vui lòng chọn trận đấu khác!");
             return "ticket/clientCreate";
@@ -56,17 +66,25 @@ public class TicketClientController {
         model.addAttribute("ticketTypeList", ticketTypeList);
         model.addAttribute("ticketDto", ticketDto);
         model.addAttribute("sessionList", sessionList);
+        model.addAttribute("matchId", matchSchedule.getId());
 
         return "ticket/clientCreate";
     }
 
     @PostMapping("/saveCreate")
-    public String saveCreate(@ModelAttribute("ticketDto") TicketDto ticketDto, Model model) {
-
+    public String saveCreate(@RequestParam(name = "matchId", required = false) Integer matchId, @ModelAttribute("ticketDto") TicketDto ticketDto, Model model, jakarta.servlet.http.HttpSession sessionHttp, @RequestParam(name = "standSessionId", required = false) Integer standSessionId) {
         if (ticketDto.getStandSession() == null || ticketDto.getStandSession().isBlank()) {
             model.addAttribute("mess", "Vui lòng chọn khu ghế.");
             model.addAttribute("ticketDto", ticketDto);
             return "ticket/infoTicketOfClient";
+        }
+
+        if (standSessionId != null) {
+            Session session = sessionService.findSessionById(standSessionId);
+            if (session != null) {
+                session.setCapacity(session.getCapacity() - ticketDto.getQuantity());
+                sessionService.save(session);
+            }
         }
 
         if (ticketDto.getQuantity() == null || ticketDto.getQuantity() <= 0) {
@@ -95,7 +113,6 @@ public class TicketClientController {
             return "ticket/infoTicketOfClient";
         }
 
-
         String standName = session.getName();
         String shortStand = standName.substring(standName.lastIndexOf(" ") + 1);
 
@@ -116,9 +133,12 @@ public class TicketClientController {
         ticketDto.setTotalPay(totalPay);
 
         model.addAttribute("ticketDto", ticketDto);
+        model.addAttribute("matchId", matchId);
         model.addAttribute("mess", "Đặt vé thành công!");
-
+        model.addAttribute("quantity", ticketDto.getQuantity());
+        model.addAttribute("standSessionId", standSessionId);
+        sessionHttp.setAttribute("latestTicket", ticketDto);
+        System.out.println(matchId);
         return "ticket/infoTicketOfClient";
     }
-
 }
