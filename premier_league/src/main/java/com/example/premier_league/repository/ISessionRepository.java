@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ISessionRepository extends JpaRepository<Session, Integer> {
     List<Session> findAllByStadium_Id(Integer stadiumId);
+    Session findByNameAndStadium_Name(String name, String stadiumName);
 }
