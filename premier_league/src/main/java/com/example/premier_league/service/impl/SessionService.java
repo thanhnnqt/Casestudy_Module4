@@ -34,4 +34,9 @@ public class SessionService implements ISessionService {
     public Session findByNameAndStadiumName(String name, String stadiumName) {
         return sessionRepository.findByNameAndStadium_Name(name, stadiumName);
     }
+
+    @Override
+    public Session findSessionById(Integer id) {
+        return sessionRepository.findById(id).orElse(null);
+    }
 }

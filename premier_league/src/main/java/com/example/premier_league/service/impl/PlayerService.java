@@ -67,17 +67,22 @@ public class PlayerService implements IPlayerService {
         }
     }
 
+
     @Override
     public List<PlayerShortDto> getPlayersByTeam(Long teamId) {
-        return playerRepository.findByTeamId(teamId)
-                .stream()
-                .map(p -> {
-                    PlayerShortDto dto = new PlayerShortDto();
-                    dto.setId(p.getId());
-                    dto.setName(p.getName());
-                    dto.setPosition(p.getPosition());
-                    return dto;
-                })
+        List<Player> players = playerRepository.findByTeamId(teamId);
+
+        return players.stream()
+                .map(p -> new PlayerShortDto(
+                        p.getId(),
+                        p.getName(),
+                        p.getPosition(),
+                        p.getAvatar(),
+                        p.getSeasonYellowCards(),         // Thẻ vàng mùa giải
+                        p.getSuspensionMatchesRemaining() // Số trận treo giò
+                ))
                 .toList();
     }
 }
+
+

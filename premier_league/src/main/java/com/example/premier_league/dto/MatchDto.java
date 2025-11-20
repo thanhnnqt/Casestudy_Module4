@@ -21,4 +21,7 @@ public class MatchDto {
 
     public String matchDate;
     public String matchTime;
+
+    public String homeLogo;
+    public String awayLogo;
 }

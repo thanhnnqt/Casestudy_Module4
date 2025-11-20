@@ -128,7 +128,7 @@
         const matchId = document.getElementById("matchId").value;
         if (!matchId) return;
 
-        const res = await fetch(`/api/matches/${matchId}`);
+        const res = await fetch(`/api/matches/${matchId}/score`);
         const match = await res.json();
 
         const teamSelect = document.getElementById("teamSelect");
@@ -151,15 +151,32 @@
         const players = await res.json();
 
         playerSelect.innerHTML = `<option value="">-- Chọn cầu thủ --</option>`;
+
         players.forEach(p => {
+            const suspended = p.suspensionMatchesRemaining > 0;
+
             playerSelect.innerHTML += `
-                <option value="${p.id}">${p.name} (${p.position})</option>
-            `;
+            <option value="${p.id}" ${suspended ? "disabled" : ""}>
+                ${suspended ? "🔴 " : ""}${p.name} (${p.position})
+                ${suspended ? ` - Treo giò: ${p.suspensionMatchesRemaining} trận` : ""}
+            </option>
+        `;
         });
     }
 
+
     document.getElementById("teamSelect").addEventListener("change", e => {
         loadPlayers(e.target.value);
+    });
+    document.getElementById("playerSelect").addEventListener("change", (e) => {
+        const selectedOption = e.target.selectedOptions[0];
+        if (!selectedOption) return;
+
+        // kiểm tra text có chứa từ "Treo giò"
+        if (selectedOption.textContent.includes("Treo giò")) {
+            alert("⛔ Cầu thủ này đang bị treo giò và không thể tham gia trận đấu!");
+            e.target.value = ""; // reset về mặc định
+        }
     });
 
     document.getElementById('send').addEventListener('click', async () => {
@@ -177,6 +194,12 @@
 
         if (type === "GOAL" && !teamId) return alert("⛔ Ghi bàn phải chọn đội!");
         if (type === "GOAL" && !playerId) return alert("⛔ Ghi bàn phải chọn cầu thủ!");
+        if (playerId) {
+            const selectedOption = document.querySelector(`#playerSelect option[value="${playerId}"]`);
+            if (selectedOption && selectedOption.textContent.includes("Treo giò")) {
+                return alert("⛔ Không thể gửi sự kiện! Cầu thủ đang bị treo giò.");
+            }
+        }
 
         const payload = {
             teamId: teamId || null,
