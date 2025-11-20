@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập Admin - Premier League</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        plPurple: "#38003c",
+                        plCyan: "#00ff85",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #38003c;
+            background-image:
+                    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                    radial-gradient(at 100% 100%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #toast-notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            background-color: #00ff85;
+            color: #38003c;
+            font-weight: bold;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            visibility: hidden;
+        }
+
+        #toast-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .input-focus:focus {
+            border-color: #00ff85;
+            box-shadow: 0 0 0 3px rgba(0, 255, 133, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center py-12 px-4">
+
+<div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+        <div class="bg-white rounded-full w-28 h-28 flex items-center justify-center mx-auto mb-6 shadow-2xl border-4 border-white/10 overflow-hidden">
+            <img src="/images/logoo.png" alt="Logo" class="w-20 h-20 object-contain"/>
+        </div>
+        <p class="text-gray-300 text-lg font-medium">Hệ thống quản trị Premier League</p>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-2xl p-8">
+
+        <!-- FORM ĐĂNG NHẬP -->
+        <form method="post" th:action="@{/admin/login}" class="space-y-5">
+
+            <div>
+                <label class="block text-sm font-bold text-plPurple mb-1">Email</label>
+                <div class="relative">
+                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <i data-lucide="mail" class="w-5 h-5"></i>
+                    </div>
+                    <input type="email" name="email" required
+                           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg outline-none transition-all input-focus text-gray-900 font-medium"
+                           placeholder="Nhập email admin"/>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-plPurple mb-1">Mật khẩu</label>
+                <div class="relative">
+                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <i data-lucide="lock" class="w-5 h-5"></i>
+                    </div>
+                    <input type="password" name="password" required
+                           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg outline-none transition-all input-focus text-gray-900 font-medium"
+                           placeholder="Nhập mật khẩu"/>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between text-sm">
+                <label class="flex items-center text-gray-600 cursor-pointer">
+                    <input type="checkbox" class="mr-2 w-4 h-4 text-plPurple focus:ring-plCyan border-gray-300 rounded"/>
+                    <span>Ghi nhớ đăng nhập</span>
+                </label>
+                <a href="#" class="text-plPurple font-bold hover:text-plCyan transition-colors">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-plPurple text-white py-3.5 rounded-xl font-bold text-lg shadow-lg hover:bg-[#500055] transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group">
+                <span>Đăng nhập</span>
+                <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+            </button>
+
+        </form>
+
+    </div>
+
+    <p class="text-center text-white/40 text-xs">© 2025 Premier League Admin. All rights reserved.</p>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+
+</body>
+</html>
