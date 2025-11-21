@@ -11,7 +11,9 @@
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
-<div th:replace="~{layout/navbar :: header}"></div>
+<div th:with="activePage='tournament', pageTitle='Thêm mùa giải'"
+     th:replace="~{layout/admin-layout :: adminLayout}">
+</div>
 
 <div class="flex-grow container mx-auto px-4 py-12 flex justify-center items-center">
   <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-2xl">
@@ -70,7 +72,6 @@
   </div>
 </div>
 
-<div th:replace="~{layout/footer :: footer}"></div>
 <script>lucide.createIcons();</script>
 </body>
 </html>

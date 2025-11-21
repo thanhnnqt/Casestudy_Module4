@@ -11,7 +11,9 @@
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
-<div th:replace="~{layout/navbar :: header}"></div>
+<div th:with="activePage='tournament', pageTitle='Quản lý đội tham dự'"
+     th:replace="~{layout/admin-layout :: adminLayout}">
+</div>
 
 <div class="flex-grow container mx-auto px-4 py-8 max-w-5xl">
 
@@ -120,8 +122,6 @@
     </div>
   </form>
 </div>
-
-<div th:replace="~{layout/footer :: footer}"></div>
 
 <script>
   lucide.createIcons();

@@ -12,7 +12,9 @@
 
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
-<div th:replace="~{layout/navbar :: header}"></div>
+<div th:with="activePage='tournament', pageTitle='Danh sách mùa giải'"
+     th:replace="~{layout/admin-layout :: adminLayout}">
+</div>
 
 <div class="flex-grow container mx-auto px-4 py-12 max-w-7xl">
 
@@ -99,7 +101,6 @@
     </div>
 </div>
 
-<div th:replace="~{layout/footer :: footer}"></div>
 
 <style>
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
