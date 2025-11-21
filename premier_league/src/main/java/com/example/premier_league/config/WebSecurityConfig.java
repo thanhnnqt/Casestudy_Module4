@@ -174,8 +174,6 @@ public class WebSecurityConfig {
 
         // SỬA: Áp dụng Custom Access Denied Handler
         http.exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler));
-
-
         return http.build();
     }
 }
