@@ -8,6 +8,8 @@ public interface ICoachService {
 
     List<Coach> findAll();
 
+    List<Coach> findByTeamId(Long teamId);
+
     void save(Coach coach);
 
     Coach findById(int id);

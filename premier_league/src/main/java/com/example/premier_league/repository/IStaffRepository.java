@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface IStaffRepository extends JpaRepository<Staff, Integer> {
     List<Staff> findByFullNameContainingIgnoreCase(String name);
+
+    List<Staff> findByTeamId(Long teamId);
 }

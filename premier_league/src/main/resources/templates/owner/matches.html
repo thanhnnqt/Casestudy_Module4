@@ -1,173 +1,205 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="layout :: layout('Lịch Thi Đấu', 'matches', ~{::content})">
+      th:replace="layout :: layout('BXH & Lịch Thi Đấu', 'standings', ~{::content})">
 
 <th:block th:fragment="content">
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      prefix: 'tw-', // Thêm prefix để không xung đột với Bootstrap của Layout
+      theme: {
+        extend: {
+          colors: {
+            primary: "#38003c",
+            secondary: "#00ff85"
+          }
+        }
+      },
+      // Tắt preflight để không reset CSS của Layout
+      corePlugins: {
+        preflight: false,
+      }
+    }
+  </script>
 
-  <style>
-    .content-wrapper { font-family: 'Inter', sans-serif !important; }
-    .card-custom { border: none; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: #fff; }
-    .table-custom thead th { background: #f9fafb; color: #6b7280; font-size: 0.75rem; padding: 1rem; text-transform: uppercase; }
-    .table-custom tbody td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid #f3f4f6; font-size: 0.9rem; }
-    .badge-soft { padding: 0.35em 0.65em; font-size: 0.75em; font-weight: 600; border-radius: 0.375rem; }
-    .bg-soft-info { background: #eff6ff; color: #2563eb; }
-    .bg-soft-success { background: #f0fdf4; color: #16a34a; }
-    .bg-soft-danger { background: #fef2f2; color: #dc2626; }
-    .bg-soft-warning { background: #fffbeb; color: #d97706; }
-    .bg-soft-secondary { background: #f3f4f6; color: #4b5563; }
-    .btn-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 0.375rem; padding: 0; }
-  </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-  <div class="container-fluid">
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="fw-bold text-dark mb-0"><i class="bi bi-calendar-week text-primary me-2"></i>Lịch Thi Đấu</h2>
-    </div>
+  <div class="tw-w-full tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8">
 
-    <div class="card card-custom mb-4">
-      <div class="card-body p-4">
-        <form class="row g-3" th:action="@{/admin/matches}" method="get">
-          <div class="col-md-4">
-            <label class="form-label fw-bold small text-muted">Đội bóng</label>
-            <select name="team" class="form-select">
-              <option value="">-- Tất cả --</option>
-              <option th:if="${teamsList != null}" th:each="t : ${teamsList}"
-                      th:value="${t.name}" th:text="${t.name}" th:selected="${team == t.name}">
-              </option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-bold small text-muted">Ngày thi đấu</label>
-            <input type="date" name="date" class="form-control" th:value="${date}">
-          </div>
-          <div class="col-md-2">
-            <label class="form-label fw-bold small text-muted">Vòng đấu</label>
-            <input type="number" name="round" class="form-control" th:value="${round}">
-          </div>
-          <div class="col-md-3 d-flex align-items-end">
-            <button class="btn btn-dark w-100 fw-bold"><i class="bi bi-search"></i> Tìm kiếm</button>
-          </div>
-        </form>
+    <div class="lg:tw-col-span-2">
+      <div class="tw-flex tw-items-center tw-justify-between tw-mb-6">
+        <h1 class="tw-text-3xl tw-font-extrabold tw-text-primary tw-m-0">
+          Bảng Xếp Hạng
+        </h1>
+        <span class="tw-bg-gray-200 tw-text-gray-600 tw-px-3 tw-py-1 tw-rounded-full tw-text-sm tw-font-semibold">Premier League 24/25</span>
+      </div>
+
+      <div class="tw-bg-white tw-shadow-lg tw-rounded-2xl tw-overflow-hidden tw-border tw-border-gray-200">
+        <div class="tw-overflow-x-auto">
+          <table class="tw-w-full">
+            <thead class="tw-bg-primary tw-text-white tw-text-xs tw-uppercase">
+            <tr>
+              <th class="tw-py-3 tw-px-4 tw-text-center">#</th>
+              <th class="tw-py-3 tw-px-4 tw-text-left">Câu lạc bộ</th>
+              <th class="tw-py-3 tw-px-4 tw-text-center">Trận</th>
+              <th class="tw-py-3 tw-px-4 tw-text-center">T</th>
+              <th class="tw-py-3 tw-px-4 tw-text-center">H</th>
+              <th class="tw-py-3 tw-px-4 tw-text-center">B</th>
+              <th class="tw-py-3 tw-px-4 tw-text-center">HS</th>
+              <th class="tw-py-3 tw-px-4 tw-text-center tw-font-bold">Điểm</th>
+            </tr>
+            </thead>
+            <tbody id="rankingBody" class="tw-text-gray-800 tw-text-sm">
+            <tr>
+              <td colspan="8" class="tw-text-center tw-py-8 tw-text-gray-400">
+                Đang tải dữ liệu...
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="card card-custom overflow-hidden">
-      <div class="table-responsive">
-        <table class="table table-custom table-hover mb-0">
-          <thead>
-          <tr>
-            <th class="text-center">STT</th>
-            <th>Trận đấu</th>
-            <th class="text-center">Vòng</th>
-            <th>Thời gian</th>
-            <th>Sân vận động</th>
-            <th class="text-center">Trạng thái</th>
-            <th class="text-end">Hành động</th>
-          </tr>
-          </thead>
+    <div class="tw-bg-white tw-shadow-lg tw-rounded-2xl tw-p-6 tw-border tw-border-gray-200 tw-h-fit">
 
-          <tbody>
-          <tr th:if="${matches == null or #lists.isEmpty(matches)}">
-            <td colspan="7" class="text-center py-5 text-muted">
-              <i class="bi bi-inbox display-4 d-block mb-3"></i>
-              Không có dữ liệu trận đấu.
-            </td>
-          </tr>
+      <h2 class="tw-text-xl tw-font-bold tw-text-primary tw-mb-4 tw-flex tw-items-center tw-gap-2">
+        📅 Lịch Thi Đấu
+      </h2>
 
-          <tr th:each="match, iterStat : ${matches}">
-            <td class="text-center fw-bold text-muted" th:text="${iterStat.count}"></td>
+      <form method="get" action="/admin/owner/matches" class="tw-mb-5">
+        <label class="tw-font-semibold tw-text-sm tw-text-gray-500 tw-mb-1 tw-block">Chọn vòng đấu:</label>
+        <select name="round"
+                class="tw-w-full tw-p-2.5 tw-border tw-border-gray-300 tw-rounded-lg tw-bg-gray-50 tw-text-sm focus:tw-ring-primary focus:tw-border-primary"
+                onchange="this.form.submit()">
+          <option th:each="i : ${#numbers.sequence(1, 38)}"
+                  th:value="${i}"
+                  th:text="'Vòng ' + ${i}"
+                  th:selected="${i == selectedRound}">
+          </option>
+        </select>
+      </form>
 
-            <td>
-              <div class="d-flex align-items-center">
-                <span class="fw-bold text-primary"
-                      th:text="${match.homeTeam != null ? match.homeTeam.name : 'Unknown'}"></span>
-                <span class="badge bg-light text-muted border mx-2">VS</span>
-                <span class="fw-bold text-primary"
-                      th:text="${match.awayTeam != null ? match.awayTeam.name : 'Unknown'}"></span>
+      <div class="tw-space-y-3">
+        <a th:each="match : ${upcomingMatches}"
+           th:href="@{'/live_matches/' + ${match.id}}"
+           class="tw-block tw-p-3 tw-border tw-rounded-xl tw-bg-gray-50 hover:tw-bg-white hover:tw-shadow-md tw-transition tw-group tw-no-underline">
+
+          <div class="tw-flex tw-items-center tw-justify-between">
+            <div class="tw-text-center tw-w-1/3">
+              <div class="tw-w-12 tw-h-12 tw-bg-white tw-rounded-full tw-mx-auto tw-mb-2 tw-flex tw-items-center tw-justify-center tw-p-2 tw-shadow-sm">
+                <img th:src="${match.homeTeam.logoUrl}" class="tw-w-full tw-h-full tw-object-contain"/>
               </div>
-              <div class="small mt-1 fw-bold text-dark"
-                   th:if="${match.homeScore != null}"
-                   th:text="${match.homeScore} + ' - ' + ${match.awayScore}">
+              <h3 class="tw-text-xs tw-font-bold tw-text-gray-800 tw-truncate" th:text="${match.homeTeam.shortName}">Home</h3>
+            </div>
+
+            <div class="tw-w-1/3 tw-text-center">
+              <div class="tw-text-xl tw-font-black tw-text-gray-300 tw-mb-1">VS</div>
+
+              <p class="tw-text-[10px] tw-text-gray-500 tw-font-medium tw-mb-1"
+                 th:text="${#temporals.format(match.matchDate, 'dd/MM HH:mm')}">Time</p>
+
+              <div class="tw-inline-flex tw-items-center tw-gap-1 tw-text-[10px] tw-font-bold tw-px-2 tw-py-0.5 tw-rounded-full"
+                   th:classappend="${#strings.equalsIgnoreCase(match.status,'finished')} ? 'tw-bg-gray-200 tw-text-gray-600' : 'tw-bg-green-100 tw-text-green-700'">
+                <i data-lucide="clock" class="tw-w-3 tw-h-3"></i>
+                <span th:text="${#strings.equalsIgnoreCase(match.status,'finished') ? 'Kết thúc' : 'Sắp đá'}"></span>
               </div>
-            </td>
+            </div>
 
-            <td class="text-center">
-              <span class="badge bg-light text-dark border"
-                    th:text="${match.round != null ? '#' + match.round : '-'}"></span>
-            </td>
-
-            <td>
-              <div class="d-flex flex-column">
-                <span class="fw-bold text-dark"
-                      th:text="${match.matchDate != null ? #temporals.format(match.matchDate, 'dd/MM/yyyy') : '-'}"></span>
-                <span class="small text-muted">
-                   <i class="bi bi-clock me-1"></i>
-                   <span th:text="${match.matchTime != null ? #temporals.format(match.matchTime, 'HH:mm') : '--:--'}"></span>
-                </span>
+            <div class="tw-text-center tw-w-1/3">
+              <div class="tw-w-12 tw-h-12 tw-bg-white tw-rounded-full tw-mx-auto tw-mb-2 tw-flex tw-items-center tw-justify-center tw-p-2 tw-shadow-sm">
+                <img th:src="${match.awayTeam.logoUrl}" class="tw-w-full tw-h-full tw-object-contain"/>
               </div>
-            </td>
+              <h3 class="tw-text-xs tw-font-bold tw-text-gray-800 tw-truncate" th:text="${match.awayTeam.shortName}">Away</h3>
+            </div>
+          </div>
+        </a>
 
-            <td class="text-muted small" th:text="${match.stadium != null ? match.stadium : ''}"></td>
-
-            <td class="text-center">
-              <span th:if="${match.status != null}" th:switch="${match.status.name()}">
-                  <span th:case="'SCHEDULED'" class="badge badge-soft bg-soft-success">Sắp đá</span>
-                  <span th:case="'LIVE'" class="badge badge-soft bg-soft-danger">Live</span>
-                  <span th:case="'POSTPONED'" class="badge badge-soft bg-soft-warning">Hoãn</span>
-                  <span th:case="'FINISHED'" class="badge badge-soft bg-soft-secondary">Kết thúc</span>
-                  <span th:case="*" class="badge badge-soft bg-soft-info" th:text="${match.status}"></span>
-              </span>
-            </td>
-
-            <td class="text-end">
-              <div class="d-flex justify-content-end gap-1" th:if="${match.status != null}">
-
-                <th:block th:if="${match.status.name() == 'SCHEDULED'}">
-                  <a th:href="@{'/admin/matches/start/' + ${match.id}}" class="btn btn-icon btn-outline-success" title="Bắt đầu"><i class="bi bi-play-fill"></i></a>
-                  <a th:href="@{'/admin/matches/postpone/' + ${match.id}}" class="btn btn-icon btn-outline-warning" title="Hoãn trận"><i class="bi bi-pause-fill"></i></a>
-                </th:block>
-
-                <th:block th:if="${match.status.name() == 'LIVE'}">
-                  <a th:href="@{'/admin/matches/live/' + ${match.id}}" class="btn btn-icon btn-outline-danger" title="Xem Live"><i class="bi bi-eye"></i></a>
-                </th:block>
-
-                <th:block th:if="${match.status.name() == 'POSTPONED'}">
-                  <a th:href="@{'/admin/matches/reschedule/' + ${match.id}}" class="btn btn-icon btn-outline-primary" title="Dời lịch"><i class="bi bi-calendar-date"></i></a>
-                </th:block>
-
-                <a href="#" class="btn btn-icon btn-light text-muted" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></a>
-              </div>
-            </td>
-          </tr>
-          </tbody>
-        </table>
+        <div th:if="${#lists.isEmpty(upcomingMatches)}" class="tw-text-center tw-py-6 tw-text-gray-400 tw-text-sm tw-italic">
+          <i data-lucide="calendar-x" class="tw-w-8 tw-h-8 tw-mx-auto tw-mb-2 tw-opacity-50"></i>
+          Không có lịch thi đấu vòng này.
+        </div>
       </div>
 
-      <div class="card-footer bg-white border-top-0 py-3" th:if="${totalPages != null and totalPages > 1}">
-        <nav>
-          <ul class="pagination justify-content-center mb-0">
-            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-              <a class="page-link rounded-pill px-3" th:href="@{/admin/matches(page=${currentPage - 1}, team=${team}, date=${date}, round=${round})}">&laquo;</a>
-            </li>
-            <li class="page-item disabled"><span class="page-link border-0">Trang <span th:text="${currentPage + 1}"></span></span></li>
-            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-              <a class="page-link rounded-pill px-3" th:href="@{/admin/matches(page=${currentPage + 1}, team=${team}, date=${date}, round=${round})}">&raquo;</a>
-            </li>
-          </ul>
-        </nav>
-      </div>
     </div>
+
   </div>
 
-  <script th:inline="javascript">
-    document.addEventListener("DOMContentLoaded", function(){
-      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'))
-      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-      })
+  <script>
+    const body = document.getElementById("rankingBody");
+
+    async function loadRanking() {
+      try {
+        // Gọi API lấy dữ liệu BXH
+        const res = await fetch("/api/rankings/v1");
+        const data = await res.json();
+
+        body.innerHTML = "";
+
+        data.forEach((r, index) => {
+          const tr = document.createElement("tr");
+          tr.className = "tw-border-b tw-border-gray-100 hover:tw-bg-gray-50 tw-transition";
+
+          // Highlight Top 4 & Xuống hạng
+          let posClass = "tw-text-gray-500";
+          let rowBg = "";
+
+          if(index < 4) {
+            posClass = "tw-text-white tw-bg-primary tw-w-6 tw-h-6 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mx-auto tw-text-xs";
+            // Sửa lại logic hiển thị số thứ tự cho đẹp
+            var posHtml = `<div class="${posClass}">${index + 1}</div>`;
+          } else if (index >= 17) {
+            posHtml = `<div class="tw-text-red-500 tw-font-bold">${index + 1}</div>`;
+          } else {
+            posHtml = `<div class="${posClass}">${index + 1}</div>`;
+          }
+
+          tr.innerHTML = `
+                        <td class="tw-py-3 tw-px-4 tw-text-center">${posHtml}</td>
+
+                        <td class="tw-py-3 tw-px-4">
+                            <div class="tw-flex tw-items-center tw-gap-3">
+                                <img src="${r.logoUrl}" class="tw-w-8 tw-h-8 tw-object-contain" />
+                                <a href="/team/${r.id}" class="tw-font-bold tw-text-gray-800 hover:tw-text-primary tw-no-underline tw-transition">${r.name}</a>
+                            </div>
+                        </td>
+
+                        <td class="tw-py-3 tw-px-4 tw-text-center tw-font-medium">${(r.winCount||0) + (r.drawCount||0) + (r.loseCount||0)}</td>
+                        <td class="tw-py-3 tw-px-4 tw-text-center tw-text-green-600">${r.winCount ?? 0}</td>
+                        <td class="tw-py-3 tw-px-4 tw-text-center tw-text-gray-500">${r.drawCount ?? 0}</td>
+                        <td class="tw-py-3 tw-px-4 tw-text-center tw-text-red-500">${r.loseCount ?? 0}</td>
+                        <td class="tw-py-3 tw-px-4 tw-text-center">${r.goalDifference > 0 ? '+' + r.goalDifference : r.goalDifference}</td>
+                        <td class="tw-py-3 tw-px-4 tw-text-center tw-font-black tw-text-lg tw-text-primary">${r.points}</td>
+                    `;
+
+          body.appendChild(tr);
+        });
+      } catch (e) {
+        console.error(e);
+        body.innerHTML = `<tr><td colspan="8" class="tw-text-center tw-py-4 tw-text-red-500">Lỗi tải dữ liệu. Vui lòng thử lại.</td></tr>`;
+      }
+    }
+
+    loadRanking();
+
+    // WebSocket Realtime
+    const socket = new SockJS('/ws');
+    const stomp = Stomp.over(socket);
+    stomp.debug = null;
+
+    stomp.connect({}, () => {
+      stomp.subscribe('/topic/ranking-updated', () => {
+        body.classList.add('tw-opacity-50');
+        setTimeout(() => body.classList.remove('tw-opacity-50'), 300);
+        loadRanking();
+      });
     });
+
+    lucide.createIcons();
   </script>
 
 </th:block>
