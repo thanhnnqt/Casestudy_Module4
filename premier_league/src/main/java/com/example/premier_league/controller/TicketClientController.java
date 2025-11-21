@@ -90,7 +90,8 @@ public class TicketClientController {
 
         } else if (ticketDto.getTicketType() == null) {
             messTicketType = "Vui lòng chọn loại vé";
-            redirectAttributes.addFlashAttribute("messTicketType", messTicketType);;
+            redirectAttributes.addFlashAttribute("messTicketType", messTicketType);
+            ;
             return "redirect:/tickets/create?id=" + matchId;
         }
 

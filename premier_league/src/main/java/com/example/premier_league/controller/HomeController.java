@@ -162,10 +162,10 @@ public class HomeController {
     }
 
     // 8. Đặt vé
-    @GetMapping("/ticket")
-    public String tickets(Model model) {
-        return "home/ticket";
-    }
+//    @GetMapping("/ticket")
+//    public String tickets(Model model) {
+//        return "home/ticket";
+//    }
 
     // 9. Tin tức
     @GetMapping("/new")

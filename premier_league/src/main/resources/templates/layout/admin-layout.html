@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content, activeTab)">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#4f46e5', secondary: '#00ff85' } } }
+        }
+    </script>
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background-color: rgba(99, 102, 241, 0.2); border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans h-screen overflow-hidden flex">
+
+<aside class="w-64 bg-white border-r shadow-sm flex flex-col z-20 hidden md:flex shrink-0">
+    <div class="h-16 flex items-center px-6 border-b">
+        <a th:href="@{/}" class="flex items-center gap-3">
+            <div class="w-10 h-10 overflow-hidden">
+                <img th:src="@{/images/logoo.png}" alt="Logo" class="w-full h-full object-contain" />
+            </div>
+            <span class="text-xl font-bold text-primary">Premier League</span>
+        </a>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+
+        <a th:href="@{/admin/home}"
+           th:classappend="${activeTab == 'home'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Tổng quan
+        </a>
+
+        <a th:href="@{/admin/tournaments}"
+           th:classappend="${activeTab == 'teams' or activeTab == 'tournament'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors">
+            <i data-lucide="shirt" class="w-5 h-5"></i> Quản lý đội bóng
+        </a>
+
+        <a th:href="@{/admin/matches}"
+           th:classappend="${activeTab == 'matches'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors">
+            <i data-lucide="calendar-days" class="w-5 h-5"></i> Quản lý lịch thi đấu
+        </a>
+
+        <a th:href="@{/admin/prize}"
+           th:classappend="${activeTab == 'prize'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors">
+            <i data-lucide="award" class="w-5 h-5"></i> Quản lý giải thưởng
+        </a>
+
+        <a th:href="@{/admin/owners}"
+           th:classappend="${activeTab == 'sponsor'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors">
+            <i data-lucide="dollar-sign" class="w-5 h-5"></i> Quản lý nhà tài trợ
+        </a>
+    </nav>
+</aside>
+
+<div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
+    <header class="bg-white h-16 border-b flex items-center justify-between px-6 shadow-sm shrink-0">
+        <h1 class="text-xl font-bold text-primary" th:text="${pageTitle ?: 'Hệ Thống Quản Trị'}"></h1>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold">Admin</span>
+                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">A</div>
+            </div>
+            <form th:action="@{/admin/logout}" method="post" class="border-l pl-4 border-gray-200">
+                <button type="submit" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-6 custom-scroll bg-gray-50">
+        <div class="max-w-7xl mx-auto" th:replace="${content}"></div>
+    </main>
+</div>
+<script>lucide.createIcons();</script>
+</body>
+</html>

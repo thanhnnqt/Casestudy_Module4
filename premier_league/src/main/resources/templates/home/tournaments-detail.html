@@ -150,6 +150,17 @@
 
     // 1. Tách logic render thành một hàm riêng
     function renderRanking(data) {
+
+        // 👉 SORT theo yêu cầu:
+        data.sort((a, b) => {
+            // Ưu tiên điểm
+            if (b.points !== a.points) {
+                return b.points - a.points;
+            }
+            // Nếu bằng điểm → so hiệu số
+            return b.goalDifference - a.goalDifference;
+        });
+
         body.innerHTML = ""; // Xóa nội dung cũ
 
         data.forEach((r, index) => {
@@ -176,6 +187,7 @@
             body.appendChild(tr);
         });
     }
+
 
     // Hàm ban đầu vẫn dùng để tải lần đầu qua REST API
     async function loadRanking() {
