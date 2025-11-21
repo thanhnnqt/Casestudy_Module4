@@ -237,7 +237,7 @@
                     <th>Ngày</th>
                     <th>Giờ</th>
                     <th>Đội Nhà</th>
-                    <th class="text-center">Tỷ số</th>
+<!--                    <th class="text-center">Tỷ số</th>-->
                     <th>Đội Khách</th>
                     <th>Ghi chú</th>
                     <th>Trạng thái</th>
@@ -253,23 +253,23 @@
                     <td th:text="${#temporals.format(match.matchDate, 'dd/MM/yyyy')}"></td>
                     <td th:text="${match.matchTime}"></td>
                     <td th:text="${match.homeTeam.name}"></td>
-                    <td>
-    <span th:switch="${match.status}">
-        <span th:case="${T(com.example.premier_league.entity.MatchStatus).FINISHED}">
-            <span th:text="${match.match.homeScore}"></span>
-            -
-            <span th:text="${match.match.awayScore}"></span>
-        </span>
+<!--                    <td>-->
+<!--    <span th:switch="${match.status}">-->
+<!--        <span th:case="${T(com.example.premier_league.entity.MatchStatus).FINISHED}">-->
+<!--            <span th:text="${match.match.homeScore}"></span>-->
+<!--            - -->
+<!--            <span th:text="${match.match.awayScore}"></span>-->
+<!--        </span>-->
 
-        <span th:case="${T(com.example.premier_league.entity.MatchStatus).LIVE}">
-            <span th:text="${match.match.homeScore}"></span>
-            -
-            <span th:text="${match.match.awayScore}"></span>
-        </span>
+<!--        <span th:case="${T(com.example.premier_league.entity.MatchStatus).LIVE}">-->
+<!--            <span th:text="${match.match.homeScore}"></span>-->
+<!--            - -->
+<!--            <span th:text="${match.match.awayScore}"></span>-->
+<!--        </span>-->
 
-        <span th:case="*">-</span>
-    </span>
-                    </td>
+<!--        <span th:case="*">-</span>-->
+<!--    </span>-->
+<!--                    </td>-->
                     <td th:text="${match.awayTeam.name}"></td>
                     <td th:text="${match.note}"></td>
 
