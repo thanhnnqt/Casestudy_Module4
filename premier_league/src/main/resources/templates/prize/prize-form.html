@@ -1,99 +1,81 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: layout(~{::content}, 'prize')}">
 <head>
-  <meta charset="UTF-8">
   <title>Thông tin Giải Thưởng</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#38003c',
-            secondary: '#00ff85',
-          }
-        }
-      }
-    }
-  </script>
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+<body>
 
-<body class="bg-gray-50 min-h-screen flex flex-col">
-
-<div th:with="activePage='prize', pageTitle='Tạo/Sửa Giải thưởng'"
-     th:replace="~{layout/admin-layout :: adminLayout}">
-</div>
-
-<div class="flex-grow container mx-auto px-4 py-12 flex justify-center items-center">
-  <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-lg">
+<div th:fragment="content" class="flex justify-center items-center min-h-[80vh]">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 w-full max-w-lg">
     <div class="text-center mb-8">
-      <div class="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div class="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ring-4 ring-primary/5">
         <i data-lucide="award" class="w-8 h-8 text-primary"></i>
       </div>
       <h2 class="text-2xl font-bold text-gray-900" th:text="${prizeDto.id == null} ? 'Tạo Giải Thưởng Mới' : 'Sửa Thông Tin Giải'"></h2>
-      <p class="text-gray-500 text-sm">Nhập thông tin cơ bản cho giải thưởng</p>
+      <p class="text-gray-500 text-sm mt-1">Điền thông tin chi tiết cho phần thưởng</p>
     </div>
 
     <form th:action="@{/admin/prize/save}" th:object="${prizeDto}" method="post" class="space-y-5">
       <input type="hidden" th:field="*{id}">
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Tên giải thưởng</label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Tên giải thưởng</label>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <i data-lucide="type" class="w-5 h-5 text-gray-400"></i>
           </div>
           <input type="text" th:field="*{name}"
-                 class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                 th:classappend="${#fields.hasErrors('name')} ? 'border-red-500' : ''"
+                 class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                 th:classappend="${#fields.hasErrors('name')} ? 'border-red-500 bg-red-50' : ''"
                  placeholder="Vd: Cầu thủ xuất sắc nhất tháng">
         </div>
-        <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-red-500 text-xs mt-1"></p>
+        <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-red-500 text-xs mt-1 ml-1"></p>
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Loại giải</label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Loại giải</label>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <i data-lucide="tag" class="w-5 h-5 text-gray-400"></i>
           </div>
           <select th:field="*{type}"
-                  class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all bg-white"
-                  th:classappend="${#fields.hasErrors('type')} ? 'border-red-500' : ''">
-            <option value="INDIVIDUAL">Cá nhân</option>
-            <option value="TEAM">Đội bóng</option>
+                  class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white appearance-none"
+                  th:classappend="${#fields.hasErrors('type')} ? 'border-red-500 bg-red-50' : ''">
+            <option value="INDIVIDUAL">Giải Cá nhân (Cầu thủ)</option>
+            <option value="TEAM">Giải Tập thể (Đội bóng)</option>
             <option value="OTHER">Khác</option>
           </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+          </div>
         </div>
-        <p th:if="${#fields.hasErrors('type')}" th:errors="*{type}" class="text-red-500 text-xs mt-1"></p>
+        <p th:if="${#fields.hasErrors('type')}" th:errors="*{type}" class="text-red-500 text-xs mt-1 ml-1"></p>
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Giá trị giải thưởng (USD)</label>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Giá trị giải thưởng (USD)</label>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <i data-lucide="dollar-sign" class="w-5 h-5 text-gray-400"></i>
           </div>
           <input type="number" step="100" th:field="*{amount}"
-                 class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                 th:classappend="${#fields.hasErrors('amount')} ? 'border-red-500' : ''">
+                 class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                 th:classappend="${#fields.hasErrors('amount')} ? 'border-red-500 bg-red-50' : ''">
         </div>
-        <p th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}" class="text-red-500 text-xs mt-1"></p>
+        <p th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}" class="text-red-500 text-xs mt-1 ml-1"></p>
       </div>
 
-      <div class="flex gap-4 pt-4">
-        <button type="submit" class="flex-1 bg-primary hover:bg-[#500055] text-white font-bold py-3 rounded-lg shadow-md transition-colors">
-          Lưu thông tin
-        </button>
-        <a th:href="@{/admin/prize}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg shadow-sm text-center transition-colors">
-          Hủy
+      <div class="flex gap-4 pt-6">
+        <a th:href="@{/admin/prize}" class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 rounded-xl shadow-sm text-center transition-colors">
+          Hủy bỏ
         </a>
+        <button type="submit" class="flex-1 bg-primary hover:bg-[#4338ca] text-white font-bold py-3 rounded-xl shadow-lg shadow-primary/30 transition-all transform hover:-translate-y-0.5">
+          <i data-lucide="save" class="w-4 h-4 inline mr-2"></i> Lưu thông tin
+        </button>
       </div>
     </form>
   </div>
 </div>
-
-<script>lucide.createIcons();</script>
 </body>
 </html>

@@ -261,6 +261,13 @@
                     <!-- Hành động -->
                     <td class="p-5 text-center">
                         <div class="actions-row">
+
+                            <!-- Nút Đăng ký (Register) -->
+                            <a th:href="@{/coach/team/{tid}/match/{mid}/register(tid=${teamId}, mid=${dto.match.id})}"
+                               class="action-btn text-primary bg-secondary hover:bg-green-400 focus:ring-4 focus:outline-none focus:ring-green-200 font-bold rounded-lg text-sm px-4 py-2.5 inline-flex items-center shadow-md no-wrap">
+                                <i data-lucide="pen-tool" class="w-4 h-4"></i>
+                                <span>Đăng ký</span>
+                            </a>
                             <!-- Nút Sơ đồ (Tactics) — icon + text trên 1 dòng -->
                             <a th:href="@{/coach/team/{tid}/match/{mid}/tactics(tid=${teamId}, mid=${dto.match.id})}"
                                class="action-btn group/btn relative inline-flex items-center justify-center p-0.5 text-sm font-medium rounded-lg bg-gradient-to-br from-purple-600 to-blue-500 shadow-md">
@@ -270,12 +277,7 @@
                                 </span>
                             </a>
 
-                            <!-- Nút Đăng ký (Register) -->
-                            <a th:href="@{/coach/team/{tid}/match/{mid}/register(tid=${teamId}, mid=${dto.match.id})}"
-                               class="action-btn text-primary bg-secondary hover:bg-green-400 focus:ring-4 focus:outline-none focus:ring-green-200 font-bold rounded-lg text-sm px-4 py-2.5 inline-flex items-center shadow-md no-wrap">
-                                <i data-lucide="pen-tool" class="w-4 h-4"></i>
-                                <span>Đăng ký</span>
-                            </a>
+
                         </div>
                     </td>
                 </tr>

@@ -131,7 +131,7 @@
         <span class="info-value text-danger fs-5" th:text="${#numbers.formatDecimal(ticketDto.getTotalPay(), 0, 'COMMA', 0, 'POINT')}"></span><span> đ</span>
     </div>
 
-    <a class="back-btn" href="/">Quay về trang chủ</a>
+    <a class="back-btn" th:href="@{/tickets/create(id=${matchId}, quantity = ${quantity}, standSessionId = ${standSessionId})} ">Hủy</a>
     <a class="back-btn" th:href="@{/payment/showFormToPay(total=${ticketDto.getTotalPay()})}">Thanh toán</a>
 
 </div>

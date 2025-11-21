@@ -236,4 +236,11 @@ public class MatchScheduleService implements IMatchScheduleService {
     public boolean hasSchedule() {
         return matchScheduleRepository.count() > 0;
     }
+
+    @Override
+    public Page<MatchSchedule> search(String team, LocalDate date, Integer round, Pageable pageable) {
+        Page<MatchSchedule> page = matchScheduleRepository.search(team, date, round, pageable);
+        page.forEach(this::autoUpdateStatus);
+        return page;
+    }
 }

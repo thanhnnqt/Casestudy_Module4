@@ -30,10 +30,13 @@ public class WebSecurityConfig {
     @Autowired
     private CustomAuthFailureHandler customAuthFailureHandler;
 
+    // 1. TIÊM HANDLER TÙY CHỈNH VÀO ĐÂY
+    @Autowired
+    private CustomLoginSuccessHandler customLoginSuccessHandler;
+
     @Autowired
     private IAccountRepository accountRepository;
 
-    // ... (Các Bean springSecurityDialect, passwordEncoder, authenticationManager giữ nguyên) ...
     @Bean
     public SpringSecurityDialect springSecurityDialect() {
         return new SpringSecurityDialect();
@@ -73,29 +76,25 @@ public class WebSecurityConfig {
     }
 
     // ==================================================================
-    // CẤU HÌNH 1: DÀNH RIÊNG CHO ADMIN (Order 1 - Chạy trước)
+    // CẤU HÌNH 1: DÀNH RIÊNG CHO ADMIN (Giữ nguyên)
     // ==================================================================
     @Bean
     @Order(1)
     public SecurityFilterChain adminFilterChain(HttpSecurity http, AuthenticationProvider authProvider) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
-
         http.securityMatcher("/admin/**");
-
         http.authenticationProvider(authProvider);
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/login", "/admin/process-login", "/admin/logout").permitAll()
-                // Các trang admin khác bắt buộc phải có ROLE_ADMIN
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
         );
 
         http.formLogin(form -> form
-                // SỬA: Đổi /admin/admin-login thành /admin/login
                 .loginPage("/admin/login")
                 .loginProcessingUrl("/admin/process-login")
-                .defaultSuccessUrl("/admin/home", true)
+                .defaultSuccessUrl("/admin/home", true) // Admin login ở trang admin thì về home admin
                 .failureUrl("/admin/login?error")
                 .usernameParameter("username")
                 .passwordParameter("password")
@@ -104,7 +103,7 @@ public class WebSecurityConfig {
 
         http.logout(logout -> logout
                 .logoutUrl("/admin/logout")
-                .logoutSuccessUrl("/admin/login?logout") // SỬA: Đảm bảo logout xong về đúng trang login
+                .logoutSuccessUrl("/admin/login?logout")
                 .deleteCookies("JSESSIONID")
                 .permitAll()
         );
@@ -113,7 +112,7 @@ public class WebSecurityConfig {
     }
 
     // ==================================================================
-    // CẤU HÌNH 2: DÀNH CHO USER & CÔNG KHAI (Order 2 - Chạy sau)
+    // CẤU HÌNH 2: DÀNH CHO USER, COACH, OWNER (Sửa đổi ở đây)
     // ==================================================================
     @Bean
     @Order(2)
@@ -121,10 +120,7 @@ public class WebSecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable);
         http.authenticationProvider(authProvider);
 
-        // Không cần securityMatcher, nó sẽ hứng tất cả những gì Cấu hình 1 bỏ qua
-
         http.authorizeHttpRequests(auth -> auth
-                // Public URLs
                 .requestMatchers(
                         "/", "/home", "/login", "/logout", "/register",
                         "/css/**", "/js/**", "/images/**", "/webjars/**",
@@ -132,11 +128,9 @@ public class WebSecurityConfig {
                         "/stadium/**", "/matches/**", "/blogs/**", "/news/**", "/layout/**","/tournaments-detail",
                         "/oauth2/**"
                 ).permitAll()
-
-                // Yêu cầu login
+                .requestMatchers("/coach/**").hasRole("COACH")
+                .requestMatchers("/owner/**").hasAnyRole("ADMIN", "OWNER")
                 .requestMatchers("/ticket").authenticated()
-
-                // Các request còn lại
                 .anyRequest().permitAll()
         );
 
@@ -144,8 +138,12 @@ public class WebSecurityConfig {
         http.formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/process-login")
-                .defaultSuccessUrl("/?success", true)
-                .failureHandler(customAuthFailureHandler) // Handler lỗi của User
+
+                // 2. THAY THẾ defaultSuccessUrl BẰNG successHandler
+                // .defaultSuccessUrl("/?success", true)  <-- XÓA DÒNG NÀY
+                .successHandler(customLoginSuccessHandler) // <-- THÊM DÒNG NÀY
+
+                .failureHandler(customAuthFailureHandler)
                 .usernameParameter("username")
                 .passwordParameter("password")
                 .permitAll()

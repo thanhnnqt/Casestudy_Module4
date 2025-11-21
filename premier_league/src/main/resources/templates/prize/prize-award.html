@@ -1,38 +1,32 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: layout(~{::content}, 'prize')}">
 <head>
-  <meta charset="UTF-8">
   <title>Trao Giải Thưởng</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { theme: { extend: { colors: { primary: '#38003c', secondary: '#00ff85' } } } }
-  </script>
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body>
 
-<div th:with="activePage='prize', pageTitle='Trao giải thưởng'"
-     th:replace="~{layout/admin-layout :: adminLayout}">
-</div>
-
-<div class="flex-grow container mx-auto px-4 py-12 flex justify-center items-start">
+<div th:fragment="content" class="flex justify-center items-start pt-8 min-h-[80vh]">
   <div class="w-full max-w-2xl">
 
     <div class="text-center mb-8">
-      <h2 class="text-3xl font-bold text-gray-900 mb-2">Trao Giải Thưởng</h2>
-      <div class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200">
-        <i data-lucide="trophy" class="w-5 h-5 text-yellow-500"></i>
+      <h2 class="text-3xl font-bold text-gray-900 mb-3">Trao Giải Thưởng</h2>
+      <div class="inline-flex items-center gap-3 px-5 py-2.5 bg-white rounded-full shadow-sm border border-gray-200">
+        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+          <i data-lucide="trophy" class="w-5 h-5 text-yellow-600"></i>
+        </div>
         <span class="font-bold text-primary text-lg" th:text="${prizeName}">Tên giải</span>
-        <span class="mx-2 text-gray-300">|</span>
-        <span class="text-sm font-semibold text-gray-500" th:text="${prizeType == 'INDIVIDUAL' ? 'Giải Cá Nhân' : 'Giải Tập Thể'}"></span>
+        <span class="w-px h-5 bg-gray-300"></span>
+        <span class="text-sm font-semibold text-gray-500 uppercase tracking-wide" th:text="${prizeType == 'INDIVIDUAL' ? 'Giải Cá Nhân' : 'Giải Tập Thể'}"></span>
       </div>
     </div>
 
-    <div th:if="${error}" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm" role="alert">
-      <p th:text="${error}"></p>
+    <div th:if="${error}" class="bg-red-50 border border-red-200 text-red-700 p-4 mb-6 rounded-lg shadow-sm flex items-center gap-2">
+      <i data-lucide="alert-circle" class="w-5 h-5"></i>
+      <span th:text="${error}"></span>
     </div>
 
-    <form th:action="@{/admin/prize/award/save}" th:object="${prizeDto}" method="post" class="bg-white rounded-2xl shadow-xl p-8">
+    <form th:action="@{/admin/prize/award/save}" th:object="${prizeDto}" method="post" class="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
       <input type="hidden" th:field="*{id}">
       <input type="hidden" th:field="*{type}">
 
@@ -42,41 +36,52 @@
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <i data-lucide="calendar-days" class="w-5 h-5 text-gray-400"></i>
           </div>
-          <input type="date" th:field="*{awardedDate}" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" required>
+          <input type="date" th:field="*{awardedDate}" class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" required>
         </div>
       </div>
 
-      <div class="border-t border-gray-100 my-6"></div>
+      <div class="border-t border-gray-100 my-8 relative">
+        <span class="absolute top-[-10px] left-1/2 transform -translate-x-1/2 bg-white px-3 text-gray-400 text-sm">Đối tượng nhận giải</span>
+      </div>
 
-      <div th:if="${prizeType == 'INDIVIDUAL'}" class="animate-fade-in">
-        <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
-          <i data-lucide="user" class="w-5 h-5"></i> Chọn Cầu Thủ Nhận Giải
-        </h4>
-        <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Bước 1: Lọc theo Đội Bóng</label>
-            <select id="teamSelectForPlayer" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" onchange="loadPlayers()">
-              <option value="">-- Chọn đội --</option>
-              <option th:each="t : ${teams}" th:value="${t.id}" th:text="${t.name}"></option>
-            </select>
-          </div>
+      <div th:if="${prizeType == 'INDIVIDUAL'}" class="space-y-4">
+        <div class="bg-blue-50/50 p-6 rounded-xl border border-blue-100">
+          <h4 class="text-base font-bold text-primary mb-4 flex items-center gap-2">
+            <i data-lucide="filter" class="w-4 h-4"></i> Bộ lọc cầu thủ
+          </h4>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Bước 2: Chọn Cầu Thủ</label>
-            <select th:field="*{playerId}" id="playerSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-100 cursor-not-allowed" disabled>
-              <option value="">-- Vui lòng chọn đội trước --</option>
-            </select>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Bước 1: Chọn Đội Bóng</label>
+              <div class="relative">
+                <select id="teamSelectForPlayer" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white" onchange="loadPlayers()">
+                  <option value="">-- Chọn đội bóng --</option>
+                  <option th:each="t : ${teams}" th:value="${t.id}" th:text="${t.name}"></option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Bước 2: Chọn Cầu Thủ</label>
+              <div class="relative">
+                <select th:field="*{playerId}" id="playerSelect" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-gray-50 cursor-not-allowed transition-all" disabled>
+                  <option value="">-- Vui lòng chọn đội trước --</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <i data-lucide="user" class="w-4 h-4 text-gray-400"></i>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div th:if="${prizeType == 'TEAM'}" class="animate-fade-in">
-        <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
-          <i data-lucide="users" class="w-5 h-5"></i> Chọn Đội Bóng Nhận Giải
-        </h4>
-        <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Đội Bóng</label>
-          <select th:field="*{teamId}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none">
+      <div th:if="${prizeType == 'TEAM'}" class="space-y-4">
+        <div class="bg-purple-50/50 p-6 rounded-xl border border-purple-100">
+          <h4 class="text-base font-bold text-primary mb-4 flex items-center gap-2">
+            <i data-lucide="shield" class="w-4 h-4"></i> Chọn Đội Bóng Nhận Giải
+          </h4>
+          <select th:field="*{teamId}" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white">
             <option value="">-- Chọn đội bóng --</option>
             <option th:each="t : ${teams}" th:value="${t.id}" th:text="${t.name}"></option>
           </select>
@@ -84,66 +89,64 @@
       </div>
 
       <div class="flex gap-4 mt-8">
-        <button type="submit" class="flex-1 bg-secondary hover:bg-green-400 text-primary font-bold py-3 rounded-lg shadow-md transition-colors">
-          Xác nhận Trao giải
-        </button>
-        <a th:href="@{/admin/prize}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg shadow-sm text-center transition-colors">
+        <a th:href="@{/admin/prize}" class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 rounded-xl shadow-sm text-center transition-colors">
           Hủy
         </a>
+        <button type="submit" class="flex-1 bg-secondary hover:bg-green-400 text-primary font-bold py-3 rounded-xl shadow-lg shadow-green-200 transition-colors transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+          <i data-lucide="check-circle" class="w-5 h-5"></i> Xác nhận Trao giải
+        </button>
       </div>
     </form>
   </div>
-</div>
 
-<script>
-  lucide.createIcons();
+  <script>
+    function loadPlayers() {
+      const teamId = document.getElementById('teamSelectForPlayer').value;
+      const playerSelect = document.getElementById('playerSelect');
 
-  // Hàm load cầu thủ (Chỉ dùng cho giải cá nhân)
-  function loadPlayers() {
-    const teamId = document.getElementById('teamSelectForPlayer').value;
-    const playerSelect = document.getElementById('playerSelect');
+      if (!playerSelect) return;
 
-    if (!playerSelect) return; // Nếu không có element này (giải tập thể) thì thoát
+      playerSelect.innerHTML = '<option value="">-- Đang tải dữ liệu... --</option>';
+      playerSelect.disabled = true;
+      playerSelect.classList.add('bg-gray-50', 'cursor-not-allowed');
+      playerSelect.classList.remove('bg-white');
 
-    // Reset state
-    playerSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
-    playerSelect.disabled = true;
-    playerSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
+      if (!teamId) {
+        playerSelect.innerHTML = '<option value="">-- Vui lòng chọn đội trước --</option>';
+        return;
+      }
 
-    if (!teamId) {
-      playerSelect.innerHTML = '<option value="">-- Vui lòng chọn đội trước --</option>';
-      return;
-    }
+      // Gọi API lấy cầu thủ
+      fetch(`/admin/prize/api/players-by-team/${teamId}`)
+              .then(response => {
+                if (!response.ok) throw new Error("HTTP error " + response.status);
+                return response.json();
+              })
+              .then(data => {
+                playerSelect.innerHTML = '<option value="">-- Chọn cầu thủ --</option>';
 
-    // Call API (đã sửa đường dẫn /admin)
-    fetch(`/admin/prize/api/players-by-team/${teamId}`)
-            .then(response => {
-              if (!response.ok) throw new Error("HTTP error " + response.status);
-              return response.json();
-            })
-            .then(data => {
-              playerSelect.innerHTML = '<option value="">-- Chọn cầu thủ --</option>';
+                if (data.length === 0) {
+                  playerSelect.innerHTML += '<option value="" disabled>Đội này chưa có cầu thủ</option>';
+                }
 
-              if (data.length === 0) {
-                playerSelect.innerHTML += '<option value="" disabled>Đội này chưa có cầu thủ</option>';
-              }
+                data.forEach(player => {
+                  const option = document.createElement('option');
+                  option.value = player.id;
+                  option.text = `${player.name} (${player.position})`;
+                  playerSelect.add(option);
+                });
 
-              data.forEach(player => {
-                const option = document.createElement('option');
-                option.value = player.id;
-                option.text = `${player.name} (${player.position})`;
-                playerSelect.add(option);
+                playerSelect.disabled = false;
+                playerSelect.classList.remove('bg-gray-50', 'cursor-not-allowed');
+                playerSelect.classList.add('bg-white');
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                playerSelect.innerHTML = '<option value="">Lỗi kết nối server</option>';
               });
-
-              playerSelect.disabled = false;
-              playerSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              playerSelect.innerHTML = '<option value="">Lỗi khi tải danh sách</option>';
-            });
-  }
-</script>
+    }
+  </script>
+</div>
 
 </body>
 </html>

@@ -23,4 +23,5 @@ public interface IMatchScheduleService {
     void reschedule(Long id, LocalDate newDate, String newTime);
     List<CoachMatchScheduleDto> getCoachMatchSchedules(Long teamId);//THới
     boolean hasSchedule();
+    Page<MatchSchedule> search(String team, LocalDate date, Integer round, Pageable pageable);
 }

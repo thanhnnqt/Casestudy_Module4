@@ -3,124 +3,321 @@
 <head>
     <meta charset="UTF-8">
     <title>Đăng ký đội hình thi đấu</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+
+        /* Style cho cầu thủ bị treo giò */
+        .player-item.suspended {
+            opacity: 0.6;
+            background-color: #f8d7da !important; /* Màu đỏ nhạt cảnh báo */
+            cursor: not-allowed !important;
+            border: 1px solid #f5c6cb !important;
+        }
+
+        .player-item.suspended:active {
+            cursor: not-allowed !important;
+        }
+
+        /* --- Variables --- */
+        :root{
+            --pl-deep: #38003c;    /* tím than */
+            --pl-neon: #00ff85;    /* xanh neon */
+            --pl-pink: #ff0050;
+            --card-bg: linear-gradient(180deg, rgba(56,0,60,0.92), rgba(56,0,60,0.85));
+            --glass: rgba(255,255,255,0.04);
+            --muted: #bfc6cc;
+        }
+
+        /* --- Reset / Base --- */
+        html,body { height:100%; }
+        body {
+            font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: radial-gradient(1200px 400px at 10% 5%, rgba(56,0,60,0.06), transparent 8%),
+            radial-gradient(900px 300px at 90% 95%, rgba(0,255,133,0.02), transparent 6%),
+            #f4f6f8;
+            color:#0b1220;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+            padding-bottom:48px;
+        }
         .container-fluid { max-width: 1400px; }
 
+        /* --- Header area --- */
+        .pl-page-header {
+            background: var(--card-bg);
+            color: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(56,0,60,0.18);
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:16px;
+            margin-bottom:20px;
+        }
+        .pl-title {
+            font-weight:900;
+            letter-spacing:0.6px;
+            font-size:1.6rem;
+            display:flex;
+            flex-direction:column;
+            line-height:1;
+        }
+        .pl-sub {
+            color: rgba(255,255,255,0.85);
+            font-weight:600;
+            font-size:0.95rem;
+            margin-top:6px;
+        }
+
+        /* --- Card / panels --- */
         .card-custom {
-            border: none; border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            background: white; height: 85vh;
-            display: flex; flex-direction: column;
+            border-radius:12px;
+            overflow:hidden; /* Giữ nguyên hidden ở cha để bo góc */
+            background:linear-gradient(180deg, #ffffff, #fbfcfd);
+            box-shadow: 0 6px 18px rgba(6,6,8,0.06);
+            height: 85vh;
+            display:flex;
+            flex-direction:column; /* Quan trọng cho flex layout dọc */
         }
         .card-header-custom {
-            background: #fff; border-bottom: 1px solid #eee;
-            padding: 15px 20px; font-weight: 700;
-            border-radius: 12px 12px 0 0;
-            display: flex; justify-content: space-between; align-items: center;
+            padding:12px 16px;
+            border-bottom:1px solid rgba(11,18,32,0.04);
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            background: linear-gradient(180deg, rgba(56,0,60,0.03), rgba(56,0,60,0.01));
+            flex-shrink: 0; /* Không cho header bị co lại */
         }
-        .scrollable-content { flex: 1; overflow-y: auto; padding: 10px; }
+        .card-header-custom .title {
+            font-weight:700;
+            color: var(--pl-deep);
+        }
 
-        /* Player Row */
+        /* --- [FIXED] Scrollable Content --- */
+        .scrollable-content {
+            flex: 1;            /* Chiếm toàn bộ chiều cao còn lại */
+            overflow-y: auto;   /* Hiện thanh cuộn dọc khi cần thiết */
+            overflow-x: hidden; /* Ẩn thanh cuộn ngang */
+            padding: 10px;      /* Thêm padding để nội dung không sát lề */
+            min-height: 0;      /* Fix lỗi flexbox trên một số trình duyệt cũ */
+        }
+
+        /* Tùy chỉnh thanh cuộn (Scrollbar) cho đẹp hơn */
+        .scrollable-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollable-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background-color: rgba(56,0,60,0.2);
+            border-radius: 20px;
+        }
+        .scrollable-content::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(56,0,60,0.4);
+        }
+
+        /* --- Player Row (pool) --- */
         .player-draggable {
-            background: #fff; border: 1px solid #e0e0e0;
-            border-radius: 8px; padding: 10px; margin-bottom: 8px;
-            cursor: grab; display: flex; align-items: center; justify-content: space-between;
-            transition: all 0.2s;
+            background: linear-gradient(90deg, #fff, #fbfbff);
+            border: 1px solid rgba(56,0,60,0.06);
+            border-left: 4px solid rgba(56,0,60,0.06);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: grab;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            transition: transform .14s ease, box-shadow .14s ease;
         }
-        .player-draggable:hover { background: #f8f9fa; border-color: #0d6efd; transform: translateX(2px); }
-        .player-draggable.dragging { opacity: 0.5; border: 2px dashed #999; }
+        .player-draggable:hover {
+            transform: translateX(6px);
+            box-shadow: 0 6px 18px rgba(56,0,60,0.06);
+            border-left-color: var(--pl-deep);
+        }
+        .player-draggable.dragging {
+            opacity: 0.6;
+            transform: scale(0.98);
+            border-style: dashed;
+        }
 
-        /* Badges */
         .pos-badge {
-            width: 35px; height: 35px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; font-weight: bold; font-size: 0.75rem; color: white;
-            margin-right: 10px;
+            width:42px; height:42px;
+            display:flex; align-items:center; justify-content:center;
+            border-radius:10px; font-weight:700; color:white; font-size:0.78rem;
+            margin-right:12px;
+            box-shadow: inset 0 -6px 18px rgba(0,0,0,0.06);
         }
-        .pos-GK { background: #f0ad4e; } .pos-DF { background: #5cb85c; }
-        .pos-MF { background: #0d6efd; } .pos-FW { background: #d9534f; }
+        .pos-GK { background: linear-gradient(180deg,#f6a83d,#d98a17); }
+        .pos-DF { background: linear-gradient(180deg,#4bd07b,#1e8d4a); }
+        .pos-MF { background: linear-gradient(180deg,#4f83ff,#0d52ff); }
+        .pos-FW { background: linear-gradient(180deg,#ff6b7a,#d92b3a); }
 
-        .card-icon { font-size: 0.8rem; margin-left: 5px; }
-        .card-yellow { color: #ffc107; }
-        .card-red { color: #dc3545; }
+        .player-draggable .meta {
+            display:flex; gap:8px; align-items:center;
+        }
+        .player-draggable .name { font-weight:700; color:#0b1220; }
+        .player-draggable .sub { color:var(--muted); font-size:0.82rem; }
 
-        /* Drop Zones */
+        /* --- Drop zones --- */
         .drop-zone {
-            min-height: 100px; border: 2px dashed #dee2e6;
-            border-radius: 8px; padding: 10px; background: #fafafa;
-            transition: background 0.2s;
+            /* Đã xóa min-height cứng ở đây vì flex layout sẽ lo việc đó,
+               nhưng giữ border style cho đẹp */
+            border: 2px dashed rgba(56,0,60,0.08);
+            border-radius: 12px; /* Bo góc trong content */
+            background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.9));
+            transition: background .12s ease, border-color .12s ease, box-shadow .12s ease;
         }
-        .drop-zone.drag-over { background: #e9ecef; border-color: #0d6efd; }
+        .drop-zone.drag-over {
+            background: linear-gradient(180deg, rgba(0,255,133,0.04), rgba(56,0,60,0.02));
+            border-color: rgba(0,255,133,0.4);
+            box-shadow: 0 10px 28px rgba(0,255,133,0.03);
+        }
 
-        /* Captain Radio */
-        .captain-select { transform: scale(1.3); cursor: pointer; accent-color: #ffc107; }
+        /* --- Squad / badges --- */
+        .badge.pl-main { background:var(--pl-neon); color: #0b1220; font-weight:700; }
+        .badge.pl-empty { background: rgba(56,0,60,0.06); color: var(--pl-deep); font-weight:600; }
+        .badge.pl-warning { background: #fff6e0; color: #a66f00; font-weight:700; }
+
+        /* --- Captain wrapper styling --- */
+        .captain-wrapper {
+            border-left: 2px solid rgba(56,0,60,0.06);
+            padding-left:10px;
+            margin-left:10px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        .captain-select { transform:scale(1.15); cursor:pointer; accent-color:var(--pl-neon); }
+
+        /* --- Buttons (PL style) --- */
+        .btn-pl-primary {
+            background: linear-gradient(90deg,var(--pl-neon), #00e672);
+            color: var(--pl-deep);
+            border: none;
+            font-weight:700;
+            box-shadow: 0 8px 20px rgba(0,255,133,0.08);
+            border-radius: 10px;
+            padding: .56rem .9rem;
+        }
+        .btn-pl-primary:hover { transform: translateY(-2px); filter:brightness(.98); }
+
+        .btn-pl-outline {
+            background: rgba(255,255,255,0.08);      /* sáng hơn so với background header */
+            border: 1px solid rgba(0,255,133,0.12);  /* viền neon mờ */
+            color: var(--pl-neon);                    /* text xanh neon để nổi */
+            font-weight:600;
+            border-radius:10px;
+            padding:.46rem .75rem;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12), 0 2px 6px rgba(0,255,133,0.03);
+            backdrop-filter: blur(4px);               /* tạo hiệu ứng glass, giúp tương phản */
+        }
+
+        /* small responsive tweaks */
+        @media (max-width:991px) {
+            .card-custom { height: auto; min-height: 500px; }
+            .player-draggable { padding: 8px; }
+            .pos-badge { width:36px; height:36px; }
+            /* Trên mobile thì giới hạn chiều cao danh sách để vẫn scroll được */
+            .scrollable-content { height: 400px; flex: none; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container-fluid py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="pl-page-header">
         <div>
-            <h2 class="fw-bold text-primary mb-0">Đăng ký đội hình thi đấu</h2>
-            <div class="text-muted">Trận: <span th:text="${match.homeTeam.name} + ' vs ' + ${match.awayTeam.name}"></span></div>
+            <div class="pl-title">QUẢN LÝ ĐĂNG KÝ ĐỘI HÌNH</div>
+            <div class="pl-sub">Trận: <span th:text="${match.homeTeam.name} + ' vs ' + ${match.awayTeam.name}">Team A vs Team B</span></div>
         </div>
-        <div>
+
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="@{/coach/team/{teamId}/schedule(teamId=${teamId})}" class="btn btn-pl-outline d-flex align-items-center gap-2">
+                <i class="bi bi-arrow-left-circle"></i> Trở về Lịch
+            </a>
+
+            <button type="button" id="resetBtn" class="btn btn-pl-outline d-flex align-items-center gap-2" title="Đặt lại đội hình">
+                <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
+            </button>
+
             <form id="submitForm" method="post" th:action="@{/coach/team/{teamId}/match/{matchId}/register/save(teamId=${teamId}, matchId=${match.id})}">
                 <div id="hiddenInputs"></div>
                 <input type="hidden" name="captainId" id="captainIdInput">
-
-                <a th:href="@{/coach/team/{teamId}/schedule(teamId=${teamId})}" class="btn btn-light border me-2">Hủy</a>
-                <button type="button" id="confirmBtn" class="btn btn-success btn-lg px-4">
-                    <i class="bi bi-check-lg"></i> Xác nhận đăng ký
-                </button>
+                <div style="display:inline-block">
+                    <button type="button" id="confirmBtn" class="btn btn-pl-primary d-flex align-items-center gap-2">
+                        <i class="bi bi-check-lg"></i> Xác nhận đăng ký
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div th:if="${error}" class="alert alert-danger mt-3 rounded shadow-sm" role="alert">
         <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 mt-2">
 
         <div class="col-lg-4">
             <div class="card-custom">
-                <div class="card-header-custom text-primary">
-                    <span><i class="bi bi-people-fill"></i> Danh sách cầu thủ</span>
-                    <span class="badge bg-light text-dark border" id="poolCount">0</span>
+                <div class="card-header-custom">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-people-fill fs-4" style="color:var(--pl-deep)"></i>
+                        <div>
+                            <div class="title">Danh sách cầu thủ</div>
+                            <div class="small text-muted">Kéo cầu thủ vào đội hình chính hoặc dự bị</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="poolCount" class="badge pl-empty">0</span>
+                    </div>
                 </div>
-                <div class="p-2 border-bottom">
+
+                <div class="p-2 border-bottom" style="background:transparent;">
                     <input type="text" class="form-control form-control-sm" id="searchPlayer" placeholder="Tìm kiếm tên cầu thủ...">
                 </div>
-                <div class="scrollable-content drop-zone" id="playerPool">
+
+                <div class="scrollable-content drop-zone" id="playerPool" aria-label="Player pool">
                     <div th:each="p : ${allPlayersForTable}"
-                         class="player-draggable"
-                         draggable="true"
+                         class="player-draggable player-item"
+                         th:classappend="${p.suspensionMatchesRemaining > 0} ? 'suspended' : ''"
+                         th:attr="draggable=${p.suspensionMatchesRemaining == 0}, data-suspended=${p.suspensionMatchesRemaining > 0}"
                          th:data-id="${p.id}"
-                         th:data-name="${p.name}">
+                         th:data-name="${p.name}"
+                         th:data-pos="${p.position}">
 
                         <div class="d-flex align-items-center">
-                            <div class="pos-badge" th:classappend="'pos-' + ${p.position}" th:text="${p.position}"></div>
+                            <div class="pos-badge" th:classappend="'pos-' + ${p.position}" th:text="${p.position}">DF</div>
                             <div>
-                                <div class="fw-bold" th:text="${p.name}"></div>
-                                <div class="small text-muted">
-                                    <span th:text="${p.age} + ' tuổi'"></span> | Exp: <span th:text="${p.experience}"></span>
+                                <div class="name fw-bold" th:text="${p.name}">Nguyen Van A</div>
+                                <div th:if="${p.suspensionMatchesRemaining > 0}" class="text-danger small fw-bold">
+                                    <i class="bi bi-ban"></i> Treo giò (<span th:text="${p.suspensionMatchesRemaining}"></span> trận)
                                 </div>
+                                <div th:unless="${p.suspensionMatchesRemaining > 0}" class="sub small"
+                                     th:text="${p.age} + ' tuổi · Exp: ' + ${p.experience}">22 tuổi</div>
                             </div>
                         </div>
 
-                        <div class="text-end">
-                            <div th:if="${p.yellowCards > 0}" class="card-icon card-yellow" title="Thẻ vàng"><i class="bi bi-square-fill"></i> <span th:text="${p.yellowCards}"></span></div>
-                            <div th:if="${p.redCards > 0}" class="card-icon card-red" title="Thẻ đỏ"><i class="bi bi-square-fill"></i> <span th:text="${p.redCards}"></span></div>
+                        <div class="text-end d-flex align-items-center gap-2">
+                            <div th:if="${p.seasonYellowCards > 0}" class="d-flex align-items-center" title="Thẻ vàng tích lũy">
+                                <span class="fw-bold text-dark me-1" th:text="${p.seasonYellowCards}"></span>
+                                <i class="bi bi-square-fill" style="color: #ffc107; font-size: 0.8rem;"></i>
+                            </div>
+
+                            <div th:if="${p.suspensionMatchesRemaining > 0}" title="Đang bị treo giò">
+                                <i class="bi bi-square-fill" style="color: #dc3545; font-size: 0.8rem;"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -128,25 +325,44 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card-custom border-success">
-                <div class="card-header-custom text-success bg-success-subtle">
-                    <span><i class="bi bi-shield-fill-check"></i> Đá chính (11)</span>
-                    <span class="badge bg-success" id="mainCount">0/11</span>
+            <div class="card-custom border" style="border-color: rgba(56,0,60,0.06);">
+                <div class="card-header-custom" style="background: linear-gradient(90deg, rgba(56,0,60,0.03), rgba(0,255,133,0.02));">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-shield-fill-check fs-4" style="color:var(--pl-neon)"></i>
+                        <div>
+                            <div class="title">Đá chính (11)</div>
+                            <div class="small text-muted">Kéo cầu thủ vào đây. Chọn 1 đội trưởng (©).</div>
+                        </div>
+                    </div>
+                    <div>
+                        <span id="mainCount" class="badge pl-main">0/11</span>
+                    </div>
                 </div>
+
                 <div class="p-2 bg-light small text-center text-muted fst-italic">
-                    Kéo cầu thủ vào đây. Chọn 1 Đội trưởng (©).
+                    Sắp xếp đội hình → Kéo thả hoặc chạm để di chuyển
                 </div>
-                <div class="scrollable-content drop-zone" id="mainSquad"></div>
+
+                <div class="scrollable-content drop-zone" id="mainSquad" aria-label="Main squad"></div>
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="card-custom border-warning">
-                <div class="card-header-custom text-warning-emphasis bg-warning-subtle">
-                    <span><i class="bi bi-person-plus-fill"></i> Dự bị (Max 9)</span>
-                    <span class="badge bg-warning text-dark" id="subCount">0/9</span>
+            <div class="card-custom border" style="border-color: rgba(255,197,0,0.06);">
+                <div class="card-header-custom" style="background: linear-gradient(90deg, rgba(255,197,0,0.03), rgba(56,0,60,0.01));">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-person-plus-fill fs-4" style="color:#f0ad4e"></i>
+                        <div>
+                            <div class="title">Dự bị (Max 9)</div>
+                            <div class="small text-muted">Kéo cầu thủ vào ghế dự bị</div>
+                        </div>
+                    </div>
+                    <div>
+                        <span id="subCount" class="badge pl-warning">0/9</span>
+                    </div>
                 </div>
-                <div class="scrollable-content drop-zone" id="subSquad"></div>
+
+                <div class="scrollable-content drop-zone" id="subSquad" aria-label="Sub squad"></div>
             </div>
         </div>
 
@@ -155,8 +371,8 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    const savedMainIds = /*[[${mainPlayers.![id]}]]*/ [];
-    const savedSubIds = /*[[${subPlayers.![id]}]]*/ [];
+    const savedMainIds = /*[[${mainPlayers != null ? mainPlayers.![id] : {}}]]*/ [];
+    const savedSubIds = /*[[${subPlayers != null ? subPlayers.![id] : {}}]]*/ [];
     const savedCaptainId = /*[[${currentCaptainId}]]*/ null;
     /*]]>*/
 </script>
@@ -167,7 +383,7 @@
         Swal.fire({
             toast: true,
             position: position,
-            icon: type, // 'success' | 'error' | 'warning' | 'info' | 'question'
+            icon: type,
             title: message,
             showConfirmButton: false,
             timer: timer,
@@ -180,16 +396,64 @@
         const pool = document.getElementById('playerPool');
         const main = document.getElementById('mainSquad');
         const sub = document.getElementById('subSquad');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // position order for sorting
+        const posOrder = { 'GK': 0, 'DF': 1, 'MF': 2, 'FW': 3 };
 
         // Initialize draggables after DOM content (some elements generated by Thymeleaf)
         function initDraggables() {
             document.querySelectorAll('.player-draggable').forEach(draggable => {
-                draggable.addEventListener('dragstart', () => draggable.classList.add('dragging'));
-                draggable.addEventListener('dragend', () => {
-                    draggable.classList.remove('dragging');
-                    updateUI();
-                });
+                // avoid double-binding
+                if (!draggable.dataset.listener) {
+                    draggable.addEventListener('dragstart', () => draggable.classList.add('dragging'));
+                    draggable.addEventListener('dragend', () => {
+                        draggable.classList.remove('dragging');
+                        updateUI();
+                    });
+                    draggable.dataset.listener = '1';
+                }
             });
+        }
+
+        // Sort player pool by position then name
+        function sortPlayerPool() {
+            const items = Array.from(pool.querySelectorAll('.player-draggable'));
+            items.sort((a,b) => {
+                const pa = (a.dataset.pos || '').toUpperCase();
+                const pb = (b.dataset.pos || '').toUpperCase();
+                const oa = posOrder.hasOwnProperty(pa) ? posOrder[pa] : 99;
+                const ob = posOrder.hasOwnProperty(pb) ? posOrder[pb] : 99;
+                if (oa !== ob) return oa - ob;
+                const na = (a.dataset.name || '').toLowerCase();
+                const nb = (b.dataset.name || '').toLowerCase();
+                return na.localeCompare(nb);
+            });
+            // re-append in order
+            items.forEach(it => pool.appendChild(it));
+            updateUI();
+        }
+
+        // restore saved state
+        function restoreState() {
+            // Move saved main players
+            if(savedMainIds && savedMainIds.length > 0) {
+                savedMainIds.forEach(id => {
+                    const el = pool.querySelector(`.player-draggable[data-id="${id}"]`);
+                    if (el) { main.appendChild(el); addCaptainRadio(el); }
+                });
+            }
+            // Move saved sub players
+            if(savedSubIds && savedSubIds.length > 0) {
+                savedSubIds.forEach(id => {
+                    const el = pool.querySelector(`.player-draggable[data-id="${id}"]`);
+                    if (el) sub.appendChild(el);
+                });
+            }
+            // After moving, ensure draggables attached and pool sorted
+            initDraggables();
+            sortPlayerPool();
         }
 
         initDraggables();
@@ -227,6 +491,23 @@
                     // Nếu kéo ra khỏi Main, xóa nút Captain
                     const radioWrapper = draggable.querySelector('.captain-wrapper');
                     if (radioWrapper) radioWrapper.remove();
+                    // remove any checked radio too
+                    const radio = draggable.querySelector('input[name="captainGroup"]');
+                    if (radio) radio.checked = false;
+                }
+
+                // If dropped into pool, sort pool so the moved player lands in correct place
+                if (zone.id === 'playerPool') {
+                    // ensure draggable has data-pos and data-name (if not, try to set from inner text)
+                    if (!draggable.dataset.pos) {
+                        const badge = draggable.querySelector('.pos-badge');
+                        if (badge) draggable.dataset.pos = badge.textContent.trim();
+                    }
+                    if (!draggable.dataset.name) {
+                        const nameNode = draggable.querySelector('.fw-bold');
+                        if (nameNode) draggable.dataset.name = nameNode.textContent.trim();
+                    }
+                    sortPlayerPool();
                 }
 
                 updateUI();
@@ -237,166 +518,219 @@
         document.getElementById('searchPlayer').addEventListener('keyup', function() {
             const val = this.value.toLowerCase();
             pool.querySelectorAll('.player-draggable').forEach(item => {
-                const name = item.getAttribute('data-name').toLowerCase();
+                const name = (item.getAttribute('data-name') || '').toLowerCase();
                 item.style.display = name.includes(val) ? 'flex' : 'none';
             });
         });
 
         // Confirm button
-        document.getElementById('confirmBtn').addEventListener('click', () => {
+        confirmBtn.addEventListener('click', () => {
             validateAndSubmit();
         });
 
-        // Re-init when using restoreState (some nodes moved)
-        // use MutationObserver to re-attach drag listeners to new nodes if needed
-        const observer = new MutationObserver(() => initDraggables());
+        // Reset button: confirm then performReset
+        resetBtn.addEventListener('click', () => {
+            const totalFilled = document.querySelectorAll('#mainSquad .player-draggable, #subSquad .player-draggable').length;
+            if (totalFilled === 0) {
+                Swal.fire({ icon: 'info', title: 'Thông báo', text: 'Không có cầu thủ trên sân để đặt lại.'});
+                return;
+            }
+
+            Swal.fire({
+                title: 'Đặt lại đội hình?',
+                text: 'Toàn bộ cầu thủ ở đội hình chính và dự bị sẽ trở về bảng chờ.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy',
+                reverseButtons: true,
+                customClass: { popup: 'rounded-xl' }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    performReset();
+                    showToast('success', 'Đã đặt lại đội hình', 'top-end', 1500);
+                }
+            });
+        });
+
+        // Re-init when using restoreState or dynamic changes (re-attach listeners)
+        const observer = new MutationObserver(() => {
+            initDraggables();
+            updateUI();
+        });
         observer.observe(pool, { childList: true, subtree: true });
         observer.observe(main, { childList: true, subtree: true });
         observer.observe(sub, { childList: true, subtree: true });
 
         updateUI();
-    });
 
-    function addCaptainRadio(playerEl) {
-        if (playerEl.querySelector('.captain-wrapper')) return;
+        // --- functions used above ---
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'captain-wrapper ms-3 border-start ps-3 d-flex align-items-center';
+        function addCaptainRadio(playerEl) {
+            if (playerEl.querySelector('.captain-wrapper')) return;
 
-        const radio = document.createElement('input');
-        radio.type = 'radio';
-        radio.name = 'captainGroup';
-        radio.className = 'form-check-input captain-select';
-        radio.value = playerEl.getAttribute('data-id');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'captain-wrapper ms-3 border-start ps-3 d-flex align-items-center';
 
-        if (savedCaptainId && radio.value == savedCaptainId) radio.checked = true;
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'captainGroup';
+            radio.className = 'form-check-input captain-select';
+            radio.value = playerEl.getAttribute('data-id');
 
-        const label = document.createElement('label');
-        label.className = 'd-block small fw-bold text-warning ms-2 mb-0';
-        label.innerText = '©';
+            if (savedCaptainId && radio.value == savedCaptainId) radio.checked = true;
 
-        wrapper.appendChild(radio);
-        wrapper.appendChild(label);
-        playerEl.appendChild(wrapper);
-    }
+            const label = document.createElement('label');
+            label.className = 'd-block small fw-bold text-warning ms-2 mb-0';
+            label.innerText = '©';
 
-    function restoreState() {
-        const pool = document.getElementById('playerPool');
-        const main = document.getElementById('mainSquad');
-        const sub = document.getElementById('subSquad');
-
-        // Move saved main players
-        savedMainIds.forEach(id => {
-            const el = pool.querySelector(`.player-draggable[data-id="${id}"]`);
-            if (el) { main.appendChild(el); addCaptainRadio(el); }
-        });
-        // Move saved sub players
-        savedSubIds.forEach(id => {
-            const el = pool.querySelector(`.player-draggable[data-id="${id}"]`);
-            if (el) sub.appendChild(el);
-        });
-    }
-
-    function updateUI() {
-        const mainCount = document.getElementById('mainSquad').children.length;
-        document.getElementById('mainCount').innerText = `${mainCount}/11`;
-        document.getElementById('subCount').innerText = `${document.getElementById('subSquad').children.length}/9`;
-        document.getElementById('poolCount').innerText = document.getElementById('playerPool').children.length;
-
-        const badge = document.getElementById('mainCount');
-        badge.className = mainCount === 11 ? 'badge bg-success' : 'badge bg-danger';
-    }
-
-    function validateAndSubmit() {
-        const mainDivs = document.querySelectorAll('#mainSquad .player-draggable');
-        const subDivs = document.querySelectorAll('#subSquad .player-draggable');
-
-        // 1. Check main count
-        if (mainDivs.length !== 11) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Số lượng đội hình không hợp lệ',
-                html: `Bạn mới chọn <strong>${mainDivs.length}</strong> cầu thủ đá chính. Cần đủ <strong>11</strong> người.`,
-                customClass: { popup: 'rounded-xl' }
-            });
-            return;
+            wrapper.appendChild(radio);
+            wrapper.appendChild(label);
+            playerEl.appendChild(wrapper);
         }
 
-        // 2. Check sub count
-        if (subDivs.length < 1) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Thiếu dự bị',
-                text: 'Phải chọn tối thiểu 1 cầu thủ dự bị!',
-                customClass: { popup: 'rounded-xl' }
-            });
-            return;
+        function updateUI() {
+            const mainCount = document.getElementById('mainSquad').children.length;
+            document.getElementById('mainCount').innerText = `${mainCount}/11`;
+            document.getElementById('subCount').innerText = `${document.getElementById('subSquad').children.length}/9`;
+            document.getElementById('poolCount').innerText = document.querySelectorAll('#playerPool .player-draggable').length;
+
+            const badge = document.getElementById('mainCount');
+            badge.className = mainCount === 11 ? 'badge pl-main' : 'badge pl-empty';
         }
 
-        // 3. Check captain
-        const captainRadio = document.querySelector('input[name="captainGroup"]:checked');
-        if (!captainRadio) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Chưa chọn đội trưởng',
-                text: 'Vui lòng chọn Đội trưởng (©) trong danh sách đá chính!',
-                customClass: { popup: 'rounded-xl' }
-            });
-            return;
-        }
+        function validateAndSubmit() {
+            const mainDivs = document.querySelectorAll('#mainSquad .player-draggable');
+            const subDivs = document.querySelectorAll('#subSquad .player-draggable');
 
-        // 4. Confirmation modal before submit
-        Swal.fire({
-            title: 'Xác nhận đăng ký đội hình',
-            html: `<div>Bạn xác nhận đăng ký đội hình này cho trận đấu?</div>
-                   <div class="mt-2 text-muted small">Số cầu thủ chính: <strong>${mainDivs.length}</strong> - Dự bị: <strong>${subDivs.length}</strong></div>`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Xác nhận',
-            cancelButtonText: 'Hủy',
-            reverseButtons: true,
-            customClass: { popup: 'rounded-xl' }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // prepare hidden inputs
-                const container = document.getElementById('hiddenInputs');
-                container.innerHTML = '';
-
-                mainDivs.forEach(el => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'mainPlayerIds';
-                    input.value = el.dataset.id;
-                    container.appendChild(input);
-                });
-
-                subDivs.forEach(el => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'subPlayerIds';
-                    input.value = el.dataset.id;
-                    container.appendChild(input);
-                });
-
-                document.getElementById('captainIdInput').value = captainRadio.value;
-
-                // Optional: show a short saving toast then submit
+            // 1. Check main count
+            if (mainDivs.length !== 11) {
                 Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Đang gửi đăng ký...',
-                    showConfirmButton: false,
-                    timer: 900,
-                    timerProgressBar: true,
+                    icon: 'error',
+                    title: 'Số lượng đội hình không hợp lệ',
+                    html: `Bạn mới chọn <strong>${mainDivs.length}</strong> cầu thủ đá chính. Cần đủ <strong>11</strong> người.`,
                     customClass: { popup: 'rounded-xl' }
                 });
-
-                // submit the form
-                document.getElementById('submitForm').submit();
+                return;
             }
-        });
-    }
+
+            // 2. Check sub count
+            if (subDivs.length < 1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Thiếu dự bị',
+                    text: 'Phải chọn tối thiểu 1 cầu thủ dự bị!',
+                    customClass: { popup: 'rounded-xl' }
+                });
+                return;
+            }
+
+            // 3. Check captain
+            const captainRadio = document.querySelector('input[name="captainGroup"]:checked');
+            if (!captainRadio) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Chưa chọn đội trưởng',
+                    text: 'Vui lòng chọn Đội trưởng (©) trong danh sách đá chính!',
+                    customClass: { popup: 'rounded-xl' }
+                });
+                return;
+            }
+
+            // 4. Confirmation modal before submit
+            Swal.fire({
+                title: 'Xác nhận đăng ký đội hình',
+                html: `<div>Bạn xác nhận đăng ký đội hình này cho trận đấu?</div>
+                       <div class="mt-2 text-muted small">Số cầu thủ chính: <strong>${mainDivs.length}</strong> - Dự bị: <strong>${subDivs.length}</strong></div>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Xác nhận',
+                cancelButtonText: 'Hủy',
+                reverseButtons: true,
+                customClass: { popup: 'rounded-xl' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // prepare hidden inputs
+                    const container = document.getElementById('hiddenInputs');
+                    container.innerHTML = '';
+
+                    mainDivs.forEach(el => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'mainPlayerIds';
+                        input.value = el.dataset.id;
+                        container.appendChild(input);
+                    });
+
+                    subDivs.forEach(el => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'subPlayerIds';
+                        input.value = el.dataset.id;
+                        container.appendChild(input);
+                    });
+
+                    document.getElementById('captainIdInput').value = captainRadio.value;
+
+                    // Optional: show a short saving toast then submit
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Đang gửi đăng ký...',
+                        showConfirmButton: false,
+                        timer: 900,
+                        timerProgressBar: true,
+                        customClass: { popup: 'rounded-xl' }
+                    });
+
+                    // submit the form
+                    document.getElementById('submitForm').submit();
+                }
+            });
+        }
+
+        // Perform reset: move all from main & sub back to pool and remove captain wrappers
+        function performReset() {
+            const moved = [];
+
+            // Move main squad players back
+            document.querySelectorAll('#mainSquad .player-draggable').forEach(p => {
+                // remove captain wrapper if any
+                const cap = p.querySelector('.captain-wrapper');
+                if (cap) cap.remove();
+                // ensure data attributes exist: data-name/data-pos
+                ensureDataAttributesFromDom(p);
+                pool.appendChild(p);
+                moved.push(p);
+            });
+
+            // Move sub squad players back
+            document.querySelectorAll('#subSquad .player-draggable').forEach(p => {
+                const cap = p.querySelector('.captain-wrapper');
+                if (cap) cap.remove();
+                ensureDataAttributesFromDom(p);
+                pool.appendChild(p);
+                moved.push(p);
+            });
+
+            // re-attach drag events & sort pool & update counts
+            initDraggables();
+            sortPlayerPool();
+            updateUI();
+        }
+
+        function ensureDataAttributesFromDom(el) {
+            if (!el.dataset.name) {
+                const nameEl = el.querySelector('.fw-bold') || el.querySelector('.name') || el;
+                el.dataset.name = (nameEl && nameEl.textContent) ? nameEl.textContent.trim() : 'Unknown';
+            }
+            if (!el.dataset.pos) {
+                const posEl = el.querySelector('.pos-badge') || el.querySelector('.position');
+                el.dataset.pos = (posEl && posEl.textContent) ? posEl.textContent.trim() : '';
+            }
+        }
+    });
 </script>
 
 </body>
