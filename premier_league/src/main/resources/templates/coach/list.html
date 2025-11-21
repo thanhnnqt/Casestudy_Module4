@@ -1,145 +1,107 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout('Ban huấn luyện', 'coaches', ~{::content})">
 
-<!-- Gọi layout -->
-<th:block th:replace="layout :: layout(
-        'Ban huấn luyện',
-        'coaches',
-        ~{::content}
-    )">
+<th:block th:fragment="content">
 
-    <!-- Nội dung trang con -->
-    <th:block th:fragment="content">
+    <style>
+        :root { --pl-purple: #38003c; --pl-pink: #ff0050; }
+        .btn-primary-pl { background-color: var(--pl-pink); border-color: var(--pl-pink); color: white; font-weight: 600; padding: 0.5rem 1.2rem; border-radius: 0.5rem; transition: all 0.2s; }
+        .btn-primary-pl:hover { background-color: #d10042; transform: translateY(-2px); }
 
-        <style>
-            .page-title {
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }
-            .coach-card {
-                border-radius: 15px;
-                overflow: hidden;
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-            }
-            .coach-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 10px 20px rgba(0,0,0,0.12);
-            }
-            .coach-avatar-wrapper { display: block; overflow: hidden; }
-            .coach-avatar {
-                width: 100%;
-                height: 220px;
-                object-fit: cover;
-                transition: transform 0.3s ease;
-            }
-            .coach-card:hover .coach-avatar {
-                transform: scale(1.03);
-            }
-            .coach-name { font-weight: 700; font-size: 1.05rem; }
-            .coach-position-title {
-                font-weight: 700;
-                margin-bottom: 10px;
-                border-left: 4px solid #0d6efd;
-                padding-left: 8px;
-                text-transform: uppercase;
-                font-size: 0.95rem;
-                color: #0d6efd;
-            }
-            .coach-role { font-size: 0.9rem; color: #6c757d; }
-            .coach-meta { font-size: 0.85rem; }
-            .badge-status {
-                font-size: 0.75rem;
-                padding: 4px 10px;
-                border-radius: 50px;
-            }
-            .empty-text {
-                text-align: center;
-                color: #999;
-                font-style: italic;
-                margin-top: 40px;
-            }
-            .position-block { margin-bottom: 32px; }
-        </style>
+        .coach-card { border: none; border-radius: 1rem; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: all 0.3s ease; height: 100%; overflow: hidden; }
+        .coach-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
+        .coach-avatar-wrapper { position: relative; height: 240px; overflow: hidden; background: #f8f9fa; display: block;}
+        .coach-avatar { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.4s ease; }
+        .coach-card:hover .coach-avatar { transform: scale(1.05); }
+
+        .coach-name { font-size: 1.1rem; font-weight: 700; color: var(--pl-purple); margin-bottom: 0.25rem; text-decoration: none; }
+        .coach-role { font-size: 0.85rem; color: #6c757d; font-weight: 500; margin-bottom: 1rem; text-transform: uppercase; }
+
+        .info-row { font-size: 0.85rem; color: #495057; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px; }
+        .info-row i { color: var(--pl-pink); opacity: 0.8; width: 16px; }
+
+        .role-separator { display: flex; align-items: center; margin: 2rem 0 1.5rem 0; }
+        .role-separator span { background: var(--pl-purple); color: white; padding: 0.5rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(56, 0, 60, 0.2); }
+        .role-separator::after { content: ''; flex-grow: 1; height: 2px; background: #e9ecef; margin-left: 1rem; }
+
+        .badge-status { padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; }
+        .bg-status-active { background-color: #e6f8e9; color: #0f5132; }
+        .bg-status-inactive { background-color: #f2f2f2; color: #595959; }
+    </style>
+
+    <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="page-title mb-0">Ban huấn luyện</h2>
-            <a href="/admin/coaches/create" class="btn btn-primary"> + Thêm huấn luyện viên </a>
+            <a th:href="@{/owner/coaches/create}" class="btn btn-primary-pl">
+                <i class="bi bi-plus-lg me-2"></i>Thêm Mới
+            </a>
         </div>
 
-        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-
-        <div th:if="${#maps.isEmpty(coachesByRole)}" class="empty-text">
-            Chưa có huấn luyện viên nào trong danh sách.
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <div th:each="entry : ${coachesByRole}" class="position-block">
+        <div th:if="${#maps.isEmpty(coachesByRole)}" class="text-center py-5">
+            <div class="bg-white rounded-circle d-inline-flex p-4 shadow-sm mb-3">
+                <i class="bi bi-people text-muted fs-1"></i>
+            </div>
+            <h5 class="text-muted">Chưa có dữ liệu huấn luyện viên.</h5>
+        </div>
 
-            <div class="coach-position-title" th:text="${entry.key}"></div>
+        <div th:each="entry : ${coachesByRole}">
+            <div class="role-separator">
+                <span th:text="${entry.key}">Head Coach</span>
+            </div>
 
             <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-
                 <div class="col" th:each="coach : ${entry.value}">
-                    <div class="card coach-card h-100 shadow-sm">
-
-                        <a th:href="@{'/admin/coaches/' + ${coach.id}}" class="coach-avatar-wrapper">
+                    <div class="card coach-card">
+                        <a th:href="@{'/owner/coaches/' + ${coach.id}}" class="coach-avatar-wrapper">
                             <img class="coach-avatar"
                                  th:src="${coach.avatarUrl}"
-                                 alt="avatar"
-                                 onerror="this.onerror=null; this.src='/images/no-image.png';">
-
+                                 alt="Coach Avatar"
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x400?text=No+Image';">
                         </a>
 
-                        <div class="card-body d-flex flex-column">
-
-                            <div class="mb-2">
-                                <div class="coach-name" th:text="${coach.fullName}"></div>
-                                <div class="coach-role">
-                                    <i class="bi bi-person-badge"></i>
-                                    <span th:text="${coach.role}"></span>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <a th:href="@{'/owner/coaches/' + ${coach.id}}" class="coach-name d-block" th:text="${coach.fullName}">Name</a>
+                                    <div class="coach-role" th:text="${coach.role}">Role</div>
                                 </div>
                             </div>
 
-                            <div class="coach-meta mb-2">
-                                <div><strong>Đội:</strong>
-                                    <span th:text="${coach.team != null ? coach.team.name : 'Chưa gán đội'}"></span>
+                            <div class="mt-2">
+                                <div class="info-row">
+                                    <i class="bi bi-shield-shaded"></i>
+                                    <span th:text="${coach.team != null ? coach.team.name : 'Tự do'}">Team</span>
                                 </div>
-                                <div><strong>Quốc tịch:</strong>
-                                    <span th:text="${coach.nationality}"></span>
+                                <div class="info-row">
+                                    <i class="bi bi-globe"></i>
+                                    <span th:text="${coach.nationality}">Nation</span>
                                 </div>
-                                <div th:if="${coach.dateOfBirth}">
-                                    <strong>Ngày sinh:</strong>
-                                    <span th:text="${coach.dateOfBirth}"></span>
-                                </div>
-                                <div th:if="${coach.joinDate}">
-                                    <strong>Ngày gia nhập:</strong>
-                                    <span th:text="${coach.joinDate}"></span>
+                                <div class="info-row">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span th:text="${coach.experienceYears + ' năm kn'}">Exp</span>
                                 </div>
                             </div>
 
-                            <div class="coach-meta mt-auto">
-                                <div><strong>SĐT:</strong> <span th:text="${coach.phone}"></span></div>
-                                <div><strong>Email:</strong> <span th:text="${coach.email}"></span></div>
-
-                                <div class="mt-2">
-                                    <span class="badge badge-status bg-success"
-                                          th:if="${coach.status == 'Active'}"
-                                          th:text="${coach.status}"></span>
-                                    <span class="badge badge-status bg-secondary"
-                                          th:if="${coach.status != 'Active'}"
-                                          th:text="${coach.status}"></span>
-                                </div>
-
+                            <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                                <span class="badge badge-status"
+                                      th:classappend="${coach.status == 'Active' ? 'bg-status-active' : 'bg-status-inactive'}"
+                                      th:text="${coach.status}">
+                                </span>
+                                <a th:href="@{'/owner/coaches/' + ${coach.id}}" class="btn btn-sm btn-light rounded-circle" title="Chi tiết">
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-
         </div>
-
-    </th:block>
+    </div>
 </th:block>
-
 </html>

@@ -9,5 +9,7 @@ public interface ICoachRepository extends JpaRepository<Coach, Integer> {
 
     List<Coach> findByFullNameContainingIgnoreCase(String name);
 
+    List<Coach> findByTeamId(Long teamId);
+
     boolean existsByRole(String role);
 }

@@ -5,136 +5,80 @@
 <th:block th:fragment="content">
 
     <style>
-        .page-title {
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .player-card {
-            border-radius: 15px;
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .player-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0,0,0,0.12);
-        }
-
-        .player-avatar-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: block;
-        }
-
-        .player-avatar {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .player-avatar-wrapper:hover .player-avatar {
-            transform: scale(1.05);
-        }
-
-        .player-position-badge {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.7);
-            color: #fff;
-            padding: 4px 10px;
-            border-radius: 50px;
-            font-size: 0.8rem;
-        }
-
-        .player-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .player-team {
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-
-        .player-meta {
-            font-size: 0.85rem;
-        }
-
-        .search-box-player {
-            max-width: 420px;
-        }
-
-        .empty-text {
-            text-align: center;
-            color: #999;
-            font-style: italic;
-            margin-top: 40px;
-        }
+        :root { --pl-purple: #38003c; --pl-pink: #ff0050; }
+        .btn-primary-pl { background-color: var(--pl-pink); border-color: var(--pl-pink); color: white; font-weight: 600; padding: 0.5rem 1.2rem; border-radius: 0.5rem; transition: all 0.2s; }
+        .btn-primary-pl:hover { background-color: #d10042; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 0, 80, 0.3); }
+        .player-card { border: none; border-radius: 1rem; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: all 0.3s ease; overflow: hidden; }
+        .player-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .player-avatar-wrapper { position: relative; height: 260px; overflow: hidden; background: #f8f9fa; display: block; }
+        .player-avatar { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .player-card:hover .player-avatar { transform: scale(1.05); }
+        .player-number { position: absolute; top: 10px; right: 10px; background: var(--pl-pink); color: white; font-weight: 800; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+        .card-body { padding: 1.25rem; }
+        .player-name { font-size: 1.1rem; font-weight: 700; color: var(--pl-purple); margin-bottom: 0.25rem; }
+        .player-role { font-size: 0.85rem; color: #6c757d; font-weight: 600; text-transform: uppercase; }
+        .info-row { font-size: 0.85rem; color: #495057; margin-top: 0.5rem; display: flex; align-items: center; gap: 8px; }
+        .info-row i { color: var(--pl-pink); width: 16px; }
+        .search-box-player { max-width: 400px; }
+        .search-box-player input { border-radius: 20px 0 0 20px; border-color: #e9ecef; }
+        .search-box-player button { border-radius: 0 20px 20px 0; background: var(--pl-purple); color: white; border: none; }
     </style>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="page-title mb-0">Danh sách cầu thủ</h2>
-        <a href="/admin/players/create" class="btn btn-primary">
-            + Thêm cầu thủ
-        </a>
-    </div>
-
-    <!-- Thông báo -->
-    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-
-    <!-- Form tìm kiếm -->
-    <form class="mb-4" action="/players/search" method="get">
-        <div class="input-group search-box-player">
-            <input type="text" name="name" class="form-control" placeholder="Tìm theo tên..."
-                   th:value="${search}">
-            <button class="btn btn-outline-secondary" type="submit">Tìm</button>
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a th:href="@{/owner/players/create}" class="btn btn-primary-pl">
+                <i class="bi bi-plus-lg me-2"></i>Thêm Cầu Thủ
+            </a>
         </div>
-    </form>
 
-    <!-- Grid cầu thủ -->
-    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-        <div class="col" th:each="p : ${players}">
-            <div class="card player-card h-100 shadow-sm">
-                <!-- Avatar + link chi tiết -->
-                <a th:href="@{'/admin/players/' + ${p.id}}" class="player-avatar-wrapper">
-                    <img class="player-avatar"
-                         th:src="${p.avatar}"
-                         alt="avatar"
-                         onerror="this.src='https://via.placeholder.com/300x300?text=No+Image';">
-                    <span class="player-position-badge" th:text="${p.position}">Position</span>
-                </a>
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
 
-                <div class="card-body d-flex flex-column">
-                    <div class="mb-2">
-                        <div class="player-name" th:text="${p.name}">Tên cầu thủ</div>
-                        <div class="player-team">
-                            <i class="bi bi-shield"></i>
-                            <span th:text="${p.team != null ? p.team.name : 'Chưa có đội'}">Team</span>
+        <form class="mb-4" th:action="@{/owner/players}" method="get">
+        </form>
+
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+            <div class="col" th:each="p : ${players}">
+                <div class="card player-card h-100">
+                    <a th:href="@{'/owner/players/' + ${p.id}}" class="player-avatar-wrapper">
+                        <span class="player-number">#</span>
+                        <img class="player-avatar"
+                             th:src="${p.avatar}"
+                             alt="avatar"
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/300x300?text=No+Image';">
+                    </a>
+
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-2">
+                            <div class="player-name" th:text="${p.name}">Name</div>
+                            <div class="player-role" th:text="${p.position}">Position</div>
                         </div>
-                    </div>
 
-                    <div class="player-meta mb-3">
-                        <div>
-                            <strong>Ngày sinh: </strong>
-                            <span th:text="${p.dob}">2000-01-01</span>
-                        </div>
-                        <div th:if="${p.experience != null}">
-                            <strong>Kinh nghiệm: </strong>
-                            <span th:text="${p.experience}">3 years</span>
+                        <div class="mt-auto">
+                            <div class="info-row">
+                                <i class="bi bi-shield-shaded"></i>
+                                <span th:text="${p.team != null ? p.team.name : 'Chưa có đội'}">Team</span>
+                            </div>
+                            <div class="info-row">
+                                <i class="bi bi-calendar-event"></i>
+                                <span th:text="${p.dob}">Date</span>
+                            </div>
+                            <div class="info-row">
+                                <i class="bi bi-trophy"></i>
+                                <span th:text="${p.experience != null ? p.experience + ' năm KN' : 'N/A'}">Exp</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
-    </div>
 
-    <div th:if="${#lists.isEmpty(players)}" class="empty-text">
-        Chưa có cầu thủ nào trong danh sách.
+        <div th:if="${#lists.isEmpty(players)}" class="text-center py-5 text-muted">
+            <i class="bi bi-people display-4 d-block mb-3"></i>
+            Chưa có cầu thủ nào trong danh sách.
+        </div>
     </div>
 
 </th:block>

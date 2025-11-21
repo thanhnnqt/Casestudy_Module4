@@ -16,6 +16,11 @@ public class CoachService implements ICoachService {
         this.coachRepository = coachRepository;
     }
 
+
+    @Override
+    public List<Coach> findByTeamId(Long teamId) {
+        return coachRepository.findByTeamId(teamId);
+    }
     @Override
     public List<Coach> findAll() {
         return coachRepository.findAll();
