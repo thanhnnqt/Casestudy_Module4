@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Table(name = "matches")
 @Getter
 @Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Match {
@@ -46,5 +47,6 @@ public class Match {
     @OneToOne(mappedBy = "match")
     private MatchSchedule schedule;
 
-
+    @Column(name = "ranking_processed", nullable = false)
+    private boolean rankingProcessed = false;
 }
