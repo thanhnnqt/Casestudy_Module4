@@ -4,7 +4,6 @@ import com.example.premier_league.dto.RankingsDto;
 import com.example.premier_league.entity.Match;
 import com.example.premier_league.entity.Team;
 import com.example.premier_league.repository.ITeamRepository;
-import com.example.premier_league.repository.IMatchRepository;
 import com.example.premier_league.service.IRankingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -19,34 +18,18 @@ import java.util.List;
 public class RankingsService implements IRankingsService {
 
     private final ITeamRepository teamRepository;
-    private final IMatchRepository matchRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    /**
-     * Áp kết quả trận vào BXH. Idempotent: nếu trận đã được áp (rankingProcessed == true) thì không làm gì.
-     */
     @Override
     @Transactional
     public void applyMatchResult(Match match) {
-        if (match == null) return;
 
-        // reload match to be safe (managed)
-        Match managedMatch = matchRepository.findById(match.getId()).orElse(null);
-        if (managedMatch == null) return;
-
-        // nếu đã xử lý trước đó thì skip
-        if (managedMatch.isRankingProcessed()) {
-            // optional: log
-            System.out.println("RankingsService: match id=" + managedMatch.getId() + " already processed for ranking. Skip.");
-            return;
-        }
-
-        Team home = teamRepository.findById(managedMatch.getHomeTeam().getId()).orElse(null);
-        Team away = teamRepository.findById(managedMatch.getAwayTeam().getId()).orElse(null);
+        Team home = teamRepository.findById(match.getHomeTeam().getId()).orElse(null);
+        Team away = teamRepository.findById(match.getAwayTeam().getId()).orElse(null);
         if (home == null || away == null) return;
 
-        int hs = managedMatch.getHomeScore() == null ? 0 : managedMatch.getHomeScore();
-        int as = managedMatch.getAwayScore() == null ? 0 : managedMatch.getAwayScore();
+        int hs = match.getHomeScore() == null ? 0 : match.getHomeScore();
+        int as = match.getAwayScore() == null ? 0 : match.getAwayScore();
 
         // update goals
         home.setGoalsFor(home.getGoalsFor() + hs);
@@ -54,7 +37,7 @@ public class RankingsService implements IRankingsService {
         away.setGoalsFor(away.getGoalsFor() + as);
         away.setGoalsAgainst(away.getGoalsAgainst() + hs);
 
-        // update win/draw/loss + points
+        // update W/D/L + points
         if (hs > as) {
             home.setWinCount(home.getWinCount() + 1);
             home.setPoints(home.getPoints() + 3);
@@ -74,19 +57,12 @@ public class RankingsService implements IRankingsService {
         home.setGoalDifference(home.getGoalsFor() - home.getGoalsAgainst());
         away.setGoalDifference(away.getGoalsFor() - away.getGoalsAgainst());
 
-        // save teams
         teamRepository.save(home);
         teamRepository.save(away);
 
-        // mark match as processed and save
-        managedMatch.setRankingProcessed(true);
-        matchRepository.save(managedMatch);
-
-        // broadcast BXH realtime
+        // websocket broadcast
         List<RankingsDto> updated = getRanking();
         messagingTemplate.convertAndSend("/topic/ranking-updated", updated);
-
-        System.out.println("RankingsService: applied match id=" + managedMatch.getId() + " to rankings.");
     }
 
     @Override
@@ -105,10 +81,10 @@ public class RankingsService implements IRankingsService {
                         t.getGoalDifference()
                 ))
                 .sorted(Comparator
-                        .comparingInt((RankingsDto r) -> r.points).reversed()
-                        .thenComparingInt(r -> r.goalDifference).reversed()
-                        .thenComparingInt(r -> r.goalsFor).reversed()
-                        .thenComparing(r -> r.name))
+                        .comparingInt((RankingsDto t) -> t.points).reversed()
+                        .thenComparingInt(t -> t.goalDifference).reversed()
+                        .thenComparingInt(t -> t.goalsFor).reversed()
+                )
                 .toList();
     }
 
