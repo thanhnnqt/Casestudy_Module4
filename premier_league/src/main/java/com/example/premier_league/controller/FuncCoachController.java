@@ -159,6 +159,21 @@ public class FuncCoachController {
                               @RequestParam(value = "mainPlayerIds", required = false) List<Long> mainPlayerIds,
                               @RequestParam(value = "subPlayerIds", required = false) List<Long> subPlayerIds,
                               RedirectAttributes redirect) {
+
+        // --- 1. KIỂM TRA TRẠNG THÁI TRẬN ĐẤU (MỚI) ---
+        MatchSchedule match = iMatchScheduleService.findById(matchId);
+        if (match == null) {
+            redirect.addFlashAttribute("error", "Trận đấu không tồn tại!");
+            return "redirect:/coach/team/" + teamId + "/schedule";
+        }
+
+        // Chặn nếu trận đấu đã kết thúc hoặc đang đá
+        if (match.getStatus() == MatchStatus.FINISHED || match.getStatus() == MatchStatus.LIVE) {
+            redirect.addFlashAttribute("error", "Trận đấu đã khóa sổ (Đang đá hoặc Đã kết thúc), không thể thay đổi chiến thuật!");
+            return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/tactics";
+        }
+        // ---------------------------------------------
+
         // Lưu nháp (captain = null)
         iMatchLineupService.saveLineup(teamId, matchId, mainPlayerIds, subPlayerIds, null);
         redirect.addFlashAttribute("message", "Đã lưu sơ đồ chiến thuật (Nháp)!");
@@ -201,7 +216,20 @@ public class FuncCoachController {
                                    @RequestParam(value = "subPlayerIds", required = false) List<Long> subPlayerIds,
                                    @RequestParam(value = "captainId", required = false) Long captainId,
                                    RedirectAttributes redirect) {
+// --- 1. KIỂM TRA TRẠNG THÁI TRẬN ĐẤU (MỚI) ---
+        MatchSchedule match = iMatchScheduleService.findById(matchId);
+        if (match == null) {
+            redirect.addFlashAttribute("error", "Trận đấu không tồn tại!");
+            return "redirect:/coach/team/" + teamId + "/schedule";
+        }
 
+        // Nếu trận đấu đã kết thúc (FINISHED) hoặc đang đá (LIVE), chặn lại ngay
+        if (match.getStatus() == MatchStatus.FINISHED || match.getStatus() == MatchStatus.LIVE) {
+            redirect.addFlashAttribute("error", "Trận đấu đã kết thúc hoặc đang diễn ra, không thể thay đổi đội hình!");
+            // Redirect về lại trang đăng ký để người dùng thấy lỗi, hoặc về lịch thi đấu tùy bạn
+            return "redirect:/coach/team/" + teamId + "/match/" + matchId + "/register";
+        }
+        // ---------------------------------------------
         List<Long> mainIds = (mainPlayerIds != null) ? mainPlayerIds : new ArrayList<>();
         List<Long> subIds = (subPlayerIds != null) ? subPlayerIds : new ArrayList<>();
 

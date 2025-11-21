@@ -291,7 +291,15 @@
 
                     <td class="d-flex gap-2">
 
-                        <a th:if="${match.status.equals(T(com.example.premier_league.entity.MatchStatus).UPCOMING)}"
+                        <!-- Khi trận đã kết thúc -->
+                        <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).FINISHED}"
+                           th:href="@{'/live_matches/' + ${match.id}}"
+                           class="btn btn-primary btn-sm">
+                            Chi tiết
+                        </a>
+
+                        <!-- UPCOMING -->
+                        <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).UPCOMING}"
                            th:href="@{'/admin/events?matchId=' + ${match.id}}"
                            class="btn btn-success btn-sm">Bắt đầu</a>
 
@@ -299,7 +307,8 @@
                            th:href="@{'/admin/matches/postpone/' + ${match.id}}"
                            class="btn btn-warning btn-sm">Hoãn</a>
 
-                        <a th:if="${match.status.equals(T(com.example.premier_league.entity.MatchStatus).SCHEDULED)}"
+                        <!-- SCHEDULED -->
+                        <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).SCHEDULED}"
                            th:href="@{'/admin/events?matchId=' + ${match.id}}"
                            class="btn btn-success btn-sm">Bắt đầu</a>
 
@@ -307,6 +316,7 @@
                            th:href="@{'/admin/matches/postpone/' + ${match.id}}"
                            class="btn btn-warning btn-sm">Hoãn</a>
 
+                        <!-- POSTPONED -->
                         <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).POSTPONED}"
                            th:href="@{'/admin/matches/reschedule/' + ${match.id}}"
                            class="btn btn-primary btn-sm">Dời lịch</a>
@@ -317,6 +327,7 @@
                             <button class="btn btn-success btn-sm">Không hoãn</button>
                         </form>
 
+                        <!-- LIVE -->
                         <a th:if="${match.status == T(com.example.premier_league.entity.MatchStatus).LIVE}"
                            th:href="@{'/admin/events?matchId=' + ${match.id}}"
                            class="btn btn-danger btn-sm">Xem trận</a>
@@ -328,6 +339,7 @@
                         </form>
 
                     </td>
+
 
                 </tr>
                 </tbody>
