@@ -1,20 +1,61 @@
 package com.example.premier_league.controller;
 
 import com.example.premier_league.vnpayconfig.VNPayConfig;
+import com.lowagie.text.*;
+import com.lowagie.text.Font;
+import com.lowagie.text.pdf.PdfPTable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.lowagie.text.pdf.PdfWriter;
 
+
+import com.lowagie.text.Rectangle;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+import java.io.ByteArrayOutputStream;
+import java.util.List;
+
+import com.example.premier_league.dto.TicketDto;
+
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
+
+import java.awt.Color;
+import java.util.Locale;
 
 @Controller
 @RequestMapping("/vnpay_return")
 public class VNPayReturnController {
+    private void addRow(PdfPTable table, String label, String value,
+                        Font labelFont, Font valueFont) {
+
+        PdfPCell c1 = new PdfPCell(new Phrase(label, labelFont)); // 🔥 label dùng font BOLD
+        c1.setBorder(Rectangle.NO_BORDER);
+        c1.setPadding(4f);
+
+        PdfPCell c2 = new PdfPCell(new Phrase(value, valueFont)); // value font thường
+        c2.setBorder(Rectangle.NO_BORDER);
+        c2.setPadding(4f);
+
+        table.addCell(c1);
+        table.addCell(c2);
+    }
+
+
     @GetMapping
     public String result(HttpServletRequest request, Model model) {
         // 1. Lấy tất cả tham số trả về từ VNPay
@@ -93,4 +134,104 @@ public class VNPayReturnController {
             return "vnpay/fail";
         }
     }
+
+    @GetMapping(value = "/printTicket", produces = "application/pdf")
+    public ResponseEntity<byte[]> printTicket(HttpSession session) throws Exception {
+        TicketDto ticketDto = (TicketDto) session.getAttribute("latestTicket");
+
+        if (ticketDto == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Không tìm thấy thông tin vé trong phiên làm việc.".getBytes("UTF-8"));
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        Document document = new Document(PageSize.A5.rotate(), 40, 40, 30, 30);
+        PdfWriter.getInstance(document, baos);
+        document.open();
+
+        // ====== FONT ======
+        Font titleFont = new Font(Font.HELVETICA, 22, Font.BOLD, new Color(25, 118, 210));
+        Font subTitleFont = new Font(Font.HELVETICA, 12, Font.NORMAL, new Color(56, 142, 60));
+        Font labelFont = new Font(Font.HELVETICA, 11, Font.NORMAL, new Color(66, 66, 66));
+        Font valueFont = new Font(Font.HELVETICA, 11, Font.NORMAL, Color.BLACK);
+        Font footerFont = new Font(Font.HELVETICA, 9, Font.ITALIC, new Color(117, 117, 117));
+
+        // ====== TITLE ======
+        Paragraph title = new Paragraph("HÓA ĐƠN ĐẶT VÉ XEM BÓNG ĐÁ", titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+        title.setSpacingAfter(4);
+        document.add(title);
+
+        Paragraph subTitle = new Paragraph("Xác nhận đặt vé thành công", subTitleFont);
+        subTitle.setAlignment(Element.ALIGN_CENTER);
+        subTitle.setSpacingAfter(12);
+        document.add(subTitle);
+
+        document.add(new Paragraph(" ")); // spacing
+
+        // ====== FORMAT NGÀY (dd/MM/yyyy) ======
+        String formattedDate = ticketDto.getDateMatch() != null
+                ? ticketDto.getDateMatch().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                : "";
+
+        // ====== BẢNG THÔNG TIN ======
+        PdfPTable infoTable = new PdfPTable(2);
+        infoTable.setWidthPercentage(100);
+        infoTable.setWidths(new float[]{30f, 70f});
+        infoTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+
+        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+        String totalFormatted = nf.format(ticketDto.getTotalPay()) + " đ";
+
+        addRow(infoTable, "Trận đấu", ticketDto.getHomeTeam() + " vs " + ticketDto.getAwayTeam(), labelFont, valueFont);
+        addRow(infoTable, "Sân vận động", ticketDto.getStadium(), labelFont, valueFont);
+        addRow(infoTable, "Địa chỉ", ticketDto.getAddress(), labelFont, valueFont);
+        addRow(infoTable, "Ngày", formattedDate, labelFont, valueFont); // <--- NGÀY CHUẨN VIỆT NAM
+        addRow(infoTable, "Giờ", String.valueOf(ticketDto.getTimeMatch()), labelFont, valueFont);
+        addRow(infoTable, "Khu", ticketDto.getStandSession(), labelFont, valueFont);
+        addRow(infoTable, "Số ghế", ticketDto.getSeatNumber(), labelFont, valueFont);
+        addRow(infoTable, "Số lượng ghế", String.valueOf(ticketDto.getQuantity()), labelFont, valueFont);
+        addRow(infoTable, "Tổng tiền", totalFormatted, labelFont, valueFont);
+
+        PdfPTable cardTable = new PdfPTable(1);
+        cardTable.setWidthPercentage(100);
+
+        PdfPCell cardCell = new PdfPCell();
+        cardCell.setPadding(12f);
+        cardCell.setBorderWidth(1.2f);
+        cardCell.setBorderColor(new Color(200, 200, 200));
+        cardCell.setBackgroundColor(new Color(250, 250, 250));
+        cardCell.addElement(infoTable);
+
+        cardTable.addCell(cardCell);
+        cardTable.setSpacingAfter(15);
+        document.add(cardTable);
+
+        // FOOTER
+        Paragraph note = new Paragraph(
+                "Vui lòng có mặt tại sân vận động trước giờ bóng lăn ít nhất 30 phút để ổn định chỗ ngồi.",
+                footerFont
+        );
+        note.setAlignment(Element.ALIGN_CENTER);
+        note.setSpacingBefore(8);
+        document.add(note);
+
+        Paragraph thanks = new Paragraph("Cảm ơn bạn đã đặt vé!", footerFont);
+        thanks.setAlignment(Element.ALIGN_CENTER);
+        document.add(thanks);
+
+        document.close();
+
+        byte[] pdfBytes = baos.toByteArray();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "ticket.pdf");
+        headers.setContentLength(pdfBytes.length);
+
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
+
 }
