@@ -10,7 +10,7 @@ import java.util.List;
 @Service
 public class PrizeService implements IPrizeService {
 
-    @Autowired
+
     private final IPrizeRepository prizeRepository;
 
     public PrizeService(IPrizeRepository prizeRepository) {

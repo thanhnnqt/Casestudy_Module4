@@ -14,4 +14,6 @@ public interface ITournamentService {
     boolean isTournamentStarted(Long tournamentId);
     void copyTeamsFromTournament(Long targetTournamentId, Long sourceTournamentId);
     boolean existsBySeason(String season);
+
+    void deleteTournament(Long id);
 }

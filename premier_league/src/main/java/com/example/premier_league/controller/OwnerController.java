@@ -23,10 +23,8 @@ public class OwnerController {
     private final ITeamService teamService;
     private final IAccountService accountService;
 
-    // Helper để load danh sách cho dropdown
     private void addFormAttributes(Model model) {
         model.addAttribute("teams", teamService.findAll());
-        // Trong thực tế, bạn có thể cần lọc chỉ lấy những account chưa có chủ sở hữu
         model.addAttribute("accounts", accountService.findAll());
     }
 
@@ -58,7 +56,6 @@ public class OwnerController {
             ownerService.saveFromDto(ownerDto);
             redirect.addFlashAttribute("message", "Lưu thông tin chủ sở hữu thành công!");
         } catch (Exception e) {
-            // Xử lý lỗi (ví dụ: trùng đội bóng)
             model.addAttribute("error", "Lỗi: " + e.getMessage());
             addFormAttributes(model);
             return "owner/form";
@@ -72,12 +69,14 @@ public class OwnerController {
         Owner owner = ownerService.findById(id);
         if (owner == null) {
             redirect.addFlashAttribute("error", "Không tìm thấy dữ liệu!");
-            return "redirect:/owners";
+            return "redirect:/admin/owners";
         }
 
-        // Map Entity sang DTO
         OwnerDto dto = new OwnerDto();
         BeanUtils.copyProperties(owner, dto);
+
+        // QUAN TRỌNG: Map thủ công ID vì tên khác nhau (Entity: id -> DTO: ownerId)
+        dto.setOwnerId(owner.getId());
 
         if (owner.getTeam() != null) dto.setTeamId(owner.getTeam().getId());
         if (owner.getAccount() != null) dto.setAccountId(owner.getAccount().getId());
@@ -87,10 +86,11 @@ public class OwnerController {
         return "owner/form";
     }
 
-    @GetMapping("/delete/{id}")
-    public String delete(@PathVariable Long id, RedirectAttributes redirect) {
+    // SỬA: Đổi tên biến path variable thành ownerId để tránh lỗi Identifier Altered khi xóa
+    @GetMapping("/delete/{ownerId}")
+    public String delete(@PathVariable("ownerId") Long ownerId, RedirectAttributes redirect) {
         try {
-            ownerService.delete(id);
+            ownerService.delete(ownerId);
             redirect.addFlashAttribute("message", "Đã xóa chủ sở hữu!");
         } catch (Exception e) {
             redirect.addFlashAttribute("error", "Không thể xóa (có thể do ràng buộc dữ liệu).");
