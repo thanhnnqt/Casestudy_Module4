@@ -9,7 +9,6 @@ import com.example.premier_league.repository.IOwnerRepository;
 import com.example.premier_league.repository.ITeamRepository;
 import com.example.premier_league.service.IOwnerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,26 +36,23 @@ public class OwnerService implements IOwnerService {
     @Transactional
     public void saveFromDto(OwnerDto ownerDto) {
         Owner owner;
-        // Kiểm tra nếu là Update
-        if (ownerDto.getId() != null) {
-            owner = ownerRepository.findById(ownerDto.getId()).orElse(new Owner());
+        // SỬA: Kiểm tra ownerId
+        if (ownerDto.getOwnerId() != null) {
+            owner = ownerRepository.findById(ownerDto.getOwnerId()).orElse(new Owner());
         } else {
             owner = new Owner();
         }
 
-        // Copy thông tin cơ bản
         owner.setName(ownerDto.getName());
         owner.setDob(ownerDto.getDob());
         owner.setPhoneNumber(ownerDto.getPhoneNumber());
 
-        // Tìm và gán Account
         if (ownerDto.getAccountId() != null) {
             Account account = accountRepository.findById(ownerDto.getAccountId())
                     .orElseThrow(() -> new RuntimeException("Account not found"));
             owner.setAccount(account);
         }
 
-        // Tìm và gán Team
         if (ownerDto.getTeamId() != null) {
             Team team = teamRepository.findById(ownerDto.getTeamId())
                     .orElseThrow(() -> new RuntimeException("Team not found"));
