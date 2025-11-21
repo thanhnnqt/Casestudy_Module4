@@ -7,11 +7,8 @@
     <style>
         :root { --pl-purple: #38003c; --pl-pink: #ff0050; }
         .card-profile { border: none; border-radius: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); background: #fff; overflow: hidden; }
-        .profile-header-img { width: 100%; height: 300px; object-fit: cover; object-position: top; }
+        .profile-img { width: 100%; height: 300px; object-fit: cover; object-position: top; }
         .profile-name { color: var(--pl-purple); font-weight: 800; }
-        .label-text { color: #6c757d; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; margin-bottom: 0.2rem; }
-        .value-text { color: #212529; font-weight: 500; font-size: 1rem; }
-        .badge-cert { background-color: #f3f4f6; color: var(--pl-purple); border: 1px solid #e5e7eb; padding: 6px 12px; border-radius: 8px; font-weight: 600; }
         .btn-edit { background: var(--pl-purple); color: white; border: none; } .btn-edit:hover { background: #2a002d; color: white; }
         .btn-delete { background: #fee2e2; color: #dc2626; border: none; } .btn-delete:hover { background: #fecaca; color: #b91c1c; }
     </style>
@@ -26,9 +23,7 @@
         <div class="row g-4">
             <div class="col-lg-4">
                 <div class="card card-profile h-100">
-                    <img class="profile-header-img"
-                         th:src="${coach.avatarUrl}"
-                         alt="avatar"
+                    <img class="profile-img" th:src="${coach.avatarUrl}" alt="avatar"
                          onerror="this.onerror=null; this.src='https://via.placeholder.com/400x400?text=No+Image';">
 
                     <div class="card-body text-center p-4">
@@ -40,20 +35,19 @@
                                 <i class="bi bi-pencil-square me-2"></i>Cập nhật
                             </a>
                             <button type="button" class="btn btn-delete px-3 py-2 rounded-3"
-                                    data-bs-toggle="modal" data-bs-target="#deleteCoachModal" title="Xóa">
+                                    data-bs-toggle="modal" data-bs-target="#deleteCoachModal">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
                     </div>
-
                     <div class="card-footer bg-white p-4 border-top">
                         <div class="mb-3">
-                            <div class="label-text"><i class="bi bi-envelope me-2"></i>Email</div>
-                            <div class="value-text" th:text="${coach.email}">email@example.com</div>
+                            <div class="small fw-bold text-muted text-uppercase">Email</div>
+                            <div th:text="${coach.email}"></div>
                         </div>
                         <div>
-                            <div class="label-text"><i class="bi bi-telephone me-2"></i>Số điện thoại</div>
-                            <div class="value-text" th:text="${coach.phone}">0123456789</div>
+                            <div class="small fw-bold text-muted text-uppercase">Số điện thoại</div>
+                            <div th:text="${coach.phone}"></div>
                         </div>
                     </div>
                 </div>
@@ -64,12 +58,38 @@
                     <h5 class="fw-bold text-purple mb-4 border-bottom pb-2">Thông tin cá nhân</h5>
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
-                            <div class="label-text">Quốc tịch</div>
-                            <div class="value-text"><i class="bi bi-globe me-1 text-muted"></i><span th:text="${coach.nationality}"></span></div>
+                            <strong class="text-muted small text-uppercase">Quốc tịch</strong>
+                            <div class="fs-6"><i class="bi bi-globe me-1"></i> <span th:text="${coach.nationality}"></span></div>
                         </div>
                         <div class="col-md-6">
-                            <div class="label-text">Ngày sinh</div>
-                            <div class="value-text" th:text="${#temporals.format(coach.dateOfBirth, 'dd/MM/yyyy')}"></div>
+                            <strong class="text-muted small text-uppercase">Ngày sinh</strong>
+                            <div class="fs-6" th:text="${#temporals.format(coach.dateOfBirth, 'dd/MM/yyyy')}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <strong class="text-muted small text-uppercase">Trạng thái</strong>
+                            <div><span class="badge bg-success" th:text="${coach.status}"></span></div>
+                        </div>
+                        <div class="col-md-6">
+                            <strong class="text-muted small text-uppercase">Đội bóng</strong>
+                            <div class="fw-bold text-primary" th:text="${coach.team != null ? coach.team.name : 'Tự do'}"></div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-purple mb-4 border-bottom pb-2 mt-2">Hồ sơ chuyên môn</h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <strong class="text-muted small text-uppercase">Kinh nghiệm</strong>
+                            <div class="fs-6" th:text="${coach.experienceYears + ' năm'}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <strong class="text-muted small text-uppercase">Ngày gia nhập</strong>
+                            <div class="fs-6" th:text="${#temporals.format(coach.joinDate, 'dd/MM/yyyy')}"></div>
+                        </div>
+                        <div class="col-12">
+                            <strong class="text-muted small text-uppercase mb-2 d-block">Chứng chỉ</strong>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span th:each="lic : ${coach.licenseLevels}" class="badge bg-light text-dark border" th:text="${lic}"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -81,21 +101,17 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header text-white" style="background-color: var(--pl-purple);">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title fw-bold">Xác nhận xóa</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4 text-center">
-                    <p class="mb-2">Bạn có chắc muốn xóa Huấn luyện viên này?</p>
-                    <h4 class="fw-bold text-danger" th:text="${coach.fullName}">Tên HLV</h4>
-                    <p class="text-muted small mb-0">Thao tác này không thể phục hồi.</p>
+                    <p>Bạn có chắc muốn xóa HLV <strong th:text="${coach.fullName}"></strong>?</p>
+                    <p class="text-muted small">Hành động này không thể hoàn tác.</p>
                 </div>
-                <div class="modal-footer bg-light border-0 justify-content-center">
-                    <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Hủy</button>
-
-                    <form th:action="@{'/admin/coaches/' + ${coach.id} + '/delete'}" method="post">
-                        <button type="submit" class="btn btn-danger fw-bold px-4">
-                            <i class="bi bi-trash me-2"></i>Xóa ngay
-                        </button>
+                <div class="modal-footer justify-content-center border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <form th:action="@{'/admin/coaches/delete/' + ${coach.id}}" method="post">
+                        <button type="submit" class="btn btn-danger fw-bold">Xóa ngay</button>
                     </form>
                 </div>
             </div>

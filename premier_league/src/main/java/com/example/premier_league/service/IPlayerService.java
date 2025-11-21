@@ -12,7 +12,7 @@ public interface IPlayerService {
 
     List<Player> findAll();
 
-    void save(Player player);
+    void save(PlayerDto player);
 
     Player findById(Long id);
 

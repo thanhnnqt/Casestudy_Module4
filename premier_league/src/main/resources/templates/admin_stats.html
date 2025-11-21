@@ -42,6 +42,19 @@
                placeholder="Nhập matchId và Enter để load"
                onkeypress="if(event.key==='Enter') loadStats()">
     </div>
+    <script>
+        const pathMatchId = window.location.pathname.split("/").pop();
+
+        if (!isNaN(pathMatchId)) {
+            document.getElementById("matchId").value = pathMatchId;
+
+            setTimeout(() => {
+                loadStats();
+            }, 10);
+        }
+    </script>
+
+
 
     <!-- TEAM NAMES -->
     <div class="grid grid-cols-3 text-lg font-bold mb-4">

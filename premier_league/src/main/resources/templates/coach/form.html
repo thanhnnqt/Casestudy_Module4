@@ -21,7 +21,6 @@
             border-color: var(--pl-pink); box-shadow: 0 0 0 4px rgba(255, 0, 80, 0.1);
         }
 
-        /* Button Styles */
         .btn-save {
             background-color: var(--pl-pink); border: none; color: white;
             padding: 0.75rem 2rem; font-weight: 600; border-radius: 0.5rem;
@@ -72,6 +71,11 @@
                     </div>
 
                     <div class="col-md-6">
+                        <label class="form-label">Đội bóng chủ quản</label>
+                        <input type="hidden" th:field="*{team}">
+                        <input type="text" class="form-control bg-light" th:value="${myTeamName}" readonly>
+                    </div>
+                    <div class="col-md-6">
                         <label class="form-label">Ngày sinh</label>
                         <input type="date" class="form-control" name="dateOfBirth" th:value="${coach.dateOfBirth}">
                     </div>
@@ -102,7 +106,6 @@
                             <span class="input-group-text bg-light"><i class="bi bi-link-45deg"></i></span>
                             <input type="text" class="form-control" th:field="*{avatarUrl}" placeholder="https://...">
                         </div>
-                        <div class="form-text">Dán đường dẫn ảnh trực tiếp.</div>
                     </div>
 
                     <div class="col-md-4">
@@ -138,7 +141,7 @@
 
                     <div class="col-12">
                         <label class="form-label">Ghi chú thêm</label>
-                        <textarea class="form-control" rows="3" th:field="*{note}" placeholder="Nhập ghi chú về thành tích, lịch sử..."></textarea>
+                        <textarea class="form-control" rows="3" th:field="*{note}" placeholder="Nhập ghi chú..."></textarea>
                     </div>
                 </div>
             </div>
@@ -159,13 +162,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             const el = document.getElementById('licenseSelect');
             if (el) {
-                new Choices(el, {
-                    removeItemButton: true,
-                    placeholder: true,
-                    placeholderValue: 'Chọn chứng chỉ...',
-                    searchEnabled: true,
-                    shouldSort: false
-                });
+                new Choices(el, { removeItemButton: true, placeholderValue: 'Chọn chứng chỉ...', searchEnabled: true, shouldSort: false });
             }
         });
     </script>

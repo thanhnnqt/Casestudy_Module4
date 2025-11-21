@@ -8,13 +8,8 @@
     :root { --pl-purple: #38003c; --pl-pink: #ff0050; }
     .card-profile { border: none; border-radius: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); background: #fff; overflow: hidden; }
     .profile-img { width: 100%; height: 300px; object-fit: cover; object-position: top; }
-    .profile-name { color: var(--pl-purple); font-weight: 800; letter-spacing: -0.5px; }
-
-    .label-text { color: #6c757d; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.2rem; }
-    .value-text { color: #212529; font-weight: 600; font-size: 1.05rem; }
-
-    .btn-edit { background: var(--pl-purple); color: white; border: none; } .btn-edit:hover { background: #2a002d; color: white; }
-    .btn-delete { background: #fee2e2; color: #dc2626; border: none; } .btn-delete:hover { background: #fecaca; color: #b91c1c; }
+    .btn-edit { background: var(--pl-purple); color: white; } .btn-edit:hover { background: #2a002d; color: white; }
+    .btn-delete { background: #fee2e2; color: #dc2626; } .btn-delete:hover { background: #fecaca; color: #b91c1c; }
   </style>
 
   <div class="container-fluid">
@@ -27,13 +22,11 @@
     <div class="row g-4">
       <div class="col-lg-4">
         <div class="card card-profile h-100">
-          <img class="profile-img"
-               th:src="${staff.avatarUrl}"
-               alt="avatar"
+          <img class="profile-img" th:src="${staff.avatarUrl}" alt="avatar"
                onerror="this.onerror=null; this.src='https://via.placeholder.com/400x400?text=No+Image';">
 
           <div class="card-body text-center p-4">
-            <h3 class="profile-name mb-1" th:text="${staff.fullName}">Full Name</h3>
+            <h3 class="fw-bold text-dark mb-1" th:text="${staff.fullName}">Full Name</h3>
             <span class="badge bg-info-subtle text-info-emphasis rounded-pill px-3 py-2 mb-3" th:text="${staff.role}">Role</span>
 
             <div class="d-flex justify-content-center gap-2 mt-2">
@@ -41,21 +34,14 @@
                 <i class="bi bi-pencil-square me-2"></i>Sửa
               </a>
               <button type="button" class="btn btn-delete px-3 py-2 rounded-3"
-                      data-bs-toggle="modal" data-bs-target="#deleteStaffModal" title="Xóa">
+                      data-bs-toggle="modal" data-bs-target="#deleteStaffModal">
                 <i class="bi bi-trash"></i>
               </button>
             </div>
           </div>
-
           <div class="card-footer bg-white p-4 border-top">
-            <div class="mb-3">
-              <div class="label-text"><i class="bi bi-envelope me-2"></i>Email</div>
-              <div class="value-text" th:text="${staff.email}">email@example.com</div>
-            </div>
-            <div>
-              <div class="label-text"><i class="bi bi-telephone me-2"></i>Số điện thoại</div>
-              <div class="value-text" th:text="${staff.phoneNumber}">0123456789</div>
-            </div>
+            <div class="mb-2"><i class="bi bi-envelope me-2 text-muted"></i><span th:text="${staff.email}"></span></div>
+            <div><i class="bi bi-telephone me-2 text-muted"></i><span th:text="${staff.phoneNumber}"></span></div>
           </div>
         </div>
       </div>
@@ -65,36 +51,28 @@
           <h5 class="fw-bold mb-4 pb-2 border-bottom" style="color: var(--pl-purple);">Thông tin chi tiết</h5>
           <div class="row g-4">
             <div class="col-md-6">
-              <div class="label-text">Ngày sinh</div>
-              <div class="value-text" th:text="${#temporals.format(staff.dateOfBirth, 'dd/MM/yyyy')}"></div>
+              <strong class="text-muted small text-uppercase">Ngày sinh</strong>
+              <div th:text="${#temporals.format(staff.dateOfBirth, 'dd/MM/yyyy')}"></div>
             </div>
             <div class="col-md-6">
-              <div class="label-text">Giới tính</div>
-              <div class="value-text" th:text="${staff.gender}"></div>
+              <strong class="text-muted small text-uppercase">Giới tính</strong>
+              <div th:text="${staff.gender}"></div>
             </div>
             <div class="col-md-6">
-              <div class="label-text">Quốc tịch</div>
-              <div class="value-text"><i class="bi bi-globe me-1 text-muted"></i> <span th:text="${staff.nationality}"></span></div>
+              <strong class="text-muted small text-uppercase">Quốc tịch</strong>
+              <div th:text="${staff.nationality}"></div>
             </div>
             <div class="col-md-6">
-              <div class="label-text">Ngày gia nhập</div>
-              <div class="value-text" th:text="${#temporals.format(staff.joinDate, 'dd/MM/yyyy')}"></div>
-            </div>
-          </div>
-
-          <h5 class="fw-bold mb-4 pb-2 border-bottom mt-5" style="color: var(--pl-purple);">Công việc & Trạng thái</h5>
-          <div class="row g-4">
-            <div class="col-md-6">
-              <div class="label-text">Vị trí công tác</div>
-              <div class="value-text text-primary" th:text="${staff.position}"></div>
+              <strong class="text-muted small text-uppercase">Ngày gia nhập</strong>
+              <div th:text="${#temporals.format(staff.joinDate, 'dd/MM/yyyy')}"></div>
             </div>
             <div class="col-md-6">
-              <div class="label-text">Đội bóng</div>
-              <div class="value-text" th:text="${staff.team != null ? staff.team.name : 'Chưa gán'}"></div>
+              <strong class="text-muted small text-uppercase">Vị trí</strong>
+              <div class="text-primary fw-bold" th:text="${staff.position}"></div>
             </div>
             <div class="col-md-6">
-              <div class="label-text">Trạng thái</div>
-              <span class="badge" th:classappend="${staff.status == 'Active' ? 'bg-success' : 'bg-secondary'}" th:text="${staff.status}"></span>
+              <strong class="text-muted small text-uppercase">Trạng thái</strong>
+              <div><span class="badge bg-success" th:text="${staff.status}"></span></div>
             </div>
           </div>
         </div>
@@ -106,21 +84,16 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg">
         <div class="modal-header text-white" style="background-color: var(--pl-purple);">
-          <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title fw-bold">Xác nhận xóa</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4 text-center">
-          <p class="mb-2">Bạn có chắc chắn muốn xóa nhân viên này không?</p>
-          <h5 class="fw-bold text-danger" th:text="${staff.fullName}">Tên NV</h5>
-          <p class="text-muted small mb-0">Hành động này không thể hoàn tác.</p>
+          <p>Bạn có chắc chắn muốn xóa nhân viên <strong th:text="${staff.fullName}"></strong>?</p>
         </div>
-        <div class="modal-footer bg-light border-0 justify-content-center">
-          <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Hủy bỏ</button>
-
-          <form th:action="@{/admin/staffs/delete/{id}(id=${staff.id})}" method="post">
-            <button type="submit" class="btn btn-danger fw-bold px-4">
-              <i class="bi bi-trash me-2"></i>Xóa ngay
-            </button>
+        <div class="modal-footer justify-content-center border-0">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+          <form th:action="@{'/admin/staffs/delete/' + ${staff.id}}" method="post">
+            <button type="submit" class="btn btn-danger fw-bold">Xóa ngay</button>
           </form>
         </div>
       </div>

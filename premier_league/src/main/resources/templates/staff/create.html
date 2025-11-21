@@ -93,6 +93,12 @@
             <input type="date" class="form-control" th:field="*{joinDate}">
             <small class="text-danger" th:errors="*{joinDate}"></small>
           </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Đội bóng</label>
+            <input type="hidden" th:field="*{teamId}">
+            <input type="text" class="form-control bg-light" th:value="${myTeamName}" readonly>
+          </div>
           <div class="col-md-4">
             <label class="form-label">Trạng thái</label>
             <select class="form-select" th:field="*{status}">
@@ -101,10 +107,7 @@
               <option value="On Loan">Cho mượn</option>
             </select>
           </div>
-          <div class="col-md-4">
-            <label class="form-label">ID Đội bóng (Optional)</label>
-            <input type="number" class="form-control" th:field="*{teamId}">
-          </div>
+
           <div class="col-md-12">
             <label class="form-label">Link ảnh đại diện</label>
             <div class="input-group">
@@ -126,75 +129,32 @@
 
   <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function() {
-
-      // 1. Định nghĩa dữ liệu (Map Vị trí -> Danh sách Vai trò)
       const rolesData = {
-        "Medical": [
-          "Head Doctor (Bác sĩ trưởng)",
-          "Physiotherapist (Vật lý trị liệu)",
-          "Masseur (Massage)",
-          "Nutritionist (Dinh dưỡng)",
-          "Psychologist (Tâm lý)"
-        ],
-        "Technical": [
-          "Data Analyst (Phân tích dữ liệu)",
-          "Scout (Tuyển trạch viên)",
-          "Performance Analyst (Phân tích hiệu suất)",
-          "Sport Scientist (Khoa học thể thao)"
-        ],
-        "Operations": [
-          "Kit Manager (Quản lý trang phục)",
-          "Groundskeeper (Chăm sóc sân cỏ)",
-          "Bus Driver (Tài xế)",
-          "Security Officer (An ninh)",
-          "Chef (Đầu bếp)"
-        ],
-        "Media": [
-          "Social Media Manager (Quản lý MXH)",
-          "Photographer (Nhiếp ảnh gia)",
-          "Videographer (Quay phim)",
-          "Press Officer (Cán bộ báo chí)"
-        ],
-        "Management": [
-          "HR Manager (Nhân sự)",
-          "Finance Officer (Tài chính)",
-          "Administrator (Hành chính)"
-        ]
+        "Medical": ["Head Doctor", "Physiotherapist", "Masseur", "Nutritionist", "Psychologist"],
+        "Technical": ["Data Analyst", "Scout", "Performance Analyst", "Sport Scientist"],
+        "Operations": ["Kit Manager", "Groundskeeper", "Bus Driver", "Security Officer", "Chef"],
+        "Media": ["Social Media Manager", "Photographer", "Videographer", "Press Officer"],
+        "Management": ["HR Manager", "Finance Officer", "Administrator"]
       };
 
       const positionSelect = document.getElementById('positionSelect');
       const roleSelect = document.getElementById('roleSelect');
 
-      // Hàm cập nhật Role dựa trên Position
       function updateRoles(selectedPos) {
-        // Xóa hết option cũ
         roleSelect.innerHTML = '<option value="">-- Chọn vai trò --</option>';
-
         if (selectedPos && rolesData[selectedPos]) {
-          // Duyệt qua danh sách role tương ứng và tạo option
           rolesData[selectedPos].forEach(function(roleName) {
             const option = document.createElement('option');
-            option.value = roleName; // Giá trị gửi về server
-            option.text = roleName;  // Chữ hiển thị
+            option.value = roleName;
+            option.text = roleName;
             roleSelect.appendChild(option);
           });
         }
       }
 
-      // 2. Lắng nghe sự kiện thay đổi (Change)
       positionSelect.addEventListener('change', function() {
         updateRoles(this.value);
       });
-
-      // 3. (Optional) Xử lý khi trang load lại (ví dụ khi validate lỗi)
-      // Nếu position đã được chọn trước đó, ta cần load lại role list
-      const currentPos = positionSelect.value;
-      if (currentPos) {
-        // Lưu lại giá trị role đang chọn (do Thymeleaf bind vào) để set lại sau khi update options
-        // Tuy nhiên với JS thuần đơn giản, ta chỉ cần load lại list, người dùng chọn lại.
-        // Để giữ giá trị role cũ phức tạp hơn chút, tạm thời chỉ load list.
-        updateRoles(currentPos);
-      }
     });
   </script>
 

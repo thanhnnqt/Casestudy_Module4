@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="header" class="bg-[#38003c] shadow-xl sticky top-0 z-50 border-b-4 border-[#00ff85]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+
+            <a th:href="@{/}" class="flex items-center gap-3 group text-decoration-none">
+                <div class="relative w-12 h-12 bg-white rounded-lg p-1 flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300 shadow-md">
+                    <img th:src="@{/images/logoo.png}" alt="PL Logo" class="w-full h-full object-contain" />
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-white font-black text-xl leading-none tracking-tighter group-hover:text-[#00ff85] transition-colors">PREMIER</span>
+                    <span class="text-[#00ff85] font-black text-xl leading-none tracking-tighter">LEAGUE</span>
+                </div>
+            </a>
+
+            <div class="hidden md:flex items-center gap-2">
+
+                <th:block th:if="${teamId != null}">
+                    <a th:href="@{/coach/team/{id}/schedule(id=${teamId})}"
+                       class="px-4 py-2 text-white font-bold text-sm uppercase tracking-wide hover:bg-[#500055] hover:text-[#00ff85] rounded-md transition-all duration-200"
+                       th:classappend="${activePage == 'schedule'} ? 'bg-[#500055] text-[#00ff85] border-b-2 border-[#00ff85]'">
+                        Lịch đấu & Đội hình
+                    </a>
+                    <a th:href="@{/coach/team/{id}/training(id=${teamId})}"
+                       class="px-4 py-2 text-white font-bold text-sm uppercase tracking-wide hover:bg-[#500055] hover:text-[#00ff85] rounded-md transition-all duration-200"
+                       th:classappend="${activePage == 'training'} ? 'bg-[#500055] text-[#00ff85] border-b-2 border-[#00ff85]'">
+                        Quản lý lịch tập
+                    </a>
+                    <a th:href="@{/coach/team/{id}/players(id=${teamId})}"
+                       class="px-4 py-2 text-white font-bold text-sm uppercase tracking-wide hover:bg-[#500055] hover:text-[#00ff85] rounded-md transition-all duration-200"
+                       th:classappend="${activePage == 'players'} ? 'bg-[#500055] text-[#00ff85] border-b-2 border-[#00ff85]'">
+                        Danh sách cầu thủ
+                    </a>
+                </th:block>
+
+                <th:block th:unless="${teamId != null}">
+                    <a th:href="@{/}"
+                       class="px-4 py-2 text-white font-bold text-sm uppercase tracking-wide hover:bg-[#500055] hover:text-[#00ff85] rounded-md transition-all duration-200"
+                       th:classappend="${currentPath == '/'} ? 'bg-[#500055] text-[#00ff85]'">
+                        Trang chủ
+                    </a>
+                    <a th:href="@{/tournaments}"
+                       class="px-4 py-2 text-white font-bold text-sm uppercase tracking-wide hover:bg-[#500055] hover:text-[#00ff85] rounded-md transition-all duration-200"
+                       th:classappend="${currentPath == 'tournaments'} ? 'bg-[#500055] text-[#00ff85]'">
+                        Giải đấu
+                    </a>
+                    <a th:href="@{/tickets}"
+                       class="px-4 py-2 text-white font-bold text-sm uppercase tracking-wide hover:bg-[#500055] hover:text-[#00ff85] rounded-md transition-all duration-200"
+                       th:classappend="${currentPath == '/tickets'} ? 'bg-[#500055] text-[#00ff85]'">
+                        Đặt Vé
+                    </a>
+                    <a th:href="@{/news}"
+                       class="px-4 py-2 text-white font-bold text-sm uppercase tracking-wide hover:bg-[#500055] hover:text-[#00ff85] rounded-md transition-all duration-200"
+                       th:classappend="${currentPath == '/news'} ? 'bg-[#500055] text-[#00ff85]'">
+                        Tin tức
+                    </a>
+                </th:block>
+
+            </div>
+
+            <div class="hidden md:flex items-center gap-4">
+
+                <div sec:authorize="!isAuthenticated()">
+                    <a th:href="@{/login}" class="flex items-center gap-2 px-5 py-2.5 bg-[#00ff85] hover:bg-[#00d670] text-[#38003c] font-black rounded-full transition-transform hover:scale-105 shadow-lg shadow-green-900/20 text-decoration-none">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <span>Đăng Nhập</span>
+                    </a>
+                </div>
+
+                <div sec:authorize="isAuthenticated()" class="flex items-center gap-4 pl-4 border-l border-white/20">
+                    <div class="flex items-center gap-3 text-white">
+                        <div class="w-10 h-10 rounded-full border-2 border-[#00ff85] p-0.5 overflow-hidden bg-white/10">
+                            <img th:src="${#authentication.principal.attributes['picture']}"
+                                 onerror="this.src='https://ui-avatars.com/api/?name=User&background=00ff85&color=38003c'"
+                                 class="w-full h-full object-cover rounded-full" />
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] text-gray-300 uppercase tracking-wider">Xin chào</span>
+                            <span class="font-bold text-[#00ff85] text-sm leading-none" sec:authentication="principal.attributes['name']">User</span>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/logout}" method="post" class="m-0">
+                        <button type="submit" class="p-2 text-white/70 hover:text-red-400 transition-colors" title="Đăng xuất">
+                            <i data-lucide="power" class="w-5 h-5"></i>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+            <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="md:hidden text-white p-2 hover:bg-[#500055] rounded-lg transition">
+                <i data-lucide="menu" class="w-8 h-8"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-[#2c0030] border-t border-white/10">
+        <div class="p-4 space-y-2">
+
+            <th:block th:if="${teamId != null}">
+                <a th:href="@{/coach/team/{id}/schedule(id=${teamId})}" class="block px-4 py-3 text-white font-semibold hover:bg-[#38003c] rounded-lg border-l-4 border-transparent hover:border-[#00ff85] transition-all">Lịch đấu & Đội hình</a>
+                <a th:href="@{/coach/team/{id}/training(id=${teamId})}" class="block px-4 py-3 text-white font-semibold hover:bg-[#38003c] rounded-lg border-l-4 border-transparent hover:border-[#00ff85] transition-all">Quản lý lịch tập</a>
+                <a th:href="@{/coach/team/{id}/players(id=${teamId})}" class="block px-4 py-3 text-white font-semibold hover:bg-[#38003c] rounded-lg border-l-4 border-transparent hover:border-[#00ff85] transition-all">Danh sách cầu thủ</a>
+            </th:block>
+
+            <th:block th:unless="${teamId != null}">
+                <a th:href="@{/}" class="block px-4 py-3 text-white font-semibold hover:bg-[#38003c] rounded-lg border-l-4 border-transparent hover:border-[#00ff85] transition-all">Trang chủ</a>
+                <a th:href="@{/tournaments}" class="block px-4 py-3 text-white font-semibold hover:bg-[#38003c] rounded-lg border-l-4 border-transparent hover:border-[#00ff85] transition-all">Giải đấu</a>
+                <a th:href="@{/tickets}" class="block px-4 py-3 text-white font-semibold hover:bg-[#38003c] rounded-lg border-l-4 border-transparent hover:border-[#00ff85] transition-all">Đặt Vé</a>
+                <a th:href="@{/news}" class="block px-4 py-3 text-white font-semibold hover:bg-[#38003c] rounded-lg border-l-4 border-transparent hover:border-[#00ff85] transition-all">Tin tức</a>
+            </th:block>
+
+            <div class="border-t border-white/10 my-2 pt-4">
+                <div sec:authorize="!isAuthenticated()">
+                    <a th:href="@{/login}" class="block w-full text-center px-4 py-3 bg-[#00ff85] text-[#38003c] font-bold rounded-lg shadow-md">Đăng Nhập</a>
+                </div>
+                <div sec:authorize="isAuthenticated()" class="flex flex-col gap-3">
+                    <div class="flex items-center gap-3 px-4 text-white">
+                        <div class="w-8 h-8 rounded-full bg-[#00ff85] text-[#38003c] flex items-center justify-center font-bold">U</div>
+                        <span class="font-bold" sec:authentication="principal.attributes['name']">User</span>
+                    </div>
+                    <form th:action="@{/logout}" method="post">
+                        <button class="block w-full text-center px-4 py-3 bg-red-500/20 text-red-400 font-bold rounded-lg hover:bg-red-500/30 transition">Đăng xuất</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

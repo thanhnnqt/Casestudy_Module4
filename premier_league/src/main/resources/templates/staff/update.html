@@ -20,13 +20,9 @@
             <h3 class="fw-bold" style="color: var(--pl-purple);">Cập nhật thông tin</h3>
         </div>
 
-        <form th:object="${staffDto}"
-              th:action="@{'/admin/staffs/update'}"
-              method="post">
+        <form th:object="${staffDto}" th:action="@{'/admin/staffs/update'}" method="post">
 
             <input type="hidden" th:field="*{id}">
-            <input type="hidden" th:field="*{teamId}">
-
             <input type="hidden" id="currentRoleValue" th:value="*{role}">
 
             <div class="card card-form p-4 mb-4">
@@ -67,7 +63,6 @@
             <div class="card card-form p-4 mb-4">
                 <div class="section-title">2. Thông tin công việc</div>
                 <div class="row g-4">
-
                     <div class="col-md-6">
                         <label class="form-label">Vị trí công tác</label>
                         <select class="form-select" id="positionSelect" th:field="*{position}">
@@ -93,6 +88,12 @@
                         <label class="form-label">Ngày gia nhập</label>
                         <input type="date" class="form-control" th:field="*{joinDate}">
                     </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Đội bóng</label>
+                        <input type="hidden" th:field="*{teamId}">
+                        <input type="text" class="form-control bg-light" th:value="${myTeamName}" readonly>
+                    </div>
                     <div class="col-md-4">
                         <label class="form-label">Trạng thái</label>
                         <select class="form-select" th:field="*{status}">
@@ -117,46 +118,35 @@
 
     <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
-
-            // 1. Dữ liệu
             const rolesData = {
-                "Medical": ["Head Doctor (Bác sĩ trưởng)", "Physiotherapist (Vật lý trị liệu)", "Masseur (Massage)", "Nutritionist (Dinh dưỡng)", "Psychologist (Tâm lý)"],
-                "Technical": ["Data Analyst (Phân tích dữ liệu)", "Scout (Tuyển trạch viên)", "Performance Analyst (Phân tích hiệu suất)", "Sport Scientist (Khoa học thể thao)"],
-                "Operations": ["Kit Manager (Quản lý trang phục)", "Groundskeeper (Chăm sóc sân cỏ)", "Bus Driver (Tài xế)", "Security Officer (An ninh)", "Chef (Đầu bếp)"],
-                "Media": ["Social Media Manager (Quản lý MXH)", "Photographer (Nhiếp ảnh gia)", "Videographer (Quay phim)", "Press Officer (Cán bộ báo chí)"],
-                "Management": ["HR Manager (Nhân sự)", "Finance Officer (Tài chính)", "Administrator (Hành chính)"]
+                "Medical": ["Head Doctor", "Physiotherapist", "Masseur", "Nutritionist", "Psychologist"],
+                "Technical": ["Data Analyst", "Scout", "Performance Analyst", "Sport Scientist"],
+                "Operations": ["Kit Manager", "Groundskeeper", "Bus Driver", "Security Officer", "Chef"],
+                "Media": ["Social Media Manager", "Photographer", "Videographer", "Press Officer"],
+                "Management": ["HR Manager", "Finance Officer", "Administrator"]
             };
 
             const positionSelect = document.getElementById('positionSelect');
             const roleSelect = document.getElementById('roleSelect');
-            const currentRoleValue = document.getElementById('currentRoleValue').value; // Lấy vai trò cũ
+            const currentRoleValue = document.getElementById('currentRoleValue').value;
 
-            // 2. Hàm update (Có thêm tham số selectedRole để chọn lại vai trò cũ)
             function updateRoles(selectedPos, selectedRole = null) {
                 roleSelect.innerHTML = '<option value="">-- Chọn vai trò --</option>';
-
                 if (selectedPos && rolesData[selectedPos]) {
                     rolesData[selectedPos].forEach(function(roleName) {
                         const option = document.createElement('option');
                         option.value = roleName;
                         option.text = roleName;
-
-                        // Nếu role này trùng với role cũ -> Đánh dấu selected
-                        if (selectedRole && roleName === selectedRole) {
-                            option.selected = true;
-                        }
-
+                        if (selectedRole && roleName === selectedRole) option.selected = true;
                         roleSelect.appendChild(option);
                     });
                 }
             }
 
-            // 3. Sự kiện Change (Khi người dùng đổi vị trí)
             positionSelect.addEventListener('change', function() {
-                updateRoles(this.value); // Không truyền selectedRole để nó reset
+                updateRoles(this.value);
             });
 
-            // 4. KHI TRANG VỪA LOAD (QUAN TRỌNG CHO TRANG UPDATE)
             const initialPos = positionSelect.value;
             if (initialPos) {
                 updateRoles(initialPos, currentRoleValue);

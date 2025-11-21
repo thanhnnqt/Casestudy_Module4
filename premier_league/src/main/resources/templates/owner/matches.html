@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="layout :: layout('Bảng Xếp Hạng & Lịch Đấu', 'dashboard', ~{::content})">
+      th:replace="layout :: layout('BXH & Lịch Thi Đấu', 'standings', ~{::content})">
 
 <th:block th:fragment="content">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      prefix: 'tw-', // Thêm prefix để tránh xung đột với Bootstrap của Layout
+      prefix: 'tw-', // Thêm prefix để không xung đột với Bootstrap của Layout
       theme: {
         extend: {
           colors: {
@@ -16,11 +16,14 @@
           }
         }
       },
+      // Tắt preflight để không reset CSS của Layout
       corePlugins: {
-        preflight: false, // Tắt reset CSS của Tailwind để không hỏng style của Layout
+        preflight: false,
       }
     }
   </script>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
@@ -28,17 +31,17 @@
   <div class="tw-w-full tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8">
 
     <div class="lg:tw-col-span-2">
-      <div class="tw-bg-white tw-shadow-sm tw-rounded-2xl tw-overflow-hidden tw-border tw-border-gray-200">
-        <div class="tw-bg-primary tw-p-4 tw-flex tw-items-center tw-justify-between">
-          <h2 class="tw-text-xl tw-font-bold tw-text-white tw-m-0">
-            🏆 Bảng Xếp Hạng
-          </h2>
-          <span class="tw-text-xs tw-text-gray-300 tw-uppercase tw-font-semibold">Season 2024-2025</span>
-        </div>
+      <div class="tw-flex tw-items-center tw-justify-between tw-mb-6">
+        <h1 class="tw-text-3xl tw-font-extrabold tw-text-primary tw-m-0">
+          Bảng Xếp Hạng
+        </h1>
+        <span class="tw-bg-gray-200 tw-text-gray-600 tw-px-3 tw-py-1 tw-rounded-full tw-text-sm tw-font-semibold">Premier League 24/25</span>
+      </div>
 
+      <div class="tw-bg-white tw-shadow-lg tw-rounded-2xl tw-overflow-hidden tw-border tw-border-gray-200">
         <div class="tw-overflow-x-auto">
-          <table class="tw-w-full tw-text-sm">
-            <thead class="tw-bg-gray-50 tw-text-gray-500 tw-uppercase tw-text-xs">
+          <table class="tw-w-full">
+            <thead class="tw-bg-primary tw-text-white tw-text-xs tw-uppercase">
             <tr>
               <th class="tw-py-3 tw-px-4 tw-text-center">#</th>
               <th class="tw-py-3 tw-px-4 tw-text-left">Câu lạc bộ</th>
@@ -47,13 +50,13 @@
               <th class="tw-py-3 tw-px-4 tw-text-center">H</th>
               <th class="tw-py-3 tw-px-4 tw-text-center">B</th>
               <th class="tw-py-3 tw-px-4 tw-text-center">HS</th>
-              <th class="tw-py-3 tw-px-4 tw-text-center tw-font-bold tw-text-primary">Điểm</th>
+              <th class="tw-py-3 tw-px-4 tw-text-center tw-font-bold">Điểm</th>
             </tr>
             </thead>
-            <tbody id="rankingBody" class="tw-text-gray-700">
+            <tbody id="rankingBody" class="tw-text-gray-800 tw-text-sm">
             <tr>
               <td colspan="8" class="tw-text-center tw-py-8 tw-text-gray-400">
-                Đang tải dữ liệu bảng xếp hạng...
+                Đang tải dữ liệu...
               </td>
             </tr>
             </tbody>
@@ -62,67 +65,68 @@
       </div>
     </div>
 
-    <div class="tw-space-y-6">
-      <div class="tw-bg-white tw-shadow-sm tw-rounded-2xl tw-p-5 tw-border tw-border-gray-200">
-        <h2 class="tw-text-lg tw-font-bold tw-text-primary tw-mb-4 tw-flex tw-items-center tw-gap-2">
-          📅 Lịch Thi Đấu
-        </h2>
+    <div class="tw-bg-white tw-shadow-lg tw-rounded-2xl tw-p-6 tw-border tw-border-gray-200 tw-h-fit">
 
-        <form method="get" action="#" class="tw-mb-4">
-          <select name="round"
-                  class="tw-w-full tw-p-2.5 tw-border tw-border-gray-300 tw-rounded-lg tw-bg-gray-50 tw-text-sm focus:tw-ring-primary focus:tw-border-primary"
-                  onchange="this.form.submit()">
-            <option th:each="i : ${#numbers.sequence(1, 38)}"
-                    th:value="${i}"
-                    th:text="'Vòng ' + ${i}"
-                    th:selected="${i == selectedRound}">
-            </option>
-          </select>
-        </form>
+      <h2 class="tw-text-xl tw-font-bold tw-text-primary tw-mb-4 tw-flex tw-items-center tw-gap-2">
+        📅 Lịch Thi Đấu
+      </h2>
 
-        <div class="tw-space-y-3">
-          <div th:each="match : ${upcomingMatches}"
-               class="tw-p-3 tw-border tw-rounded-xl tw-bg-gray-50 hover:tw-bg-white hover:tw-shadow-md tw-transition tw-duration-200 tw-group">
+      <form method="get" action="/admin/owner/matches" class="tw-mb-5">
+        <label class="tw-font-semibold tw-text-sm tw-text-gray-500 tw-mb-1 tw-block">Chọn vòng đấu:</label>
+        <select name="round"
+                class="tw-w-full tw-p-2.5 tw-border tw-border-gray-300 tw-rounded-lg tw-bg-gray-50 tw-text-sm focus:tw-ring-primary focus:tw-border-primary"
+                onchange="this.form.submit()">
+          <option th:each="i : ${#numbers.sequence(1, 38)}"
+                  th:value="${i}"
+                  th:text="'Vòng ' + ${i}"
+                  th:selected="${i == selectedRound}">
+          </option>
+        </select>
+      </form>
 
-            <div class="tw-flex tw-items-center tw-justify-between">
-              <div class="tw-flex tw-flex-col tw-items-center tw-w-1/3">
-                <img th:src="${match.homeTeam.logoUrl}" class="tw-w-8 tw-h-8 tw-object-contain tw-mb-1"/>
-                <span class="tw-text-xs tw-font-bold tw-text-gray-800 tw-truncate tw-w-full tw-text-center"
-                      th:text="${match.homeTeam.shortName}">ARS</span>
+      <div class="tw-space-y-3">
+        <a th:each="match : ${upcomingMatches}"
+           th:href="@{'/live_matches/' + ${match.id}}"
+           class="tw-block tw-p-3 tw-border tw-rounded-xl tw-bg-gray-50 hover:tw-bg-white hover:tw-shadow-md tw-transition tw-group tw-no-underline">
+
+          <div class="tw-flex tw-items-center tw-justify-between">
+            <div class="tw-text-center tw-w-1/3">
+              <div class="tw-w-12 tw-h-12 tw-bg-white tw-rounded-full tw-mx-auto tw-mb-2 tw-flex tw-items-center tw-justify-center tw-p-2 tw-shadow-sm">
+                <img th:src="${match.homeTeam.logoUrl}" class="tw-w-full tw-h-full tw-object-contain"/>
               </div>
+              <h3 class="tw-text-xs tw-font-bold tw-text-gray-800 tw-truncate" th:text="${match.homeTeam.shortName}">Home</h3>
+            </div>
 
-              <div class="tw-w-1/3 tw-text-center">
-                <div class="tw-text-xs tw-font-bold tw-bg-primary tw-text-white tw-px-2 tw-py-0.5 tw-rounded-full tw-inline-block tw-mb-1">
-                  VS
-                </div>
-                <div class="tw-text-[10px] tw-text-gray-500 tw-font-medium"
-                     th:text="${#temporals.format(match.matchDate, 'HH:mm')}">20:00</div>
-                <div class="tw-text-[10px] tw-text-gray-400"
-                     th:text="${#temporals.format(match.matchDate, 'dd/MM')}">12/03</div>
-              </div>
+            <div class="tw-w-1/3 tw-text-center">
+              <div class="tw-text-xl tw-font-black tw-text-gray-300 tw-mb-1">VS</div>
 
-              <div class="tw-flex tw-flex-col tw-items-center tw-w-1/3">
-                <img th:src="${match.awayTeam.logoUrl}" class="tw-w-8 tw-h-8 tw-object-contain tw-mb-1"/>
-                <span class="tw-text-xs tw-font-bold tw-text-gray-800 tw-truncate tw-w-full tw-text-center"
-                      th:text="${match.awayTeam.shortName}">MCI</span>
+              <p class="tw-text-[10px] tw-text-gray-500 tw-font-medium tw-mb-1"
+                 th:text="${#temporals.format(match.matchDate, 'dd/MM HH:mm')}">Time</p>
+
+              <div class="tw-inline-flex tw-items-center tw-gap-1 tw-text-[10px] tw-font-bold tw-px-2 tw-py-0.5 tw-rounded-full"
+                   th:classappend="${#strings.equalsIgnoreCase(match.status,'finished')} ? 'tw-bg-gray-200 tw-text-gray-600' : 'tw-bg-green-100 tw-text-green-700'">
+                <i data-lucide="clock" class="tw-w-3 tw-h-3"></i>
+                <span th:text="${#strings.equalsIgnoreCase(match.status,'finished') ? 'Kết thúc' : 'Sắp đá'}"></span>
               </div>
             </div>
-          </div>
 
-          <div th:if="${#lists.isEmpty(upcomingMatches)}" class="tw-text-center tw-py-4 tw-text-gray-400 tw-text-sm">
-            Chưa có lịch đấu cho vòng này.
+            <div class="tw-text-center tw-w-1/3">
+              <div class="tw-w-12 tw-h-12 tw-bg-white tw-rounded-full tw-mx-auto tw-mb-2 tw-flex tw-items-center tw-justify-center tw-p-2 tw-shadow-sm">
+                <img th:src="${match.awayTeam.logoUrl}" class="tw-w-full tw-h-full tw-object-contain"/>
+              </div>
+              <h3 class="tw-text-xs tw-font-bold tw-text-gray-800 tw-truncate" th:text="${match.awayTeam.shortName}">Away</h3>
+            </div>
           </div>
+        </a>
+
+        <div th:if="${#lists.isEmpty(upcomingMatches)}" class="tw-text-center tw-py-6 tw-text-gray-400 tw-text-sm tw-italic">
+          <i data-lucide="calendar-x" class="tw-w-8 tw-h-8 tw-mx-auto tw-mb-2 tw-opacity-50"></i>
+          Không có lịch thi đấu vòng này.
         </div>
       </div>
 
-      <div class="tw-bg-gradient-to-r tw-from-primary tw-to-purple-900 tw-rounded-2xl tw-p-5 tw-text-white tw-text-center tw-shadow-lg">
-        <h3 class="tw-font-bold tw-text-lg tw-mb-1">Fantasy Premier League</h3>
-        <p class="tw-text-xs tw-opacity-80 tw-mb-3">Xây dựng đội hình trong mơ của bạn ngay hôm nay!</p>
-        <button class="tw-bg-secondary tw-text-primary tw-font-bold tw-text-xs tw-py-2 tw-px-4 tw-rounded-full hover:tw-bg-white tw-transition">
-          Chơi Ngay
-        </button>
-      </div>
     </div>
+
   </div>
 
   <script>
@@ -130,60 +134,72 @@
 
     async function loadRanking() {
       try {
-        // Gọi API lấy dữ liệu BXH (Đảm bảo bạn có API này)
+        // Gọi API lấy dữ liệu BXH
         const res = await fetch("/api/rankings/v1");
-        if (!res.ok) throw new Error("API Error");
-
         const data = await res.json();
+
         body.innerHTML = "";
 
         data.forEach((r, index) => {
           const tr = document.createElement("tr");
           tr.className = "tw-border-b tw-border-gray-100 hover:tw-bg-gray-50 tw-transition";
 
-          // Highlight Top 4 (C1) và Bottom 3 (Xuống hạng)
-          let posClass = "tw-text-gray-600";
-          if(index < 4) posClass = "tw-text-primary tw-font-bold";
-          if(index >= 17) posClass = "tw-text-red-500";
+          // Highlight Top 4 & Xuống hạng
+          let posClass = "tw-text-gray-500";
+          let rowBg = "";
+
+          if(index < 4) {
+            posClass = "tw-text-white tw-bg-primary tw-w-6 tw-h-6 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mx-auto tw-text-xs";
+            // Sửa lại logic hiển thị số thứ tự cho đẹp
+            var posHtml = `<div class="${posClass}">${index + 1}</div>`;
+          } else if (index >= 17) {
+            posHtml = `<div class="tw-text-red-500 tw-font-bold">${index + 1}</div>`;
+          } else {
+            posHtml = `<div class="${posClass}">${index + 1}</div>`;
+          }
 
           tr.innerHTML = `
-                        <td class="tw-py-3 tw-px-4 tw-text-center ${posClass}">${index + 1}</td>
+                        <td class="tw-py-3 tw-px-4 tw-text-center">${posHtml}</td>
+
                         <td class="tw-py-3 tw-px-4">
                             <div class="tw-flex tw-items-center tw-gap-3">
-                                <img src="${r.logoUrl}" class="tw-w-6 tw-h-6 tw-object-contain" />
-                                <span class="tw-font-semibold tw-text-gray-800">${r.name}</span>
+                                <img src="${r.logoUrl}" class="tw-w-8 tw-h-8 tw-object-contain" />
+                                <a href="/team/${r.id}" class="tw-font-bold tw-text-gray-800 hover:tw-text-primary tw-no-underline tw-transition">${r.name}</a>
                             </div>
                         </td>
-                        <td class="tw-py-3 tw-px-4 tw-text-center">${(r.winCount || 0) + (r.drawCount || 0) + (r.loseCount || 0)}</td>
+
+                        <td class="tw-py-3 tw-px-4 tw-text-center tw-font-medium">${(r.winCount||0) + (r.drawCount||0) + (r.loseCount||0)}</td>
                         <td class="tw-py-3 tw-px-4 tw-text-center tw-text-green-600">${r.winCount ?? 0}</td>
                         <td class="tw-py-3 tw-px-4 tw-text-center tw-text-gray-500">${r.drawCount ?? 0}</td>
                         <td class="tw-py-3 tw-px-4 tw-text-center tw-text-red-500">${r.loseCount ?? 0}</td>
-                        <td class="tw-py-3 tw-px-4 tw-text-center tw-font-medium">${r.goalDifference > 0 ? '+' + r.goalDifference : r.goalDifference}</td>
-                        <td class="tw-py-3 tw-px-4 tw-text-center tw-font-bold tw-text-lg tw-text-primary">${r.points}</td>
+                        <td class="tw-py-3 tw-px-4 tw-text-center">${r.goalDifference > 0 ? '+' + r.goalDifference : r.goalDifference}</td>
+                        <td class="tw-py-3 tw-px-4 tw-text-center tw-font-black tw-text-lg tw-text-primary">${r.points}</td>
                     `;
+
           body.appendChild(tr);
         });
       } catch (e) {
-        body.innerHTML = `<tr><td colspan="8" class="tw-text-center tw-py-4 tw-text-red-500">Không thể tải dữ liệu.</td></tr>`;
+        console.error(e);
+        body.innerHTML = `<tr><td colspan="8" class="tw-text-center tw-py-4 tw-text-red-500">Lỗi tải dữ liệu. Vui lòng thử lại.</td></tr>`;
       }
     }
 
-    // Load bảng khi mở trang
     loadRanking();
 
-    // WebSocket Realtime (Giữ nguyên)
+    // WebSocket Realtime
     const socket = new SockJS('/ws');
     const stomp = Stomp.over(socket);
-    stomp.debug = null; // Tắt log debug cho gọn console
+    stomp.debug = null;
 
     stomp.connect({}, () => {
       stomp.subscribe('/topic/ranking-updated', () => {
-        // Hiệu ứng nháy bảng khi có update
         body.classList.add('tw-opacity-50');
         setTimeout(() => body.classList.remove('tw-opacity-50'), 300);
         loadRanking();
       });
     });
+
+    lucide.createIcons();
   </script>
 
 </th:block>

@@ -1,12 +1,17 @@
 package com.example.premier_league.controller;
 
+import com.example.premier_league.entity.Account;
 import com.example.premier_league.entity.Coach;
+import com.example.premier_league.entity.Team;
+import com.example.premier_league.service.IAccountService;
 import com.example.premier_league.service.ICoachService;
+import com.example.premier_league.service.ITeamService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,42 +22,25 @@ import java.util.stream.Collectors;
 public class CoachController {
 
     private final ICoachService coachService;
+    private final IAccountService accountService;
+    // Không cần ITeamService nữa vì Owner không cần load danh sách đội
 
-    public CoachController(ICoachService coachService) {
+    public CoachController(ICoachService coachService, IAccountService accountService) {
         this.coachService = coachService;
+        this.accountService = accountService;
     }
 
+    // 1. DANH SÁCH (Chỉ hiện HLV của đội mình)
     @GetMapping
-    public String listCoaches(@RequestParam(value = "name", required = false) String name,
-                              Model model) {
+    public String listCoaches(Model model, Principal principal) {
+        Team myTeam = getOwnerTeam(principal);
+        if (myTeam == null) return "redirect:/login"; // Chưa đăng nhập hoặc chưa có đội
 
-        List<Coach> coaches;
+        // Lấy danh sách HLV theo ID đội
+        List<Coach> coaches = coachService.findByTeamId(myTeam.getId());
 
-        if (name != null && !name.trim().isEmpty()) {
-            coaches = coachService.findByName(name.trim());
-            model.addAttribute("search", name.trim());
-        } else {
-            coaches = coachService.findAll();
-        }
-
-        // Sắp xếp để Head Coach luôn lên đầu,
-        // sau đó tới các role khác (theo alphabet), trong mỗi role sắp xếp theo tên
+        // Grouping logic để hiển thị theo nhóm chức vụ (Giữ nguyên logic cũ của bạn)
         Map<String, List<Coach>> coachesByRole = coaches.stream()
-                .sorted((a, b) -> {
-                    // Ưu tiên Head Coach
-                    boolean aHead = "Head Coach".equalsIgnoreCase(a.getRole());
-                    boolean bHead = "Head Coach".equalsIgnoreCase(b.getRole());
-
-                    if (aHead && !bHead) return -1; // a trước b
-                    if (!aHead && bHead) return 1;  // b trước a
-
-                    // Nếu cùng loại (cùng role) thì sort theo tên
-                    int roleCompare = a.getRole().compareToIgnoreCase(b.getRole());
-                    if (roleCompare != 0) {
-                        return roleCompare;
-                    }
-                    return a.getFullName().compareToIgnoreCase(b.getFullName());
-                })
                 .collect(Collectors.groupingBy(
                         Coach::getRole,
                         LinkedHashMap::new,
@@ -60,81 +48,109 @@ public class CoachController {
                 ));
 
         model.addAttribute("coachesByRole", coachesByRole);
-        return "coach/list"; // templates/coach/list.html
+        model.addAttribute("myTeam", myTeam); // Để hiển thị tên đội trên header nếu cần
+        return "coach/list";
     }
 
-
-
+    // 2. FORM TẠO MỚI
     @GetMapping("/create")
-    public String showCreateForm(Model model) {
+    public String createForm(Model model, Principal principal) {
+        Team myTeam = getOwnerTeam(principal);
+
         Coach coach = new Coach();
+        // Gán sẵn đội vào object để form hiển thị (dù readonly)
+        coach.setTeam(myTeam);
+
         model.addAttribute("coach", coach);
         model.addAttribute("formTitle", "Thêm huấn luyện viên");
-
-        // Kiểm tra trong DB xem đã có Head Coach chưa
-        boolean headCoachExists = coachService.existsByRole("Head Coach");
-        model.addAttribute("headCoachExists", headCoachExists);
-
+        model.addAttribute("myTeamName", myTeam.getName()); // Biến này để hiện lên ô input readonly
         return "coach/form";
     }
 
-
+    // 3. XỬ LÝ TẠO MỚI
     @PostMapping("/create")
     public String createCoach(@ModelAttribute("coach") Coach coach,
-                              RedirectAttributes redirectAttributes) {
+                              Principal principal,
+                              RedirectAttributes redirect) {
+        Team myTeam = getOwnerTeam(principal);
+
+        // Cưỡng chế gán vào đội của Owner (Bảo mật backend)
+        coach.setTeam(myTeam);
+
         coachService.save(coach);
-        redirectAttributes.addFlashAttribute("message", "Đã thêm huấn luyện viên thành công");
+        redirect.addFlashAttribute("message", "Thêm mới thành công!");
         return "redirect:/admin/coaches";
     }
 
-
-    // 4. Form Cập nhật (GET) -> URL dạng /14/edit
+    // 4. FORM CẬP NHẬT
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable("id") Integer id,
-                               Model model,
-                               RedirectAttributes redirect) {
+    public String editForm(@PathVariable Integer id, Model model, Principal principal) {
+        Team myTeam = getOwnerTeam(principal);
         Coach coach = coachService.findById(id);
-        if (coach == null) {
-            redirect.addFlashAttribute("message", "Không tìm thấy HLV!");
+
+        // Bảo mật: Nếu không tìm thấy hoặc HLV này không thuộc đội của Owner -> Đá về trang danh sách
+        if (coach == null || !coach.getTeam().getId().equals(myTeam.getId())) {
             return "redirect:/admin/coaches";
         }
+
         model.addAttribute("coach", coach);
         model.addAttribute("formTitle", "Cập nhật huấn luyện viên");
+        model.addAttribute("myTeamName", myTeam.getName());
         return "coach/form";
     }
 
-    // 5. Xử lý Cập nhật (POST) -> Gửi về /update
-    // Đây là chỗ sửa lỗi "POST not supported"
+    // 5. XỬ LÝ CẬP NHẬT
     @PostMapping("/update")
     public String updateCoach(@ModelAttribute("coach") Coach coach,
+                              Principal principal,
                               RedirectAttributes redirect) {
-        // Khi submit form, ID đã nằm ẩn trong object coach
+        Team myTeam = getOwnerTeam(principal);
+
+        // Cưỡng chế gán đội (tránh trường hợp form bị hack ID đội)
+        coach.setTeam(myTeam);
+
         coachService.save(coach);
         redirect.addFlashAttribute("message", "Cập nhật thành công!");
         return "redirect:/admin/coaches";
     }
 
-
-    @GetMapping("/{id}")
-    public String viewDetail(@PathVariable("id") int id,
-                             Model model,
-                             RedirectAttributes redirectAttributes) {
+    // 6. XÓA
+    @PostMapping("/delete/{id}")
+    public String delete(@PathVariable Integer id, Principal principal, RedirectAttributes redirect) {
+        Team myTeam = getOwnerTeam(principal);
         Coach coach = coachService.findById(id);
-        if (coach == null) {
-            redirectAttributes.addFlashAttribute("message", "Không tìm thấy huấn luyện viên");
+
+        // Bảo mật: Chỉ xóa được HLV của đội mình
+        if (coach != null && coach.getTeam().getId().equals(myTeam.getId())) {
+            coachService.delete(id);
+            redirect.addFlashAttribute("message", "Đã xóa!");
+        } else {
+            redirect.addFlashAttribute("error", "Không thể xóa HLV này!");
+        }
+        return "redirect:/admin/coaches";
+    }
+
+    // 7. CHI TIẾT
+    @GetMapping("/{id}")
+    public String detail(@PathVariable Integer id, Model model, Principal principal) {
+        Team myTeam = getOwnerTeam(principal);
+        Coach coach = coachService.findById(id);
+
+        // Bảo mật: Chỉ xem được chi tiết HLV đội mình
+        if(coach == null || !coach.getTeam().getId().equals(myTeam.getId())) {
             return "redirect:/admin/coaches";
         }
 
         model.addAttribute("coach", coach);
-        return "coach/detail"; // templates/coach-detail.html
+        return "coach/detail";
     }
 
-
-    @PostMapping("/{id}/delete")
-    public String deleteCoach(@PathVariable("id") int id,
-                              RedirectAttributes redirectAttributes) {
-        coachService.delete(id);
-        redirectAttributes.addFlashAttribute("message", "Đã xoá huấn luyện viên");
-        return "redirect:/admin/coaches";
+    // --- Helper Method ---
+    // Hàm này giúp lấy thông tin đội bóng của người đang đăng nhập một cách nhanh gọn
+    private Team getOwnerTeam(Principal principal) {
+        if (principal == null) return null;
+        return accountService.findByUsername(principal.getName())
+                .map(Account::getTeam)
+                .orElse(null);
     }
 }

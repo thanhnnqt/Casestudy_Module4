@@ -25,7 +25,11 @@
             </a>
         </div>
 
-        <div class="row g-4">
+        <div th:if="${player == null}" class="alert alert-danger">
+            Không tìm thấy thông tin cầu thủ này.
+        </div>
+
+        <div class="row g-4" th:if="${player != null}">
             <div class="col-lg-4">
                 <div class="card card-profile h-100">
                     <img class="profile-img"
@@ -34,7 +38,8 @@
                          onerror="this.onerror=null; this.src='https://via.placeholder.com/400x400?text=No+Image';">
 
                     <div class="card-body text-center p-4">
-                        <h2 class="profile-name mb-1" th:text="${player.name}">Name</h2>
+                        <h2 class="profile-name mb-1" th:text="${player.name}">Tên Cầu Thủ</h2>
+
                         <span class="badge bg-danger rounded-pill px-3 py-2 mb-4" th:text="${player.position}">Position</span>
 
                         <div class="d-flex justify-content-center gap-2">
@@ -56,23 +61,27 @@
                     <div class="row g-4">
                         <div class="col-md-6">
                             <div class="label-text">Đội bóng chủ quản</div>
-                            <div class="value-text text-primary"><i class="bi bi-shield-shaded me-2"></i><span th:text="${player.team != null ? player.team.name : 'Tự do'}"></span></div>
+                            <div class="value-text text-primary">
+                                <i class="bi bi-shield-shaded me-2"></i>
+                                <span th:text="${player.team != null ? player.team.name : 'Tự do'}"></span>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <div class="label-text">Ngày sinh</div>
-                            <div class="value-text" th:text="${player.dob}"></div>
+                            <div class="value-text" th:text="${#temporals.format(player.dob, 'dd/MM/yyyy')}"></div>
                         </div>
                         <div class="col-md-6">
                             <div class="label-text">Kinh nghiệm thi đấu</div>
-                            <div class="value-text" th:text="${player.experience + ' năm'}"></div>
+                            <div class="value-text" th:text="${player.experience != null ? player.experience : 'Chưa cập nhật'}"></div>
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="deletePlayerModal" tabindex="-1" aria-hidden="true">
+    <div th:if="${player != null}" class="modal fade" id="deletePlayerModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header text-white" style="background-color: var(--pl-purple);">

@@ -1,82 +1,34 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Chi tiết trận đấu (Realtime)</title>
 
     <!-- ẨN BODY CHO TỚI KHI LOAD XONG -->
-    <style>
-        body { visibility: hidden; }
-    </style>
-    <script>
-        window.addEventListener("load", () => {
-            document.body.style.visibility = "visible";
-        });
-    </script>
+    <style> body { visibility: hidden; } </style>
+    <script> window.addEventListener("load", () => { document.body.style.visibility = "visible"; }); </script>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: { extend: { colors: { primary:"#38003c", secondary:"#00ff85" } } }
-        }
+        tailwind.config = { theme: { extend: { colors: { primary: "#38003c", secondary: "#00ff85" } } } };
     </script>
 
     <style>
         /* ------- TAB STYLE ------- */
-        .tab-btn {
-            color: #555;
-            background: transparent;
-            border: 0;
-            padding: 0.6rem 1.25rem;
-            cursor: pointer;
-            font-weight: 600;
-            width: 50%;
-            text-align: center;
-        }
-
+        .tab-btn { color: #555; background: transparent; border: 0; padding: 0.6rem 1.25rem; cursor: pointer; font-weight: 600; width: 50%; text-align: center; }
         .tab-btn.active { color: #38003c; }
-
-        #tabHighlight {
-            position: absolute;
-            bottom: 0;
-            height: 3px;
-            background: #38003c;
-            transition: all .22s ease;
-        }
-
-        .tab-panel {
-            min-height: 600px;
-            height: 600px;
-            overflow-y: auto;
-        }
-
-        #matchRoot, #tabContainer {
-            width: 100%;
-            max-width: 750px;
-            margin: 0 auto;
-        }
-
-        #eventsList li {
-            min-height: 56px;
-            display:flex;
-            align-items:center;
-            gap: 10px;
-        }
-
-        .video-embed {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow:hidden;
-            border-radius:.5rem;
-        }
-        .video-embed iframe, .video-embed img {
-            position:absolute;
-            inset:0;
-            width:100%;
-            height:100%;
-        }
+        #tabHighlight { position: absolute; bottom: 0; height: 3px; background: #38003c; transition: all .22s ease; }
+        .tab-panel { min-height: 600px; height: 600px; overflow-y: auto; }
+        #matchRoot, #tabContainer { width: 100%; max-width: 750px; margin: 0 auto; }
+        #eventsList li { min-height: 56px; display: flex; align-items: center; gap: 10px; }
+        .video-embed { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: .5rem; }
+        .video-embed iframe, .video-embed img { position: absolute; inset: 0; width: 100%; height: 100%; }
+        /* small helpers */
+        .event-team { font-weight: 700; }
+        .event-player { color: #555; font-size: 0.9rem; }
+        .badge-yellow { color:#7a5200; background:#FFF6D6; padding: 2px 6px; border-radius: 6px; font-weight:600; }
+        .badge-red { color:#7a0000; background:#FFD6D6; padding: 2px 6px; border-radius: 6px; font-weight:600; }
     </style>
 
     <!-- WebSocket Libs -->
@@ -97,9 +49,7 @@
 
     <!-- HEADER -->
     <section class="text-center mb-6">
-        <p class="text-gray-500 text-sm">
-            Ngoại hạng Anh • <span id="matchDate">-</span>
-        </p>
+        <p class="text-gray-500 text-sm">Ngoại hạng Anh • <span id="matchDate">-</span></p>
         <p id="matchStatus" class="text-green-600 font-semibold text-sm">-</p>
 
         <div class="flex items-center justify-center gap-10 my-6">
@@ -121,13 +71,10 @@
         </div>
 
         <!-- TIMELINE -->
-        <div id="timelineContainer"
-             class="w-full bg-gray-200 rounded-full h-3 mt-4 overflow-hidden hidden">
-            <div id="timelineBar"
-                 class="h-full bg-secondary transition-all duration-500"></div>
+        <div id="timelineContainer" class="w-full bg-gray-200 rounded-full h-3 mt-4 overflow-hidden hidden">
+            <div id="timelineBar" class="h-full bg-secondary transition-all duration-500"></div>
         </div>
-        <p id="timelineMinute"
-           class="text-center text-sm text-gray-600 mt-2 hidden">0'</p>
+        <p id="timelineMinute" class="text-center text-sm text-gray-600 mt-2 hidden">0'</p>
     </section>
 
     <!-- GOALS -->
@@ -141,13 +88,8 @@
     <!-- TABS -->
     <div class="tab-wrap mt-4 mb-4">
         <div id="tabContainer" class="flex border-b relative">
-
-            <button id="btnEvents" data-tab="eventsTab"
-                    class="tab-btn active">Diễn biến chính</button>
-
-            <button id="btnStats" data-tab="statsTab"
-                    class="tab-btn">Thống kê</button>
-
+            <button id="btnEvents" data-tab="eventsTab" class="tab-btn active">Diễn biến chính</button>
+            <button id="btnStats" data-tab="statsTab" class="tab-btn">Thống kê</button>
             <div id="tabHighlight"></div>
         </div>
     </div>
@@ -159,40 +101,21 @@
 
     <!-- STATS -->
     <section id="statsTab" class="tab-panel hidden">
-        <div class="grid grid-cols-3 gap-10 text-lg font-semibold items-start">
+        <div class="text-center font-bold text-primary text-xl mb-6">THỐNG KÊ ĐỘI TUYỂN</div>
 
-            <!-- HOME STATS -->
-            <ul id="homeStats" class="text-center text-primary space-y-5">
-                <!-- Home numbers will be rendered here (10 items) -->
+        <div class="grid grid-cols-3 gap-8 text-lg font-semibold items-center">
+            <ul id="homeStats" class="space-y-5 text-primary text-center"></ul>
+            <ul class="space-y-5 text-gray-700 text-center">
+                <li>Số lần sút</li><li>Sút trúng đích</li><li>Kiểm soát bóng</li><li>Lượt chuyền bóng</li>
+                <li>Tỷ lệ chuyền bóng</li><li>Phạm lỗi</li><li>Thẻ vàng</li><li>Thẻ đỏ</li><li>Việt vị</li><li>Phạt góc</li>
             </ul>
-
-            <!-- LABELS -->
-            <ul class="text-center text-gray-700 space-y-5">
-                <li class="font-bold text-primary">THỐNG KÊ ĐỘI TUYỂN</li>
-                <li>Số lần sút</li>
-                <li>Sút trúng đích</li>
-                <li>Kiểm soát bóng</li>
-                <li>Lượt chuyền bóng</li>
-                <li>Tỷ lệ chuyền bóng</li>
-                <li>Phạm lỗi</li>
-                <li>Thẻ vàng</li>
-                <li>Thẻ đỏ</li>
-                <li>Việt vị</li>
-                <li>Phạt góc</li>
-            </ul>
-
-            <!-- AWAY STATS -->
-            <ul id="awayStats" class="text-center text-red-600 space-y-5">
-                <!-- Away numbers will be rendered here (10 items) -->
-            </ul>
-
+            <ul id="awayStats" class="space-y-5 text-red-600 text-center"></ul>
         </div>
     </section>
 
     <!-- STADIUM -->
     <section class="mt-4 text-sm text-gray-600">
-        <p><span class="font-bold text-primary">Địa điểm:</span>
-            <span id="stadium">-</span></p>
+        <p><span class="font-bold text-primary">Địa điểm:</span> <span id="stadium">-</span></p>
     </section>
 
 </main>
@@ -205,171 +128,269 @@
 
         lucide.createIcons();
 
-        /* ================= TAB (Fix giật 100%) ================ */
+        /* ================= TAB UI ================= */
         const btnEvents = document.getElementById("btnEvents");
         const btnStats  = document.getElementById("btnStats");
         const highlight = document.getElementById("tabHighlight");
-
-        const tabs = {
-            eventsTab: document.getElementById("eventsTab"),
-            statsTab: document.getElementById("statsTab")
-        };
+        const tabs = { eventsTab: document.getElementById("eventsTab"), statsTab: document.getElementById("statsTab") };
 
         function moveHighlight(btn) {
             const wrap = document.getElementById("tabContainer");
             const r1 = wrap.getBoundingClientRect();
             const r2 = btn.getBoundingClientRect();
-
             highlight.style.width = r2.width + "px";
             highlight.style.left = (r2.left - r1.left) + "px";
         }
-
         function activate(btn) {
-            btnEvents.classList.remove("active");
-            btnStats.classList.remove("active");
-            tabs.eventsTab.classList.add("hidden");
-            tabs.statsTab.classList.add("hidden");
-
-            btn.classList.add("active");
-            tabs[btn.dataset.tab].classList.remove("hidden");
-
+            btnEvents.classList.remove("active"); btnStats.classList.remove("active");
+            tabs.eventsTab.classList.add("hidden"); tabs.statsTab.classList.add("hidden");
+            btn.classList.add("active"); tabs[btn.dataset.tab].classList.remove("hidden");
             moveHighlight(btn);
         }
-
-        btnEvents.onclick = () => activate(btnEvents);
-        btnStats.onclick  = () => activate(btnStats);
-
-        window.requestAnimationFrame(() => {
-            setTimeout(() => moveHighlight(btnEvents), 200);
-        });
-
+        btnEvents.onclick = () => activate(btnEvents); btnStats.onclick = () => activate(btnStats);
+        window.requestAnimationFrame(() => setTimeout(() => moveHighlight(btnEvents), 200));
         window.onresize = () => moveHighlight(document.querySelector(".tab-btn.active"));
 
-        /* ================= LOAD DATA ================= */
+        /* ================= LOAD / SAFE FETCH ================= */
         async function safeJson(url) {
             try { let r = await fetch(url); if (!r.ok) return null; return await r.json(); }
-            catch { return null; }
+            catch (e) { console.warn("fetch error", url, e); return null; }
         }
 
         const matchId = document.getElementById("matchRoot").dataset.matchId;
 
-        async function loadAll() {
+        /* ============ Dedupe events (avoid double-send) ============ */
+        const displayedEventIds = new Set();
 
-            /* ==== SCORE / MATCH INFO ==== */
-            const m = await safeJson(`/api/matches/${matchId}/score`);
-            if (m) {
-                homeName.textContent = m.homeTeam?.name ?? "-";
-                awayName.textContent = m.awayTeam?.name ?? "-";
-                homeLogo.src = m.homeTeam?.logoUrl ?? "/images/default-team.png";
-                awayLogo.src = m.awayTeam?.logoUrl ?? "/images/default-team.png";
+        /* ============ NORMALIZE incoming event object ============
+           Accepts:
+            - MatchEventResponse {id, minute, type, description, teamName, playerName}
+            - MatchEvent entity {id, minute, type, description, team:{name}, player:{name}}
+           Returns normalized: {id, minute, type, description, teamName, playerName}
+        ============================================================ */
+        function normalizeEvent(ev) {
+            if (!ev) return null;
+            // ev might be JSON string (rare) - ignore that case
+            const id = ev.id ?? ev.eventId ?? null;
+            const minute = ev.minute ?? ev.time ?? null;
+            const type = ev.type ?? ev.eventType ?? null;
+            const description = ev.description ?? ev.desc ?? null;
+            const teamName = ev.teamName ?? (ev.team && ev.team.name) ?? (ev.team?.teamName) ?? null;
+            const playerName = ev.playerName ?? (ev.player && ev.player.name) ?? null;
+            return { id, minute, type, description, teamName, playerName, raw: ev };
+        }
 
-                homeScore.textContent = m.homeScore ?? 0;
-                awayScore.textContent = m.awayScore ?? 0;
+        /* ================= RENDER EVENTS ================= */
+        function renderEvents(list) {
+            if (!Array.isArray(list)) return;
+            // sort by minute numeric if possible
+            list.sort((a,b) => ( (a.minute ?? a.time ?? 0) - (b.minute ?? b.time ?? 0) ));
+            eventsList.innerHTML = "";
+            displayedEventIds.clear();
+            list.forEach(e => appendEvent(e));
+        }
 
-                matchStatus.textContent = m.status ?? "-";
-                stadium.textContent = m.stadium ?? "-";
-                matchDate.textContent = m.matchDate
-                    ? new Date(m.matchDate).toLocaleString("vi-VN") : "-";
+        function appendEvent(evRaw) {
+            const ev = normalizeEvent(evRaw);
+            // dedupe when id available
+            if (ev == null) return;
+            if (ev.id !== null && displayedEventIds.has(ev.id)) return;
+            if (ev.id !== null) displayedEventIds.add(ev.id);
+
+            const iconMap = { GOAL: "⚽", YELLOW_CARD: "🟨", RED_CARD: "🟥", PENALTY: "🅿️" };
+            const icon = iconMap[ (ev.type || "").toUpperCase() ] ?? "•";
+
+            // nice color for card counts: if yellow/red event, style icon background
+            const iconHtml = (ev.type && ev.type.toUpperCase()==='YELLOW_CARD')
+                ? `<span class="badge-yellow">${icon}</span>`
+                : (ev.type && ev.type.toUpperCase()==='RED_CARD')
+                    ? `<span class="badge-red">${icon}</span>`
+                    : `<span>${icon}</span>`;
+
+            const time = ev.minute != null ? ev.minute + "'" : "";
+
+            // build description: prefer provided description, else build from team/player/type
+            let desc = ev.description;
+            if (!desc) {
+                const parts = [];
+                if (ev.teamName) parts.push(ev.teamName);
+                if (ev.playerName) parts.push(ev.playerName);
+                parts.push(ev.type ? ev.type.replace("_"," ") : "");
+                desc = parts.filter(Boolean).join(" - ");
             }
 
-            /* ==== EVENTS ==== */
-            const ev = await safeJson(`/api/matches/${matchId}/events`);
-            if (Array.isArray(ev)) renderEvents(ev);
+            const li = document.createElement("li");
+            li.className = "bg-gray-50 p-3 rounded-xl shadow-sm border flex items-center gap-3";
 
-            /* ==== STATS (MatchStatsDto) ==== */
-            const stats = await safeJson(`/api/matches/${matchId}/stats`);
-            if (stats) updateStatsUI(stats);
+            li.innerHTML = `
+                <div class="w-8 text-center">${iconHtml}</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold">${escapeHtml(desc)}</div>
+                    <div class="text-xs text-gray-500">${escapeHtml(time)}</div>
+                </div>
+                <div class="text-right text-xs text-gray-500">
+                    ${ev.teamName ? `<div class="event-team">${escapeHtml(ev.teamName)}</div>` : ""}
+                    ${ev.playerName ? `<div class="event-player">${escapeHtml(ev.playerName)}</div>` : ""}
+                </div>
+            `;
+            // prepend newest on top (optional) — currently maintain chronological order by append
+            eventsList.appendChild(li);
+
+            // if event is GOAL but score wasn't delivered, we don't change score here (score handler should do it)
+            // scroll eventsList to bottom to show latest
+            // eventsList.scrollTop = eventsList.scrollHeight;
+        }
+
+        // small escape to avoid injecting HTML from backend accidentally
+        function escapeHtml(s) {
+            if (s === null || s === undefined) return "";
+            return String(s).replace(/[&<>"']/g, function (m) {
+                return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+            });
         }
 
         /* ================= RENDER STATS ================= */
         function updateStatsUI(s) {
-            // đảm bảo luôn có 10 items cho mỗi team để giữ hàng ngang
             homeStats.innerHTML = `
                 <li>${s.shotsHome ?? 0}</li>
                 <li>${s.shotsOnTargetHome ?? 0}</li>
-                <li>${s.possessionHome ? s.possessionHome + '%' : '0%'}</li>
+                <li>${(s.possessionHome ?? 0) + '%'}</li>
                 <li>${s.passesHome ?? 0}</li>
-                <li>${s.accuracyHome ? s.accuracyHome + '%' : '0%'}</li>
+                <li>${(s.accuracyHome ?? 0) + '%'}</li>
                 <li>${s.foulsHome ?? 0}</li>
-                <li>${s.yellowCardsHome ?? 0}</li>
-                <li>${s.redCardsHome ?? 0}</li>
+                <li class="text-yellow-500 font-bold">${s.yellowCardsHome ?? 0}</li>
+                <li class="text-red-600 font-bold">${s.redCardsHome ?? 0}</li>
                 <li>${s.offsidesHome ?? 0}</li>
                 <li>${s.cornersHome ?? 0}</li>
             `;
-
             awayStats.innerHTML = `
                 <li>${s.shotsAway ?? 0}</li>
                 <li>${s.shotsOnTargetAway ?? 0}</li>
-                <li>${s.possessionAway ? s.possessionAway + '%' : '0%'}</li>
+                <li>${(s.possessionAway ?? 0) + '%'}</li>
                 <li>${s.passesAway ?? 0}</li>
-                <li>${s.accuracyAway ? s.accuracyAway + '%' : '0%'}</li>
+                <li>${(s.accuracyAway ?? 0) + '%'}</li>
                 <li>${s.foulsAway ?? 0}</li>
-                <li>${s.yellowCardsAway ?? 0}</li>
-                <li>${s.redCardsAway ?? 0}</li>
+                <li class="text-yellow-500 font-bold">${s.yellowCardsAway ?? 0}</li>
+                <li class="text-red-600 font-bold">${s.redCardsAway ?? 0}</li>
                 <li>${s.offsidesAway ?? 0}</li>
                 <li>${s.cornersAway ?? 0}</li>
             `;
         }
 
-        /* ================= RENDER EVENTS ================= */
-        function renderEvents(list) {
-            list.sort((a,b)=> (a.minute??0)-(b.minute??0));
-            eventsList.innerHTML = "";
-            goalsList.innerHTML = "";
-            list.forEach(e => appendEvent(e));
+        /* ================= SCORE HANDLER =================
+           Accepts either:
+            - a full Match object (with homeScore, awayScore, status, homeTeam{...}, awayTeam{...})
+            - a simple map {homeScore, awayScore, status, minute}
+        =================================================== */
+        function handleScoreMessage(s) {
+            if (!s) return;
+            // s may be a string (rare) — assume parsed already in STOMP callback
+            const home = (s.homeScore != null) ? s.homeScore : (s.home != null ? s.home : null);
+            const away = (s.awayScore != null) ? s.awayScore : (s.away != null ? s.away : null);
+            const status = s.status ?? (s.matchStatus ?? null);
+
+            if (home != null) homeScore.textContent = home;
+            if (away != null) awayScore.textContent = away;
+            if (status != null) {
+                matchStatus.textContent = status;
+                // style status color
+                matchStatus.classList.remove("text-green-600","text-red-600","text-gray-600","text-yellow-600");
+                if (status === "LIVE") matchStatus.classList.add("text-red-600");
+                else if (status === "SCHEDULED") matchStatus.classList.add("text-green-600");
+                else if (status === "FINISHED") matchStatus.classList.add("text-gray-600");
+                else matchStatus.classList.add("text-green-600");
+            }
+
+            // optional: if message contains minute/currentMinute, show timeline
+            if (s.minute != null || s.currentMinute != null) {
+                const minute = s.minute ?? s.currentMinute;
+                timelineMinute.textContent = minute + "'";
+                timelineMinute.classList.remove("hidden");
+                timelineContainer.classList.remove("hidden");
+
+                // progress: minute / 90 (clamp)
+                const pct = Math.max(0, Math.min(100, Math.round((minute/90)*100)));
+                timelineBar.style.width = pct + "%";
+            } else {
+                // hide timeline if not provided
+                // timelineContainer.classList.add("hidden");
+                // timelineMinute.classList.add("hidden");
+            }
         }
 
-        function appendEvent(ev) {
-            const icon = {
-                GOAL:"⚽", YELLOW_CARD:"🟨", RED_CARD:"🟥", PENALTY:"🅿️"
-            }[ev.type] ?? "•";
+        /* ================= LOAD ALL ================= */
+        async function loadAll() {
+            if (!matchId) return console.warn("missing matchId");
+            // score/match info
+            const m = await safeJson(`/api/matches/${matchId}/score`);
+            if (m) {
+                // handle both shapes: m may be match object or simplified
+                homeName.textContent = m.homeTeam?.name ?? m.homeTeamName ?? "-";
+                awayName.textContent = m.awayTeam?.name ?? m.awayTeamName ?? "-";
+                homeLogo.src = m.homeTeam?.logoUrl ?? m.homeTeamLogo ?? "/images/default-team.png";
+                awayLogo.src = m.awayTeam?.logoUrl ?? m.awayTeamLogo ?? "/images/default-team.png";
 
-            const li = document.createElement("li");
-            const time = ev.minute!=null ? ev.minute+"'" : "";
+                homeScore.textContent = m.homeScore ?? m.homeScore ?? 0;
+                awayScore.textContent = m.awayScore ?? m.awayScore ?? 0;
 
-            li.className="bg-gray-50 p-3 rounded-xl shadow-sm border flex items-center gap-3";
-            li.innerHTML = `
-                <span class="w-8 text-center">${icon}</span>
-                <div>
-                    <div class="text-sm font-semibold">${ev.description ?? ev.type}</div>
-                    <div class="text-xs text-gray-500">${time}</div>
-                </div>
-            `;
-            eventsList.appendChild(li);
+                matchStatus.textContent = m.status ?? (m.matchStatus ?? "-");
+                stadium.textContent = m.stadium ?? "-";
+                matchDate.textContent = m.matchDate ? new Date(m.matchDate).toLocaleString("vi-VN") : "-";
+            }
+
+            // events
+            const ev = await safeJson(`/api/matches/${matchId}/events`);
+            if (Array.isArray(ev)) renderEvents(ev);
+
+            // stats
+            const stats = await safeJson(`/api/matches/${matchId}/stats`);
+            if (stats) updateStatsUI(stats);
         }
 
         /* ================= WEBSOCKET ================= */
         let stompClient = null;
-
         function connectWs() {
             const socket = new SockJS('/ws');
             stompClient = Stomp.over(socket);
             stompClient.debug = null;
 
             stompClient.connect({}, () => {
-
+                // events subscription
                 stompClient.subscribe(`/topic/match/${matchId}/events`, msg => {
-                    appendEvent(JSON.parse(msg.body));
+                    try {
+                        const body = JSON.parse(msg.body);
+                        // body might be single event or array — handle both
+                        if (Array.isArray(body)) renderEvents(body);
+                        else appendEvent(body);
+                    } catch (e) {
+                        console.warn("invalid event body", e, msg.body);
+                    }
                 });
 
+                // score subscription
                 stompClient.subscribe(`/topic/match/${matchId}/score`, msg => {
-                    const s = JSON.parse(msg.body);
-                    homeScore.textContent = s.homeScore;
-                    awayScore.textContent = s.awayScore;
-                    matchStatus.textContent = s.status;
+                    try {
+                        const body = JSON.parse(msg.body);
+                        handleScoreMessage(body);
+                    } catch (e) {
+                        console.warn("invalid score body", e, msg.body);
+                    }
                 });
 
+                // stats subscription (updates UI)
                 stompClient.subscribe(`/topic/match/${matchId}/stats`, msg => {
-                    updateStatsUI(JSON.parse(msg.body));
+                    try {
+                        const body = JSON.parse(msg.body);
+                        updateStatsUI(body);
+                    } catch (e) {
+                        console.warn("invalid stats body", e, msg.body);
+                    }
                 });
             });
         }
 
         /* ================= START ================= */
-        (async () => {
-            await loadAll();
-            connectWs();
-        })();
+        (async () => { await loadAll(); connectWs(); })();
 
     });
 </script>

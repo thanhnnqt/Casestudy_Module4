@@ -5,128 +5,41 @@
 <th:block th:fragment="content">
 
     <style>
-        /* --- Theme Colors --- */
-        :root {
-            --pl-purple: #38003c;
-            --pl-pink: #ff0050;
-        }
+        :root { --pl-purple: #38003c; --pl-pink: #ff0050; }
+        .btn-primary-pl { background-color: var(--pl-pink); border-color: var(--pl-pink); color: white; font-weight: 600; padding: 0.5rem 1.2rem; border-radius: 0.5rem; transition: all 0.2s; }
+        .btn-primary-pl:hover { background-color: #d10042; transform: translateY(-2px); }
 
-        .text-purple { color: var(--pl-purple); }
+        .coach-card { border: none; border-radius: 1rem; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: all 0.3s ease; height: 100%; overflow: hidden; }
+        .coach-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
-        /* --- Buttons --- */
-        .btn-primary-pl {
-            background-color: var(--pl-pink);
-            border-color: var(--pl-pink);
-            color: white;
-            font-weight: 600;
-            padding: 0.5rem 1.2rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-        }
-        .btn-primary-pl:hover {
-            background-color: #d10042;
-            border-color: #d10042;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 0, 80, 0.3);
-        }
-
-        /* --- Card Styles --- */
-        .coach-card {
-            border: none;
-            border-radius: 1rem;
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            transition: all 0.3s ease;
-            height: 100%;
-            overflow: hidden;
-        }
-        .coach-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        .coach-avatar-wrapper {
-            position: relative;
-            height: 240px;
-            overflow: hidden;
-            background: #f8f9fa;
-        }
-        .coach-avatar {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: top center;
-            transition: transform 0.4s ease;
-        }
+        .coach-avatar-wrapper { position: relative; height: 240px; overflow: hidden; background: #f8f9fa; display: block;}
+        .coach-avatar { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.4s ease; }
         .coach-card:hover .coach-avatar { transform: scale(1.05); }
 
-        .card-body { padding: 1.25rem; display: flex; flex-direction: column; }
+        .coach-name { font-size: 1.1rem; font-weight: 700; color: var(--pl-purple); margin-bottom: 0.25rem; text-decoration: none; }
+        .coach-role { font-size: 0.85rem; color: #6c757d; font-weight: 500; margin-bottom: 1rem; text-transform: uppercase; }
 
-        .coach-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--pl-purple);
-            margin-bottom: 0.25rem;
-            text-decoration: none;
-        }
-        a.coach-name:hover { color: var(--pl-pink); }
-
-        .coach-role {
-            font-size: 0.85rem;
-            color: #6c757d;
-            font-weight: 500;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .info-row {
-            font-size: 0.85rem;
-            color: #495057;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .info-row { font-size: 0.85rem; color: #495057; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px; }
         .info-row i { color: var(--pl-pink); opacity: 0.8; width: 16px; }
 
-        /* --- Group Header --- */
-        .role-separator {
-            display: flex;
-            align-items: center;
-            margin: 2rem 0 1.5rem 0;
-        }
-        .role-separator span {
-            background: var(--pl-purple);
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 10px rgba(56, 0, 60, 0.2);
-            z-index: 1;
-        }
-        .role-separator::after {
-            content: '';
-            flex-grow: 1;
-            height: 2px;
-            background: #e9ecef;
-            margin-left: 1rem;
-        }
+        .role-separator { display: flex; align-items: center; margin: 2rem 0 1.5rem 0; }
+        .role-separator span { background: var(--pl-purple); color: white; padding: 0.5rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(56, 0, 60, 0.2); }
+        .role-separator::after { content: ''; flex-grow: 1; height: 2px; background: #e9ecef; margin-left: 1rem; }
 
-        .badge-status {
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
+        .badge-status { padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; }
         .bg-status-active { background-color: #e6f8e9; color: #0f5132; }
         .bg-status-inactive { background-color: #f2f2f2; color: #595959; }
     </style>
 
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <a href="/admin/coaches/create" class="btn btn-primary-pl">
+            <div>
+                <h3 class="fw-bold mb-1" style="color: var(--pl-purple);">Ban Huấn Luyện</h3>
+                <p class="text-muted small mb-0">
+                    CLB: <span class="fw-bold text-dark" th:text="${myTeam != null ? myTeam.name : ''}">Team Name</span>
+                </p>
+            </div>
+            <a th:href="@{/admin/coaches/create}" class="btn btn-primary-pl">
                 <i class="bi bi-plus-lg me-2"></i>Thêm Mới
             </a>
         </div>
@@ -144,7 +57,6 @@
         </div>
 
         <div th:each="entry : ${coachesByRole}">
-
             <div class="role-separator">
                 <span th:text="${entry.key}">Head Coach</span>
             </div>
