@@ -12,14 +12,18 @@ public interface IPlayerService {
 
     List<Player> findAll();
 
-    void save(Player player);
+    void save(PlayerDto player);
 
     Player findById(Long id);
 
     List<Player> findByName(String name);
 
-    void update(Player player);
+    void update(PlayerDto player);
 
     void delete(Long id);
 
-    List<PlayerShortDto> getPlayersByTeam(Long teamId);}
+    List<PlayerShortDto> getPlayersByTeam(Long teamId);
+
+
+}
+

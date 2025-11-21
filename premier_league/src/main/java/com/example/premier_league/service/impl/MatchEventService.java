@@ -185,4 +185,29 @@ public class MatchEventService implements IMatchEventService {
     public MatchEvent getEvent(Long id) {
         return eventRepo.findById(id).orElse(null);
     }
+
+    /**
+     * Phương thức xử lý logic cộng dồn thẻ vàng theo luật Premier League
+     * Gọi phương thức này bên trong createEvent khi loại sự kiện là YELLOW_CARD
+     */
+    private void applySuspensionRules(Player player, int currentRound) {
+        int currentYellows = player.getSeasonYellowCards();
+
+        // Luật 1: 5 thẻ vàng trước vòng 19 -> Treo giò 1 trận
+        if (currentYellows == 5 && currentRound <= 19) {
+            player.setSuspensionMatchesRemaining(player.getSuspensionMatchesRemaining() + 1);
+        }
+        // Luật 2: 10 thẻ vàng trước vòng 32 -> Treo giò 2 trận
+        else if (currentYellows == 10 && currentRound <= 32) {
+            player.setSuspensionMatchesRemaining(player.getSuspensionMatchesRemaining() + 2);
+        }
+        // Luật 3: 15 thẻ vàng (bất kể vòng nào) -> Treo giò 3 trận
+        else if (currentYellows == 15) {
+            player.setSuspensionMatchesRemaining(player.getSuspensionMatchesRemaining() + 3);
+        }
+
+        // Lưu cập nhật
+        playerRepo.save(player);
+    }
+
 }

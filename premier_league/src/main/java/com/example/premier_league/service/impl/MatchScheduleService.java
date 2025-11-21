@@ -31,6 +31,11 @@ public class MatchScheduleService implements IMatchScheduleService {
     /* ================= FETCH DATA ================= */
 
     @Override
+    public List<MatchSchedule> findAll() {
+        return matchScheduleRepository.findAll();
+    }
+
+    @Override
     public Page<MatchSchedule> getAllMatches(Pageable pageable) {
 
         Page<MatchSchedule> page = matchScheduleRepository
@@ -235,5 +240,12 @@ public class MatchScheduleService implements IMatchScheduleService {
     @Override
     public boolean hasSchedule() {
         return matchScheduleRepository.count() > 0;
+    }
+
+    @Override
+    public Page<MatchSchedule> search(String team, LocalDate date, Integer round, Pageable pageable) {
+        Page<MatchSchedule> page = matchScheduleRepository.search(team, date, round, pageable);
+        page.forEach(this::autoUpdateStatus);
+        return page;
     }
 }

@@ -1,192 +1,265 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="layout :: layout('Dashboard chủ đội bóng', 'dashboard', ~{::content})">
+      th:replace="layout :: layout('Tổng quan CLB', 'dashboard', ~{::content})">
+
 <th:block th:fragment="content">
 
   <style>
+    :root {
+      --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+    }
     .kpi-card {
-      border-radius: 1rem;
-      padding: 1.2rem 1.3rem;
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
+      border-radius: 1rem; padding: 1.5rem; color: #fff; position: relative;
+      overflow: hidden; box-shadow: var(--card-shadow); height: 100%;
     }
-    .kpi-card:hover { transform: translateY(-5px); }
-    .kpi-card .icon { font-size: 1.6rem; opacity: 0.9; position: absolute; right: 1.2rem; top: 1.2rem;}
-    .kpi-card small { font-size: .8rem; opacity: .9; }
-    .kpi-card .value { font-size: 1.6rem; font-weight: 700; margin-top: 5px; }
-    .kpi-card .trend { font-size: .8rem; }
-
-    .bg-gradient-blue { background: linear-gradient(135deg,#3b82f6,#2563eb); }
-    .bg-gradient-green { background: linear-gradient(135deg,#22c55e,#16a34a); }
-    .bg-gradient-purple { background: linear-gradient(135deg,#8b5cf6,#6366f1); }
-    .bg-gradient-pink { background: linear-gradient(135deg,#ec4899,#f97316); }
-
-    .card { border-radius: 1rem; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-
-    .chart-placeholder {
-      height: 220px;
-      border-radius: .75rem;
-      background: repeating-linear-gradient(-45deg, #f8f9fa, #f8f9fa 6px, #e9ecef 6px, #e9ecef 12px);
-      display: flex; align-items: center; justify-content: center;
-      color: #6c757d; font-style: italic;
+    .kpi-card .value { font-size: 2.5rem; font-weight: 800; line-height: 1.1; }
+    .kpi-card small { font-size: 0.85rem; opacity: 0.9; font-weight: 600; text-transform: uppercase; }
+    .kpi-card .icon-bg {
+      position: absolute; right: -10px; bottom: -20px; font-size: 6rem;
+      opacity: 0.15; transform: rotate(-15deg);
     }
 
-    .pill {
-      display: inline-flex; align-items: center; gap: .25rem;
-      padding: .25rem .6rem; border-radius: 999px; font-size: .75rem;
-      background: #eef2ff; color: #4f46e5;
+    /* Màu sắc theo phong cách Premier League */
+    .bg-stats-1 { background: linear-gradient(135deg, #38003c 0%, #5a005a 100%); } /* Tím */
+    .bg-stats-2 { background: linear-gradient(135deg, #00ff85 0%, #00b860 100%); color: #0a3d24; } /* Xanh */
+    .bg-stats-3 { background: linear-gradient(135deg, #ff0050 0%, #d60042 100%); } /* Hồng */
+    .bg-stats-4 { background: linear-gradient(135deg, #374151 0%, #111827 100%); } /* Đen */
+
+    .card-custom {
+      border: none; border-radius: 1rem; box-shadow: var(--card-shadow);
+      background: #fff; height: 100%;
+    }
+    .card-header-c {
+      padding: 1.25rem; border-bottom: 1px solid #f3f4f6;
+      font-weight: 700; color: #38003c; display: flex; justify-content: space-between; align-items: center;
     }
   </style>
 
-  <div class="row g-4 mb-4">
-    <div class="col-md-3 col-sm-6">
-      <div class="kpi-card bg-gradient-blue">
-        <small>Tổng số cầu thủ</small>
-        <div class="value" th:text="${totalPlayers ?: '28'}">28</div>
-        <div class="trend mt-2"><i class="bi bi-arrow-up-short"></i> +2 so với mùa trước</div>
-        <div class="icon"><i class="bi bi-people-fill"></i></div>
+  <div class="container-fluid pb-5">
+
+    <div class="row g-4 mb-4">
+      <div class="col-xl-3 col-md-6">
+        <div class="kpi-card bg-stats-1">
+          <small>Điểm số mùa giải</small>
+          <div class="value" th:text="${teamPoints}">54</div>
+          <div class="mt-2"><i class="bi bi-trophy-fill"></i> <span th:text="${teamRank}">Top 4</span></div>
+          <i class="bi bi-hash icon-bg"></i>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="kpi-card bg-stats-2">
+          <small>Hiệu số (HS)</small>
+          <div class="value" th:text="${goalDiff > 0 ? '+' + goalDiff : goalDiff}">+12</div>
+          <div class="mt-2 fw-bold">
+            <i class="bi bi-arrow-up"></i> Ghi: <span th:text="${goalsFor}">40</span> |
+            <i class="bi bi-arrow-down"></i> Thủng: <span th:text="${goalsAgainst}">28</span>
+          </div>
+          <i class="bi bi-bullseye icon-bg"></i>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="kpi-card bg-stats-3">
+          <small>Tổng nhân sự</small>
+          <div class="value" th:text="${totalPersonnel}">35</div>
+          <div class="mt-2">
+            <i class="bi bi-people-fill"></i> <span th:text="${playerCount}">25</span> Cầu thủ
+          </div>
+          <i class="bi bi-person-badge icon-bg"></i>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="kpi-card bg-stats-4">
+          <small>Thẻ phạt (Vàng + Đỏ)</small>
+          <div class="value" th:text="${totalCards}">14</div>
+          <div class="mt-2 text-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i> Cần cải thiện kỷ luật
+          </div>
+          <i class="bi bi-file-earmark-excel-fill icon-bg"></i>
+        </div>
       </div>
     </div>
 
-    <div class="col-md-3 col-sm-6">
-      <div class="kpi-card bg-gradient-green">
-        <small>Điểm hiện tại</small>
-        <div class="value" th:text="${currentPoints ?: '63'}">63</div>
-        <div class="trend mt-2 text-white-50">Top 2 trên BXH</div>
-        <div class="icon"><i class="bi bi-trophy-fill"></i></div>
-      </div>
-    </div>
+    <div class="row g-4">
 
-    <div class="col-md-3 col-sm-6">
-      <div class="kpi-card bg-gradient-purple">
-        <small>Tỷ lệ thắng</small>
-        <div class="value">71%</div>
-        <div class="trend mt-2"><i class="bi bi-arrow-up-short"></i> +5% phong độ</div>
-        <div class="icon"><i class="bi bi-graph-up-arrow"></i></div>
-      </div>
-    </div>
+      <div class="col-lg-8">
 
-    <div class="col-md-3 col-sm-6">
-      <div class="kpi-card bg-gradient-pink">
-        <small>Giá trị đội hình</small>
-        <div class="value">€890M</div>
-        <div class="trend mt-2 text-white-75">Transfermarkt ước tính</div>
-        <div class="icon"><i class="bi bi-cash-coin"></i></div>
+        <div class="card card-custom mb-4">
+          <div class="card-header-c">
+            <span><i class="bi bi-pie-chart-fill me-2"></i>Thống kê kết quả</span>
+          </div>
+          <div class="card-body d-flex justify-content-center align-items-center" style="min-height: 300px;">
+            <div id="resultChart" style="width: 100%; max-width: 450px;"></div>
+
+            <div th:if="${teamPoints == 0}" class="text-muted text-center">
+              Chưa có dữ liệu thi đấu mùa này.
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-custom">
+          <div class="card-header-c">
+            <span><i class="bi bi-cone-striped text-warning me-2"></i>Cầu thủ bị treo giò / Nguy cơ</span>
+            <a href="/owner/players" class="btn btn-sm btn-light border">Chi tiết</a>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              <div th:each="p : ${warningPlayers}" class="list-group-item d-flex align-items-center gap-3 py-3">
+                <img th:src="${p.avatar != null ? p.avatar : 'https://ui-avatars.com/api/?name=' + p.name}"
+                     class="rounded-circle border" width="50" height="50" style="object-fit: cover;">
+
+                <div class="flex-grow-1">
+                  <h6 class="mb-0 fw-bold" th:text="${p.name}">Tên Cầu Thủ</h6>
+                  <small class="text-muted" th:text="${p.position}">Tiền đạo</small>
+                </div>
+
+                <div class="text-end">
+                  <div th:if="${p.suspensionMatchesRemaining > 0}">
+                    <span class="badge bg-danger">Treo giò: <span th:text="${p.suspensionMatchesRemaining}"></span> trận</span>
+                  </div>
+                  <div th:if="${p.suspensionMatchesRemaining == 0}">
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-file-fill text-white"></i>
+                                            <span th:text="${p.seasonYellowCards}"></span> thẻ vàng
+                                        </span>
+                  </div>
+                </div>
+              </div>
+
+              <div th:if="${#lists.isEmpty(warningPlayers)}" class="p-4 text-center text-muted">
+                <i class="bi bi-check-circle-fill text-success display-6 d-block mb-2"></i>
+                Đội bóng đang giữ kỷ luật rất tốt!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+
+        <div class="card card-custom mb-4">
+          <div class="card-header-c bg-white border-0 pb-0">
+            <span>Trận đấu tiếp theo</span>
+            <span class="badge bg-primary-subtle text-primary">Sắp tới</span>
+          </div>
+
+          <div class="card-body text-center" th:if="${nextMatch != null}">
+            <div class="d-flex justify-content-around align-items-center my-4">
+              <div class="text-center">
+                <img th:src="${nextMatch.homeTeam.logoUrl}" width="60" height="60" class="mb-2 object-fit-contain">
+                <div class="fw-bold small" th:text="${nextMatch.homeTeam.shortName}">HOME</div>
+              </div>
+
+              <div class="h3 fw-bold text-muted">VS</div>
+
+              <div class="text-center">
+                <img th:src="${nextMatch.awayTeam.logoUrl}" width="60" height="60" class="mb-2 object-fit-contain">
+                <div class="fw-bold small" th:text="${nextMatch.awayTeam.shortName}">AWAY</div>
+              </div>
+            </div>
+
+            <div class="bg-light rounded p-3 mb-3 text-start">
+              <div class="mb-1">
+                <i class="bi bi-calendar-event text-primary me-2"></i>
+                <span class="fw-bold" th:text="${#temporals.format(nextMatch.matchDate, 'dd/MM/yyyy')}">01/01/2024</span>
+              </div>
+              <div class="mb-1">
+                <i class="bi bi-clock text-primary me-2"></i>
+                <span class="fw-bold" th:text="${nextMatch.matchTime}">20:00</span>
+              </div>
+              <div>
+                <i class="bi bi-geo-alt text-primary me-2"></i>
+                <span th:text="${nextMatch.homeTeam.stadium}">Sân vận động</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body text-center py-5" th:if="${nextMatch == null}">
+            <i class="bi bi-calendar-x text-muted fs-1"></i>
+            <p class="mt-2 text-muted">Chưa có lịch thi đấu mới.</p>
+          </div>
+        </div>
+
+        <div class="card card-custom">
+          <div class="card-header-c">
+            <span><i class="bi bi-shield-shaded me-2"></i>Tóm tắt mùa giải</span>
+          </div>
+          <div class="card-body d-flex flex-column gap-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted">Số trận thắng</span>
+              <span class="fw-bold text-success fs-5" th:text="${loggedInTeam.winCount}">10</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted">Số trận hòa</span>
+              <span class="fw-bold text-warning fs-5" th:text="${loggedInTeam.drawCount}">5</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted">Số trận thua</span>
+              <span class="fw-bold text-danger fs-5" th:text="${loggedInTeam.loseCount}">3</span>
+            </div>
+            <hr class="my-1">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted">Tổng bàn thắng</span>
+              <span class="fw-bold text-primary fs-5" th:text="${goalsFor}">45</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
-  <div class="row g-4 mb-4">
-    <div class="col-lg-8">
-      <div class="card p-4 h-100">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div>
-            <h6 class="mb-0 fw-bold">Phong độ 10 trận gần nhất</h6>
-            <small class="text-muted">Thống kê thắng thua</small>
-          </div>
-          <span class="pill"><i class="bi bi-lightning-charge-fill"></i> Live Data</span>
-        </div>
-        <div class="chart-placeholder">
-          [Biểu đồ phong độ sẽ hiển thị ở đây]
-        </div>
-      </div>
-    </div>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      // Lấy dữ liệu từ Controller
+      var stats = JSON.parse(/*[[${matchStatsJson}]]*/ '[0, 0, 0]');
+      // stats[0]: Thắng, stats[1]: Hòa, stats[2]: Thua
 
-    <div class="col-lg-4">
-      <div class="card p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="mb-0 fw-bold">Trận đấu tiếp theo</h6>
-          <span class="badge bg-primary-subtle text-primary rounded-pill">Premier League</span>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-          <div class="text-center bg-light rounded p-2">
-            <div class="fw-bold fs-5 text-danger">SAT</div>
-            <div class="text-muted small" style="font-size: 0.7rem;">23 MAR</div>
-          </div>
-          <div class="flex-grow-1 border-start ps-3">
-            <div class="fw-bold">Arsenal vs Man City</div>
-            <div class="small text-muted"><i class="bi bi-geo-alt-fill"></i> Emirates Stadium</div>
-            <div class="small text-primary fw-bold mt-1">19:30 (GMT+7)</div>
-          </div>
-        </div>
-        <hr class="my-3 opacity-10">
-        <div class="d-flex justify-content-between small text-muted">
-          <span><i class="bi bi-activity"></i> Sẵn sàng: <strong class="text-success">96%</strong></span>
-          <span><i class="bi bi-bandaid"></i> Chấn thương: <strong>2</strong></span>
-        </div>
-      </div>
+      // Nếu tổng = 0 thì không vẽ hoặc vẽ data mẫu để đẹp
+      var total = stats.reduce((a, b) => a + b, 0);
 
-      <div class="card p-4">
-        <h6 class="mb-3 fw-bold">Việc cần làm ưu tiên</h6>
-        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
-          <li class="d-flex gap-2 align-items-start">
-            <i class="bi bi-check-circle-fill text-success mt-1"></i>
-            <span>Gia hạn hợp đồng với <strong>Bukayo Saka</strong></span>
-          </li>
-          <li class="d-flex gap-2 align-items-start">
-            <i class="bi bi-exclamation-circle-fill text-warning mt-1"></i>
-            <span>Đàm phán lương tân binh mùa hè</span>
-          </li>
-          <li class="d-flex gap-2 align-items-start">
-            <i class="bi bi-clock-fill text-primary mt-1"></i>
-            <span>Duyệt ngân sách chuyển nhượng Q2</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
+      var options = {
+        series: stats,
+        chart: {
+          type: 'donut',
+          height: 320,
+          fontFamily: 'Inter, sans-serif'
+        },
+        labels: ['Thắng', 'Hòa', 'Thua'],
+        colors: ['#00ff85', '#fbbf24', '#ff0050'], // Xanh, Vàng, Đỏ (Hồng)
+        plotOptions: {
+          pie: {
+            donut: {
+              size: '65%',
+              labels: {
+                show: true,
+                total: {
+                  show: true,
+                  label: 'Tổng trận',
+                  formatter: function (w) {
+                    return w.globals.seriesTotals.reduce((a, b) => a + b, 0)
+                  }
+                }
+              }
+            }
+          }
+        },
+        dataLabels: { enabled: false },
+        legend: { position: 'bottom' },
+        stroke: { show: false }
+      };
 
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="card p-4 h-100">
-        <h6 class="fw-bold mb-3">Tình hình y tế</h6>
-        <div class="d-flex justify-content-between small mb-2">
-          <span class="text-muted">Ca chấn thương</span><strong>3</strong>
-        </div>
-        <div class="d-flex justify-content-between small mb-3">
-          <span class="text-muted">Hồi phục trung bình</span><strong>12 ngày</strong>
-        </div>
-        <div class="progress" style="height: 6px;">
-          <div class="progress-bar bg-danger" style="width: 18%;"></div>
-        </div>
-        <small class="text-muted d-block mt-2 fst-italic">18% đội hình đang điều trị</small>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card p-4 h-100">
-        <h6 class="fw-bold mb-3">Tài chính sơ bộ</h6>
-        <div class="d-flex justify-content-between small mb-2">
-          <span class="text-muted">Doanh thu</span><strong>€420M</strong>
-        </div>
-        <div class="d-flex justify-content-between small mb-2">
-          <span class="text-muted">Quỹ lương</span><strong>€210M</strong>
-        </div>
-        <hr class="my-2">
-        <div class="d-flex justify-content-between small">
-          <span class="text-muted">Còn lại</span><strong class="text-success">€95M</strong>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card p-4 h-100">
-        <h6 class="fw-bold mb-3">Phòng thay đồ</h6>
-        <div class="d-flex justify-content-between small mb-2">
-          <span class="text-muted">Chỉ số hài lòng</span><strong>8.7 / 10</strong>
-        </div>
-        <div class="d-flex justify-content-between small mb-3">
-          <span class="text-muted">Xung đột nội bộ</span><strong class="text-success">Không</strong>
-        </div>
-        <div class="alert alert-success py-2 px-3 small mb-0 border-0">
-          <i class="bi bi-check2-all"></i> Tinh thần toàn đội đang rất tốt.
-        </div>
-      </div>
-    </div>
-  </div>
+      if(total > 0) {
+        var chart = new ApexCharts(document.querySelector("#resultChart"), options);
+        chart.render();
+      } else {
+        document.querySelector("#resultChart").innerHTML = "<div class='text-center py-5 text-muted'>Chưa có dữ liệu trận đấu</div>";
+      }
+    });
+  </script>
 
 </th:block>
 </html>

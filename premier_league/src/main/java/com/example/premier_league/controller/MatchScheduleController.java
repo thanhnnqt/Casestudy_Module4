@@ -49,32 +49,22 @@ public class MatchScheduleController {
     ) {
 
         Pageable pageable = PageRequest.of(page, 10);
-        Page<MatchSchedule> matchPage;
 
-        // parse vòng đấu nếu có
+        /* ================== PARSE ROUND ================== */
         Integer roundValue = null;
         if (round != null && !round.isEmpty()) {
             try {
                 roundValue = Integer.parseInt(round);
-                model.addAttribute("round", round);
-            } catch (Exception e) {
+            } catch (NumberFormatException ex) {
                 model.addAttribute("message", "Vòng đấu phải là số!");
             }
         }
 
-        // tìm kiếm theo điều kiện
-        if (team != null && !team.isEmpty()) {
-            matchPage = matchScheduleService.searchByTeam(team, pageable);
-            model.addAttribute("team", team);
-        } else if (date != null) {
-            matchPage = matchScheduleService.searchByDate(date, pageable);
-            model.addAttribute("date", date);
-        } else if (roundValue != null) {
-            matchPage = matchScheduleService.searchByRound(roundValue, pageable);
-        } else {
-            matchPage = matchScheduleService.getAllMatches(pageable);
-        }
+        /* ================== SEARCH COMBINATION ================== */
+        Page<MatchSchedule> matchPage =
+                matchScheduleService.search(team, date, roundValue, pageable);
 
+        /* ================== PAGINATION DATA ================== */
         int totalPages = matchPage.getTotalPages();
         int currentPage = page;
 
@@ -83,6 +73,11 @@ public class MatchScheduleController {
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("startPage", Math.max(0, currentPage - 1));
         model.addAttribute("endPage", Math.min(totalPages - 1, currentPage + 1));
+
+        /* ================== RETURN FILTER STATE ================== */
+        model.addAttribute("team", team);
+        model.addAttribute("date", date);
+        model.addAttribute("round", round);
         model.addAttribute("teamsList", teamService.findAll());
         model.addAttribute("hasSchedule", matchScheduleService.hasSchedule());
 
