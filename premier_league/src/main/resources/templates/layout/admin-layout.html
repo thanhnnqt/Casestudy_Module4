@@ -5,6 +5,8 @@
     <title>Admin System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script>
         tailwind.config = {
             theme: { extend: { colors: { primary: '#4f46e5', secondary: '#00ff85' } } }
@@ -29,6 +31,7 @@
     </div>
 
     <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+
         <a th:href="@{/admin/home}"
            th:classappend="${activeTab == 'home'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors">
@@ -36,30 +39,34 @@
         </a>
 
         <a th:href="@{/admin/tournaments}"
-           th:classappend="${activeTab == 'tournament'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
+           th:classappend="${activeTab == 'teams' or activeTab == 'tournament'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors">
-            <i data-lucide="trophy" class="w-5 h-5"></i> Quản lý Giải Đấu
+            <i data-lucide="shirt" class="w-5 h-5"></i> Quản lý đội bóng
         </a>
 
-        <a th:href="@{/admin/owners}"
-           th:classappend="${activeTab == 'owner'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
+        <a th:href="@{/admin/matches}"
+           th:classappend="${activeTab == 'matches'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors">
-            <i data-lucide="crown" class="w-5 h-5"></i> Quản lý Chủ Sở Hữu
+            <i data-lucide="calendar-days" class="w-5 h-5"></i> Quản lý lịch thi đấu
         </a>
 
         <a th:href="@{/admin/prize}"
            th:classappend="${activeTab == 'prize'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors">
-            <i data-lucide="award" class="w-5 h-5"></i> Quản lý Giải Thưởng
+            <i data-lucide="award" class="w-5 h-5"></i> Quản lý giải thưởng
         </a>
 
+        <a th:href="@{/admin/owners}"
+           th:classappend="${activeTab == 'sponsor'} ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors">
+            <i data-lucide="dollar-sign" class="w-5 h-5"></i> Quản lý nhà tài trợ
+        </a>
     </nav>
 </aside>
 
 <div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
-
     <header class="bg-white h-16 border-b flex items-center justify-between px-6 shadow-sm shrink-0">
-        <h1 class="text-xl font-bold text-primary">Hệ Thống Quản Trị</h1>
+        <h1 class="text-xl font-bold text-primary" th:text="${pageTitle ?: 'Hệ Thống Quản Trị'}"></h1>
         <div class="flex items-center gap-4">
             <div class="flex items-center gap-2">
                 <span class="text-sm font-semibold">Admin</span>
@@ -77,7 +84,6 @@
         <div class="max-w-7xl mx-auto" th:replace="${content}"></div>
     </main>
 </div>
-
 <script>lucide.createIcons();</script>
 </body>
 </html>
