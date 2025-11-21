@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Table(name = "matches")
 @Getter
 @Setter
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Match {
@@ -17,36 +16,26 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Đội nhà
     @ManyToOne
     @JoinColumn(name = "home_team_id", nullable = false)
     private Team homeTeam;
 
-    // Đội khách
     @ManyToOne
     @JoinColumn(name = "away_team_id", nullable = false)
     private Team awayTeam;
 
-    // Tỉ số - mặc định = 0
     private Integer homeScore = 0;
     private Integer awayScore = 0;
 
-    // Thời gian thi đấu
     private LocalDateTime matchDate;
 
-    // Sân vận động
     private String stadium;
 
-    // Trọng tài (optional)
     private String referee;
 
-    // Trạng thái trận đấu
     @Enumerated(EnumType.STRING)
-    private MatchStatus status = MatchStatus.SCHEDULED; // mặc định SCHEDULED
+    private MatchStatus status = MatchStatus.SCHEDULED;
 
     @OneToOne(mappedBy = "match")
     private MatchSchedule schedule;
-
-    @Column(name = "ranking_processed", nullable = false)
-    private boolean rankingProcessed = false;
 }
