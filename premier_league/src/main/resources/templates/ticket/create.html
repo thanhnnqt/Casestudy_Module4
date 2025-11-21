@@ -95,7 +95,7 @@
                 <div class="card-header">
                     Tạo vé
                 </div>
-                <form action="/admin/tickets/saveCreateTicket" th:object="${ticket}" class="mt-4" method="post">
+                <form th:action="@{/coach/tickets/__${teamId}__/saveCreateTicket}" th:object="${ticket}" class="mt-4" method="post">
                     <div class="mb-3">
                         <label class="form-label">Home team:</label>
                         <label th:text="*{homeTeam}"> </label>
