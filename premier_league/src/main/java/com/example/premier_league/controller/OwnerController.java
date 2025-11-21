@@ -64,7 +64,7 @@ public class OwnerController {
             return "owner/form";
         }
 
-        return "redirect:/owners";
+        return "redirect:/admin/owners";
     }
 
     @GetMapping("/edit/{id}")
@@ -95,6 +95,6 @@ public class OwnerController {
         } catch (Exception e) {
             redirect.addFlashAttribute("error", "Không thể xóa (có thể do ràng buộc dữ liệu).");
         }
-        return "redirect:/owners";
+        return "redirect:/admin/owners";
     }
 }
