@@ -179,6 +179,61 @@
                         </div>
                     </div>
                 </div>
+                <!-- PAGINATION -->
+                <div class="mt-8 flex justify-center" th:if="${totalPages > 1}">
+                    <nav class="inline-flex items-center space-x-1" aria-label="Pagination">
+
+                        <!-- Về trang đầu -->
+                        <a th:href="@{/ticket(page=0)}"
+                           th:classappend="${currentPage == 0} ? ' pointer-events-none opacity-40' : ''"
+                           class="px-3 py-1 bg-white border border-gray-300 rounded-l-md text-sm text-gray-700 hover:bg-gray-50">
+                            «
+                        </a>
+
+                        <!-- Trang trước -->
+                        <a th:href="@{/ticket(page=${currentPage - 1})}"
+                           th:classappend="${currentPage == 0} ? ' pointer-events-none opacity-40' : ''"
+                           class="px-3 py-1 bg-white border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
+                            ‹
+                        </a>
+
+                        <!-- Dấu ... trước -->
+                        <span th:if="${startPage > 0}"
+                              class="px-3 py-1 bg-white border border-gray-300 text-sm text-gray-500">
+            ...
+        </span>
+
+                        <!-- Các số trang -->
+                        <a th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                           th:text="${i + 1}"
+                           th:href="@{/ticket(page=${i})}"
+                           th:classappend="${i == currentPage} ? ' bg-primary text-white border-primary' : ' bg-white text-gray-700 hover:bg-gray-50'"
+                           class="px-3 py-1 border border-gray-300 text-sm rounded-md mx-0.5">
+                        </a>
+
+                        <!-- Dấu ... sau -->
+                        <span th:if="${endPage < totalPages - 1}"
+                              class="px-3 py-1 bg-white border border-gray-300 text-sm text-gray-500">
+            ...
+        </span>
+
+                        <!-- Trang sau -->
+                        <a th:href="@{/ticket(page=${currentPage + 1})}"
+                           th:classappend="${currentPage + 1 >= totalPages} ? ' pointer-events-none opacity-40' : ''"
+                           class="px-3 py-1 bg-white border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
+                            ›
+                        </a>
+
+                        <!-- Trang cuối -->
+                        <a th:href="@{/ticket(page=${totalPages - 1})}"
+                           th:classappend="${currentPage + 1 >= totalPages} ? ' pointer-events-none opacity-40' : ''"
+                           class="px-3 py-1 bg-white border border-gray-300 rounded-r-md text-sm text-gray-700 hover:bg-gray-50">
+                            »
+                        </a>
+
+                    </nav>
+                </div>
+
             </div>
         </div>
     </div>
