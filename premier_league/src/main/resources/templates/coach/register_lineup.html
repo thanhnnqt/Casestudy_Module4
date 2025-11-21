@@ -11,6 +11,19 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+
+        /* Style cho cầu thủ bị treo giò */
+        .player-item.suspended {
+            opacity: 0.6;
+            background-color: #f8d7da !important; /* Màu đỏ nhạt cảnh báo */
+            cursor: not-allowed !important;
+            border: 1px solid #f5c6cb !important;
+        }
+
+        .player-item.suspended:active {
+            cursor: not-allowed !important;
+        }
+
         /* --- Variables --- */
         :root{
             --pl-deep: #38003c;    /* tím than */
@@ -277,8 +290,9 @@
 
                 <div class="scrollable-content drop-zone" id="playerPool" aria-label="Player pool">
                     <div th:each="p : ${allPlayersForTable}"
-                         class="player-draggable"
-                         draggable="true"
+                         class="player-draggable player-item"
+                         th:classappend="${p.suspensionMatchesRemaining > 0} ? 'suspended' : ''"
+                         th:attr="draggable=${p.suspensionMatchesRemaining == 0}, data-suspended=${p.suspensionMatchesRemaining > 0}"
                          th:data-id="${p.id}"
                          th:data-name="${p.name}"
                          th:data-pos="${p.position}">
@@ -287,16 +301,22 @@
                             <div class="pos-badge" th:classappend="'pos-' + ${p.position}" th:text="${p.position}">DF</div>
                             <div>
                                 <div class="name fw-bold" th:text="${p.name}">Nguyen Van A</div>
-                                <div class="sub small" th:text="${p.age} + ' tuổi · Exp: ' + ${p.experience}">22 tuổi · Exp: 3</div>
+                                <div th:if="${p.suspensionMatchesRemaining > 0}" class="text-danger small fw-bold">
+                                    <i class="bi bi-ban"></i> Treo giò (<span th:text="${p.suspensionMatchesRemaining}"></span> trận)
+                                </div>
+                                <div th:unless="${p.suspensionMatchesRemaining > 0}" class="sub small"
+                                     th:text="${p.age} + ' tuổi · Exp: ' + ${p.experience}">22 tuổi</div>
                             </div>
                         </div>
 
-                        <div class="text-end d-flex align-items-center">
-                            <div th:if="${p.yellowCards > 0}" class="me-2" title="Thẻ vàng">
-                                <i class="bi bi-square-fill" style="color: #ffc107"></i> <small class="text-muted" th:text="${p.yellowCards}">1</small>
+                        <div class="text-end d-flex align-items-center gap-2">
+                            <div th:if="${p.seasonYellowCards > 0}" class="d-flex align-items-center" title="Thẻ vàng tích lũy">
+                                <span class="fw-bold text-dark me-1" th:text="${p.seasonYellowCards}"></span>
+                                <i class="bi bi-square-fill" style="color: #ffc107; font-size: 0.8rem;"></i>
                             </div>
-                            <div th:if="${p.redCards > 0}" class="me-2" title="Thẻ đỏ">
-                                <i class="bi bi-square-fill" style="color: #dc3545"></i> <small class="text-muted" th:text="${p.redCards}">0</small>
+
+                            <div th:if="${p.suspensionMatchesRemaining > 0}" title="Đang bị treo giò">
+                                <i class="bi bi-square-fill" style="color: #dc3545; font-size: 0.8rem;"></i>
                             </div>
                         </div>
                     </div>
@@ -354,6 +374,9 @@
     const savedMainIds = /*[[${mainPlayers != null ? mainPlayers.![id] : {}}]]*/ [];
     const savedSubIds = /*[[${subPlayers != null ? subPlayers.![id] : {}}]]*/ [];
     const savedCaptainId = /*[[${currentCaptainId}]]*/ null;
+    // Thêm dòng này để lấy trạng thái trận đấu
+    const matchStatus = /*[[${match.status}]]*/ 'SCHEDULED';
+    /*]]>*/
     /*]]>*/
 </script>
 
@@ -379,13 +402,41 @@
         const confirmBtn = document.getElementById('confirmBtn');
         const resetBtn = document.getElementById('resetBtn');
 
-        // position order for sorting
+        // --- (MỚI) KIỂM TRA TRẠNG THÁI TRẬN ĐẤU NGAY KHI LOAD ---
+        if (matchStatus === 'FINISHED' || matchStatus === 'LIVE') {
+            // Vô hiệu hóa nút xác nhận
+            confirmBtn.disabled = true;
+            confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            confirmBtn.innerHTML = '<i class="bi bi-lock-fill"></i> Đã khóa sổ';
+
+            // Vô hiệu hóa nút reset
+            resetBtn.disabled = true;
+            resetBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // Thông báo nhẹ
+            Swal.fire({
+                icon: 'info',
+                title: 'Trận đấu đã kết thúc',
+                text: 'Bạn chỉ có thể xem đội hình, không thể chỉnh sửa.',
+                position: 'top-end',
+                toast: true,
+                showConfirmButton: false,
+                timer: 5000
+            });
+        }
+        // ---------------------------------------------------------
+
         const posOrder = { 'GK': 0, 'DF': 1, 'MF': 2, 'FW': 3 };
 
-        // Initialize draggables after DOM content (some elements generated by Thymeleaf)
+        // Initialize draggables
         function initDraggables() {
             document.querySelectorAll('.player-draggable').forEach(draggable => {
-                // avoid double-binding
+                // (MỚI) Nếu trận đấu đã kết thúc, không cho kéo thả
+                if (matchStatus === 'FINISHED' || matchStatus === 'LIVE') {
+                    draggable.setAttribute('draggable', 'false');
+                    return;
+                }
+
                 if (!draggable.dataset.listener) {
                     draggable.addEventListener('dragstart', () => draggable.classList.add('dragging'));
                     draggable.addEventListener('dragend', () => {
@@ -397,7 +448,7 @@
             });
         }
 
-        // Sort player pool by position then name
+        // Sort player pool
         function sortPlayerPool() {
             const items = Array.from(pool.querySelectorAll('.player-draggable'));
             items.sort((a,b) => {
@@ -410,49 +461,46 @@
                 const nb = (b.dataset.name || '').toLowerCase();
                 return na.localeCompare(nb);
             });
-            // re-append in order
             items.forEach(it => pool.appendChild(it));
             updateUI();
         }
 
-        // restore saved state
+        // Restore state
         function restoreState() {
-            // Move saved main players
-            if(savedMainIds && savedMainIds.length > 0) {
-                savedMainIds.forEach(id => {
-                    const el = pool.querySelector(`.player-draggable[data-id="${id}"]`);
-                    if (el) { main.appendChild(el); addCaptainRadio(el); }
-                });
-            }
-            // Move saved sub players
-            if(savedSubIds && savedSubIds.length > 0) {
-                savedSubIds.forEach(id => {
-                    const el = pool.querySelector(`.player-draggable[data-id="${id}"]`);
-                    if (el) sub.appendChild(el);
-                });
-            }
-            // After moving, ensure draggables attached and pool sorted
+            savedMainIds.forEach(id => {
+                const el = pool.querySelector(`.player-draggable[data-id="${id}"]`);
+                if (el) { main.appendChild(el); addCaptainRadio(el); }
+            });
+            savedSubIds.forEach(id => {
+                const el = pool.querySelector(`.player-draggable[data-id="${id}"]`);
+                if (el) sub.appendChild(el);
+            });
             initDraggables();
             sortPlayerPool();
         }
 
         initDraggables();
-        restoreState(); // move saved players to main/sub if any
+        restoreState();
 
         // Drop zones
         document.querySelectorAll('.drop-zone').forEach(zone => {
             zone.addEventListener('dragover', e => {
                 e.preventDefault();
+                // (MỚI) Chặn drop nếu trận đã xong
+                if (matchStatus === 'FINISHED' || matchStatus === 'LIVE') return;
                 zone.classList.add('drag-over');
             });
             zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
             zone.addEventListener('drop', e => {
                 e.preventDefault();
                 zone.classList.remove('drag-over');
+
+                // (MỚI) Chặn drop nếu trận đã xong
+                if (matchStatus === 'FINISHED' || matchStatus === 'LIVE') return;
+
                 const draggable = document.querySelector('.dragging');
                 if (!draggable) return;
 
-                // Validate limits
                 if (zone.id === 'mainSquad' && main.children.length >= 11 && !main.contains(draggable)) {
                     showToast('warning', 'Đội hình chính chỉ được tối đa 11 người!');
                     return;
@@ -464,21 +512,16 @@
 
                 zone.appendChild(draggable);
 
-                // Xử lý Captain radio
                 if (zone.id === 'mainSquad') {
                     addCaptainRadio(draggable);
                 } else {
-                    // Nếu kéo ra khỏi Main, xóa nút Captain
                     const radioWrapper = draggable.querySelector('.captain-wrapper');
                     if (radioWrapper) radioWrapper.remove();
-                    // remove any checked radio too
                     const radio = draggable.querySelector('input[name="captainGroup"]');
                     if (radio) radio.checked = false;
                 }
 
-                // If dropped into pool, sort pool so the moved player lands in correct place
                 if (zone.id === 'playerPool') {
-                    // ensure draggable has data-pos and data-name (if not, try to set from inner text)
                     if (!draggable.dataset.pos) {
                         const badge = draggable.querySelector('.pos-badge');
                         if (badge) draggable.dataset.pos = badge.textContent.trim();
@@ -503,13 +546,16 @@
             });
         });
 
-        // Confirm button
+        // Confirm button click
         confirmBtn.addEventListener('click', () => {
             validateAndSubmit();
         });
 
-        // Reset button: confirm then performReset
+        // Reset button
         resetBtn.addEventListener('click', () => {
+            // (MỚI) Chặn reset nếu trận đã xong
+            if (matchStatus === 'FINISHED' || matchStatus === 'LIVE') return;
+
             const totalFilled = document.querySelectorAll('#mainSquad .player-draggable, #subSquad .player-draggable').length;
             if (totalFilled === 0) {
                 Swal.fire({ icon: 'info', title: 'Thông báo', text: 'Không có cầu thủ trên sân để đặt lại.'});
@@ -533,7 +579,6 @@
             });
         });
 
-        // Re-init when using restoreState or dynamic changes (re-attach listeners)
         const observer = new MutationObserver(() => {
             initDraggables();
             updateUI();
@@ -544,26 +589,27 @@
 
         updateUI();
 
-        // --- functions used above ---
+        // --- Functions ---
 
         function addCaptainRadio(playerEl) {
             if (playerEl.querySelector('.captain-wrapper')) return;
-
             const wrapper = document.createElement('div');
             wrapper.className = 'captain-wrapper ms-3 border-start ps-3 d-flex align-items-center';
-
             const radio = document.createElement('input');
             radio.type = 'radio';
             radio.name = 'captainGroup';
             radio.className = 'form-check-input captain-select';
             radio.value = playerEl.getAttribute('data-id');
-
             if (savedCaptainId && radio.value == savedCaptainId) radio.checked = true;
+
+            // Nếu trận đấu đã xong, disable luôn radio button
+            if (matchStatus === 'FINISHED' || matchStatus === 'LIVE') {
+                radio.disabled = true;
+            }
 
             const label = document.createElement('label');
             label.className = 'd-block small fw-bold text-warning ms-2 mb-0';
             label.innerText = '©';
-
             wrapper.appendChild(radio);
             wrapper.appendChild(label);
             playerEl.appendChild(wrapper);
@@ -574,16 +620,26 @@
             document.getElementById('mainCount').innerText = `${mainCount}/11`;
             document.getElementById('subCount').innerText = `${document.getElementById('subSquad').children.length}/9`;
             document.getElementById('poolCount').innerText = document.querySelectorAll('#playerPool .player-draggable').length;
-
             const badge = document.getElementById('mainCount');
             badge.className = mainCount === 11 ? 'badge pl-main' : 'badge pl-empty';
         }
 
         function validateAndSubmit() {
+            // --- (MỚI) KIỂM TRA LẦN CUỐI ---
+            if (matchStatus === 'FINISHED' || matchStatus === 'LIVE') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Không thể thay đổi!',
+                    text: 'Trận đấu đã kết thúc hoặc đang diễn ra.',
+                    customClass: { popup: 'rounded-xl' }
+                });
+                return;
+            }
+            // -------------------------------
+
             const mainDivs = document.querySelectorAll('#mainSquad .player-draggable');
             const subDivs = document.querySelectorAll('#subSquad .player-draggable');
 
-            // 1. Check main count
             if (mainDivs.length !== 11) {
                 Swal.fire({
                     icon: 'error',
@@ -594,7 +650,6 @@
                 return;
             }
 
-            // 2. Check sub count
             if (subDivs.length < 1) {
                 Swal.fire({
                     icon: 'error',
@@ -605,7 +660,6 @@
                 return;
             }
 
-            // 3. Check captain
             const captainRadio = document.querySelector('input[name="captainGroup"]:checked');
             if (!captainRadio) {
                 Swal.fire({
@@ -617,11 +671,10 @@
                 return;
             }
 
-            // 4. Confirmation modal before submit
             Swal.fire({
                 title: 'Xác nhận đăng ký đội hình',
                 html: `<div>Bạn xác nhận đăng ký đội hình này cho trận đấu?</div>
-                       <div class="mt-2 text-muted small">Số cầu thủ chính: <strong>${mainDivs.length}</strong> - Dự bị: <strong>${subDivs.length}</strong></div>`,
+                   <div class="mt-2 text-muted small">Số cầu thủ chính: <strong>${mainDivs.length}</strong> - Dự bị: <strong>${subDivs.length}</strong></div>`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Xác nhận',
@@ -630,16 +683,19 @@
                 customClass: { popup: 'rounded-xl' }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // prepare hidden inputs
-                    const container = document.getElementById('hiddenInputs');
-                    container.innerHTML = '';
+                    const container = document.getElementById('hiddenInputs'); // Note: id trong HTML gốc của bạn là 'hidden-inputs' (dòng 1035 file manage_lineup.html) nhưng trong JS của register_lineup lại gọi 'hiddenInputs'. Tôi sẽ dùng cách tạo dynamic form input như cũ để an toàn.
 
+                    // Clean up old inputs if any (để an toàn)
+                    const form = document.getElementById('submitForm');
+                    // Xóa các input hidden cũ nếu có để tránh trùng lặp (optional)
+
+                    // Append inputs vào form trực tiếp
                     mainDivs.forEach(el => {
                         const input = document.createElement('input');
                         input.type = 'hidden';
                         input.name = 'mainPlayerIds';
                         input.value = el.dataset.id;
-                        container.appendChild(input);
+                        form.appendChild(input);
                     });
 
                     subDivs.forEach(el => {
@@ -647,12 +703,11 @@
                         input.type = 'hidden';
                         input.name = 'subPlayerIds';
                         input.value = el.dataset.id;
-                        container.appendChild(input);
+                        form.appendChild(input);
                     });
 
                     document.getElementById('captainIdInput').value = captainRadio.value;
 
-                    // Optional: show a short saving toast then submit
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
@@ -664,28 +719,21 @@
                         customClass: { popup: 'rounded-xl' }
                     });
 
-                    // submit the form
-                    document.getElementById('submitForm').submit();
+                    form.submit();
                 }
             });
         }
 
-        // Perform reset: move all from main & sub back to pool and remove captain wrappers
         function performReset() {
+            // ... (giữ nguyên logic performReset cũ của bạn)
             const moved = [];
-
-            // Move main squad players back
             document.querySelectorAll('#mainSquad .player-draggable').forEach(p => {
-                // remove captain wrapper if any
                 const cap = p.querySelector('.captain-wrapper');
                 if (cap) cap.remove();
-                // ensure data attributes exist: data-name/data-pos
                 ensureDataAttributesFromDom(p);
                 pool.appendChild(p);
                 moved.push(p);
             });
-
-            // Move sub squad players back
             document.querySelectorAll('#subSquad .player-draggable').forEach(p => {
                 const cap = p.querySelector('.captain-wrapper');
                 if (cap) cap.remove();
@@ -693,8 +741,6 @@
                 pool.appendChild(p);
                 moved.push(p);
             });
-
-            // re-attach drag events & sort pool & update counts
             initDraggables();
             sortPlayerPool();
             updateUI();

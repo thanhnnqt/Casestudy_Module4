@@ -36,4 +36,9 @@ public class TicketService implements ITicketService {
     public Ticket findByHomeTeamAndAwayTeam(String homeTeam, String awayTeam) {
         return ticketRepository.findByHomeTeamAndAwayTeam(homeTeam, awayTeam);
     }
+
+    @Override
+    public List<Ticket> findAllByHomeTeam(String homeTeam) {
+        return ticketRepository.findAllByHomeTeam(homeTeam);
+    }
 }

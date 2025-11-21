@@ -6,6 +6,7 @@
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -83,9 +84,28 @@
                 class="w-full py-3 mt-8 bg-primary text-white font-bold rounded-lg hover:bg-secondary hover:text-primary transition">
             Cập nhật thống kê
         </button>
+        <br><br>
+        <button onclick="goBackToEvents()"
+                class="w-full py-3 flex items-center justify-center gap-2
+               bg-primary text-white font-bold rounded-lg
+               hover:bg-secondary hover:text-primary transition">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            <i data-lucide="dribbble" class="w-5 h-5"></i>
+            Quay Về Trang Thêm Sự Kiện
+        </button>
+
+
+
     </div>
 
 </div>
+<script>
+    function goBackToEvents() {
+        const matchId = window.location.pathname.split("/").pop();
+        window.location.href = "/admin/events?matchId=" + matchId;
+    }
+</script>
+
 
 <!-- FOOTER -->
 <div class="mt-auto" th:replace="layout/footer :: footer"></div>
@@ -225,6 +245,9 @@
     }
 
 
+</script>
+<script>
+    lucide.createIcons();
 </script>
 
 </body>
