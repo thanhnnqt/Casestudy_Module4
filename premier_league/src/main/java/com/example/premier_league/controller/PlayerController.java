@@ -19,7 +19,7 @@ import java.security.Principal;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin/players")
+@RequestMapping("/owner/players")
 public class PlayerController {
 
     private final IPlayerService playerService;

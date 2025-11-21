@@ -30,8 +30,9 @@ public class WebSecurityConfig {
     @Autowired
     private CustomAuthFailureHandler customAuthFailureHandler;
 
+    // 1. TIÊM HANDLER TÙY CHỈNH VÀO ĐÂY
     @Autowired
-    private CustomAdminSuccessHandler customAdminSuccessHandler;
+    private CustomLoginSuccessHandler customLoginSuccessHandler;
 
     @Autowired
     private IAccountRepository accountRepository;
@@ -75,40 +76,25 @@ public class WebSecurityConfig {
     }
 
     // ==================================================================
-    // CẤU HÌNH 1: DÀNH RIÊNG CHO QUẢN TRỊ (ADMIN & OWNER)
+    // CẤU HÌNH 1: DÀNH RIÊNG CHO ADMIN (Giữ nguyên)
     // ==================================================================
     @Bean
     @Order(1)
     public SecurityFilterChain adminFilterChain(HttpSecurity http, AuthenticationProvider authProvider) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
-
         http.securityMatcher("/admin/**");
-
         http.authenticationProvider(authProvider);
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin/login", "/admin/process-login", "/admin/logout", "/admin/assets/**").permitAll()
-
-                // 1. Trang Dashboard của Owner
-                .requestMatchers("/admin/owner/**").hasAnyRole("OWNER", "ADMIN")
-
-                // 2. Các trang quản lý dùng chung (Cầu thủ, HLV, Staff)
-                // Cả Admin và Owner đều được phép truy cập
-                .requestMatchers("/admin/players/**", "/admin/coaches/**", "/admin/staffs/**").hasAnyRole("OWNER", "ADMIN")
-
-                // 3. Các trang còn lại trong /admin/ chỉ dành cho ADMIN tổng
+                .requestMatchers("/admin/login", "/admin/process-login", "/admin/logout").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-
                 .anyRequest().authenticated()
         );
 
         http.formLogin(form -> form
                 .loginPage("/admin/login")
                 .loginProcessingUrl("/admin/process-login")
-
-                // SỬ DỤNG HANDLER ĐỂ ĐIỀU HƯỚNG THEO ROLE
-                .successHandler(customAdminSuccessHandler)
-
+                .defaultSuccessUrl("/admin/home", true) // Admin login ở trang admin thì về home admin
                 .failureUrl("/admin/login?error")
                 .usernameParameter("username")
                 .passwordParameter("password")
@@ -126,7 +112,7 @@ public class WebSecurityConfig {
     }
 
     // ==================================================================
-    // CẤU HÌNH 2: DÀNH CHO USER & CÔNG KHAI (Order 2 - Chạy sau)
+    // CẤU HÌNH 2: DÀNH CHO USER, COACH, OWNER (Sửa đổi ở đây)
     // ==================================================================
     @Bean
     @Order(2)
@@ -142,14 +128,21 @@ public class WebSecurityConfig {
                         "/stadium/**", "/matches/**", "/blogs/**", "/news/**", "/layout/**","/tournaments-detail",
                         "/oauth2/**"
                 ).permitAll()
+                .requestMatchers("/coach/**").hasRole("COACH")
+                .requestMatchers("/owner/**").hasAnyRole("ADMIN", "OWNER")
                 .requestMatchers("/ticket").authenticated()
                 .anyRequest().permitAll()
         );
 
+        // Form login cho User (Trang /login)
         http.formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/process-login")
-                .defaultSuccessUrl("/?success", true)
+
+                // 2. THAY THẾ defaultSuccessUrl BẰNG successHandler
+                // .defaultSuccessUrl("/?success", true)  <-- XÓA DÒNG NÀY
+                .successHandler(customLoginSuccessHandler) // <-- THÊM DÒNG NÀY
+
                 .failureHandler(customAuthFailureHandler)
                 .usernameParameter("username")
                 .passwordParameter("password")

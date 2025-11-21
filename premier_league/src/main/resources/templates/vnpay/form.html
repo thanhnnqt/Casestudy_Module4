@@ -1,91 +1,187 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <title>Thanh toán VNPay</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, #143b86 0, #0f74d1 30%, #e8f2ff 75%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
         }
 
-        h2 {
-            color: #333;
+        .pay-card {
+            max-width: 520px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 1.25rem;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+            padding: 28px 26px 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pay-card::before {
+            content: "";
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, #00c6ff, #005bea);
+            opacity: 0.25;
+            border-radius: 50%;
+        }
+
+        .pay-header {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .pay-title {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #0d47a1;
+            margin-bottom: 4px;
+        }
+
+        .pay-subtitle {
+            font-size: 0.9rem;
+            color: #607d8b;
+        }
+
+        .badge-vnpay {
+            font-size: 0.75rem;
+            background: linear-gradient(135deg, #005bea, #00c6ff);
+            color: #fff;
+            border-radius: 999px;
+            padding: 4px 12px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #37474f;
+        }
+
+        .form-control, .form-select {
+            border-radius: 0.6rem;
+        }
+
+        /* ------------- BUTTON STYLE ------------- */
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .btn-pay {
+            flex: 1;
+            border-radius: 999px;
+            font-weight: 600;
+            padding: 10px 0;
+            background: linear-gradient(135deg, #005bea, #00c6ff);
+            border: none;
+            color: white;
             text-align: center;
         }
 
-        .form-group {
-            margin-bottom: 15px;
+        .btn-pay:hover {
+            filter: brightness(0.95);
         }
 
-        label {
-            display: inline-block;
-            width: 150px;
-            font-weight: bold;
+        .btn-exit {
+            padding: 10px 22px;
+            border-radius: 999px;
+            border: 1px solid #005bea;
+            color: #005bea;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.15s ease-out;
         }
 
-        input[type="text"], select {
-            padding: 8px;
-            width: 250px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        .btn-exit:hover {
+            background: rgba(0, 91, 234, 0.1);
         }
 
-        input[type="submit"] {
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #218838;
-        }
-
+        /* Error message */
         .error {
-            color: red;
-            font-size: 12px;
-            margin-top: 5px;
+            color: #d32f2f;
+            font-size: 0.78rem;
+            margin-top: 4px;
             display: none;
+        }
+
+        .amount-note {
+            font-size: 0.8rem;
+            color: #90a4ae;
         }
     </style>
 </head>
 <body>
-<h2>Thanh toán VNPay</h2>
-<form action="/payment/savePayment" method="post" id="paymentForm">
-    <div class="form-group">
-        <label for="amount">Số tiền (VND):</label>
-        <input type="text" id="amount" name="amount" th:value="${total}" required/>
-        <div id="amountError" class="error">Số tiền phải là số dương (tối thiểu 10,000 VND)</div>
+
+<div class="pay-card">
+    <div class="pay-header">
+        <div class="mb-2">
+            <span class="badge-vnpay">Thanh toán qua VNPay</span>
+        </div>
+        <div class="pay-title">Thanh toán vé xem bóng đá</div>
+        <div class="pay-subtitle">Hoàn tất thanh toán để giữ chỗ trên khán đài</div>
     </div>
-    <div class="form-group">
-        <label for="ticket_id">Mã đơn hàng:</label>
-        <input type="text" id="ticket_id" name="ticket_id" th:value="${ticketId}" required/>
-        <div id="ticketIdError" class="error">Mã đơn hàng không được để trống</div>
-    </div>
-    <div class="form-group">
-        <label for="bankCode">Ngân hàng:</label>
-        <select id="bankCode" name="bankCode">
-            <option value="">Chọn ngân hàng (tùy chọn)</option>
-            <option value="NCB" selected>Ngân hàng NCB</option>
-            <option value="VNPAYQR">VNPay QR</option>
-            <option value="VIB">Ngân hàng VIB</option>
-            <option value="VIETCOMBANK">Ngân hàng Vietcombank</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="language">Ngôn ngữ:</label>
-        <select id="language" name="language">
-            <option value="vn" selected>Tiếng Việt</option>
-            <option value="en">Tiếng Anh</option>
-        </select>
-    </div>
-    <button>Thanh toán</button>
-</form>
+
+    <form action="/payment/savePayment" method="post" id="paymentForm">
+        <div class="mb-3">
+            <label for="amount" class="form-label">Số tiền (VND)</label>
+            <input type="text" id="amount" name="amount"
+                   th:value="${total}"
+                   class="form-control" required>
+            <div class="amount-note">Tối thiểu 10.000 VND</div>
+            <div id="amountError" class="error">Số tiền phải là số dương (tối thiểu 10.000 VND)</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="ticket_id" class="form-label">Mã đơn hàng</label>
+            <input type="text" id="ticket_id" name="ticket_id"
+                   th:value="${ticketId}"
+                   class="form-control" required>
+            <div id="ticketIdError" class="error">Mã đơn hàng không được để trống</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="bankCode" class="form-label">Ngân hàng</label>
+            <select id="bankCode" name="bankCode" class="form-select">
+                <option value="">Chọn ngân hàng (tùy chọn)</option>
+                <option value="NCB" selected>Ngân hàng NCB</option>
+                <option value="VNPAYQR">VNPay QR</option>
+                <option value="VIB">Ngân hàng VIB</option>
+                <option value="VIETCOMBANK">Ngân hàng Vietcombank</option>
+            </select>
+        </div>
+
+        <div class="mb-4">
+            <label for="language" class="form-label">Ngôn ngữ hiển thị cổng thanh toán</label>
+            <select id="language" name="language" class="form-select">
+                <option value="vn" selected>Tiếng Việt</option>
+                <option value="en">Tiếng Anh</option>
+            </select>
+        </div>
+
+        <!-- 2 BUTTONS NẰM TRÊN CÙNG 1 HÀNG -->
+        <div class="action-row">
+            <button type="submit" class="btn-pay">Thanh toán ngay</button>
+            <a href="/" class="btn-exit">Thoát</a>
+        </div>
+    </form>
+</div>
 
 <script>
     document.getElementById('paymentForm').addEventListener('submit', function (event) {
@@ -95,26 +191,24 @@
         const amountError = document.getElementById('amountError');
         const ticketIdError = document.getElementById('ticketIdError');
 
-        // Reset error messages
         amountError.style.display = 'none';
         ticketIdError.style.display = 'none';
 
-        // Validate amount
         if (!amount || isNaN(amount) || parseFloat(amount) < 10000) {
             amountError.style.display = 'block';
             valid = false;
         }
 
-        // Validate ticket_id
         if (!ticketId || ticketId.trim() === '') {
             ticketIdError.style.display = 'block';
             valid = false;
         }
 
         if (!valid) {
-            event.preventDefault(); // Ngăn gửi form nếu có lỗi
+            event.preventDefault();
         }
     });
 </script>
+
 </body>
 </html>

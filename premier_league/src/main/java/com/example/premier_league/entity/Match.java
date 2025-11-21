@@ -42,4 +42,9 @@ public class Match {
     // Trạng thái trận đấu
     @Enumerated(EnumType.STRING)
     private MatchStatus status = MatchStatus.SCHEDULED; // mặc định SCHEDULED
+
+    @OneToOne(mappedBy = "match")
+    private MatchSchedule schedule;
+
+
 }

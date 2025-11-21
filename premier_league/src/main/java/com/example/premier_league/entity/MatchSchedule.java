@@ -41,4 +41,9 @@ public class MatchSchedule {
 
     @Enumerated(EnumType.STRING)
     private MatchStatus status = MatchStatus.UPCOMING;
+
+    @OneToOne
+    @JoinColumn(name = "match_id")
+    private Match match;
+
 }
