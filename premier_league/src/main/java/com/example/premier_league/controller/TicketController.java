@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Controller
-@RequestMapping("/coach/tickets/{teamId}")
+@RequestMapping("/owner/tickets/{teamId}")
 public class TicketController {
     final ITicketService ticketService;
     final ITicketTypeService ticketTypeService;
@@ -109,7 +109,7 @@ public class TicketController {
         } else {
             System.out.println("Fail!");
         }
-        return "redirect:/coach/tickets/" + teamId;
+        return "redirect:/owner/tickets/" + teamId;
     }
 
     @GetMapping("/update")
