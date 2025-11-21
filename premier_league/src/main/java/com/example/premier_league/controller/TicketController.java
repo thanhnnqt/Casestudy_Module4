@@ -36,12 +36,11 @@ public class TicketController {
         this.ticketTypeService = ticketTypeService;
         this.matchScheduleService = matchScheduleService;
         this.stadiumService = stadiumService;
-
         this.teamService = teamService;
     }
 
     @GetMapping()
-    public String showTicketList(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "100") int size, @PathVariable(value = "teamId") Integer teamId) {
+    public String showTicketList(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "100") int size, @PathVariable(value = "teamId") Long teamId) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Ticket> ticketPage = ticketService.findAll(pageable);
 
@@ -51,6 +50,9 @@ public class TicketController {
             model.addAttribute("ticketPage", ticketPage);
         }
         System.out.println(teamId);
+        Team team = teamService.findById(teamId);
+        List<Ticket> ticketList = ticketService.findAllByHomeTeam(team.getName());
+        model.addAttribute("ticketList", ticketList);
         return "ticket/list";
     }
 
