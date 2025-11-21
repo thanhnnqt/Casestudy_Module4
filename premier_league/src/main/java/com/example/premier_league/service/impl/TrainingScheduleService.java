@@ -62,6 +62,26 @@ public class TrainingScheduleService implements ITrainingScheduleService {
                 break; // Check trận gần nhất là đủ
             }
         }
+        // 4. [MỚI] Kiểm tra trùng lịch với các buổi tập khác
+        List<TrainingSchedule> existingSchedules = iTrainingScheduleRepository.findByTeamIdOrderByStartTimeDesc(ts.getTeam().getId());
+
+        for (TrainingSchedule existing : existingSchedules) {
+            // Bỏ qua chính nó nếu đang là thao tác Cập nhật (Edit)
+            if (ts.getId() != null && ts.getId().equals(existing.getId())) {
+                continue;
+            }
+
+            // Logic kiểm tra trùng lặp (Overlap):
+            // (Start mới < End cũ) VÀ (End mới > Start cũ)
+            boolean isOverlapping = ts.getStartTime().isBefore(existing.getEndTime()) &&
+                    ts.getEndTime().isAfter(existing.getStartTime());
+
+            if (isOverlapping) {
+                throw new RuntimeException("Thời gian bị trùng với lịch tập: " + existing.getTitle() +
+                        " (" + existing.getStartTime().toString().replace("T", " ") +
+                        " - " + existing.getEndTime().toString().replace("T", " ") + ")");
+            }
+        }
         // === END VALIDATION ===
 
         iTrainingScheduleRepository.save(ts);
