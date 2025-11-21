@@ -31,6 +31,11 @@ public class MatchScheduleService implements IMatchScheduleService {
     /* ================= FETCH DATA ================= */
 
     @Override
+    public List<MatchSchedule> findAll() {
+        return matchScheduleRepository.findAll();
+    }
+
+    @Override
     public Page<MatchSchedule> getAllMatches(Pageable pageable) {
 
         Page<MatchSchedule> page = matchScheduleRepository

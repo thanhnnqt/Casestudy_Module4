@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface IAccountRepository extends JpaRepository<Account, Long> {
     // Phương thức tìm theo username
     Optional<Account> findByUsername(String username);
+
 }

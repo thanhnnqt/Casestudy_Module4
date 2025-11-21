@@ -1,9 +1,13 @@
 package com.example.premier_league.controller;
 
 import com.example.premier_league.dto.StaffDto;
+import com.example.premier_league.entity.Account;
 import com.example.premier_league.entity.Staff;
-import com.example.premier_league.exception.StaffNotFoundException;
+import com.example.premier_league.entity.Team;
+import com.example.premier_league.service.IAccountService;
 import com.example.premier_league.service.IStaffService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
@@ -12,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,158 +27,176 @@ import java.util.stream.Collectors;
 public class StaffController {
 
     private final IStaffService staffService;
+    private final IAccountService accountService;
 
-    public StaffController(IStaffService staffService) {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public StaffController(IStaffService staffService, IAccountService accountService) {
         this.staffService = staffService;
+        this.accountService = accountService;
     }
 
-    // ... (Giữ nguyên phần getAllStaff và createStaffForm) ...
-
+    // 1. DANH SÁCH
     @GetMapping
-    public String getAllStaff(Model model) {
-        List<Staff> staffList = staffService.findAll();
-        Map<String, List<Staff>> staffByPosition = staffList.stream()
-                .collect(Collectors.groupingBy(
-                        Staff::getPosition,
-                        LinkedHashMap::new,
-                        Collectors.toList()
-                ));
+    public String listStaffs(Model model, Principal principal) {
+        Team myTeam = getOwnerTeam(principal);
+        if (myTeam == null) return "redirect:/login";
+
+        List<Staff> staffs = staffService.findByTeamId(myTeam.getId());
+        Map<String, List<Staff>> staffByPosition = staffs.stream()
+                .collect(Collectors.groupingBy(Staff::getPosition, LinkedHashMap::new, Collectors.toList()));
+
         model.addAttribute("staffByPosition", staffByPosition);
         return "staff/list";
     }
 
-    // ... (Giữ nguyên phần createStaff) ...
+    // 2. FORM TẠO MỚI
     @GetMapping("/create")
-    public String createStaffForm(Model model) {
-        model.addAttribute("staffDto", new StaffDto());
+    public String createForm(Model model, Principal principal) {
+        Team myTeam = getOwnerTeam(principal);
+        StaffDto staffDto = new StaffDto();
+        staffDto.setTeamId(myTeam.getId());
+
+        model.addAttribute("staffDto", staffDto);
+        model.addAttribute("myTeamName", myTeam.getName());
         return "staff/create";
     }
 
+    // 3. XỬ LÝ TẠO MỚI
     @PostMapping("/create")
     public String createStaff(@Valid @ModelAttribute("staffDto") StaffDto staffDto,
-                              BindingResult bindingResult,
-                              RedirectAttributes redirect) {
-        if (bindingResult.hasErrors()) {
+                              BindingResult result,
+                              Principal principal,
+                              RedirectAttributes redirect,
+                              Model model) {
+        Team myTeam = getOwnerTeam(principal);
+        if (result.hasErrors()) {
+            model.addAttribute("myTeamName", myTeam.getName());
             return "staff/create";
         }
+
+        // Bước 1: Xóa sạch session
+        entityManager.clear();
+
+        // Bước 2: Tạo mới
         Staff staff = new Staff();
         BeanUtils.copyProperties(staffDto, staff);
+
+        // Bước 3: Gán Team Proxy (Chỉ chứa ID)
+        staff.setTeam(entityManager.getReference(Team.class, myTeam.getId()));
+
         staffService.save(staff);
-        redirect.addFlashAttribute("message", "Thêm mới nhân viên thành công!");
-        return "redirect:/admin/staffs";
+        redirect.addFlashAttribute("message", "Thêm mới thành công!");
+        return "redirect:/owner/staffs";
     }
 
-    // ==================== CHI TIẾT ====================
-    @GetMapping("/{id}")
-    public String getStaffById(@PathVariable Integer id, Model model) {
-        // Code cũ của bạn đã ổn
+    // 4. FORM CẬP NHẬT
+    @GetMapping("/update/{id}")
+    public String updateForm(@PathVariable Integer id, Model model, Principal principal) {
+        Team myTeam = getOwnerTeam(principal);
         Staff staff = staffService.findById(id);
-        if (staff == null) {
-            throw new StaffNotFoundException("Không tìm thấy nhân viên có ID: " + id);
+
+        if(staff == null || !staff.getTeam().getId().equals(myTeam.getId())) {
+            return "redirect:/owner/staffs";
         }
+
+        StaffDto staffDto = new StaffDto();
+        BeanUtils.copyProperties(staff, staffDto);
+        staffDto.setTeamId(myTeam.getId());
+
+        model.addAttribute("staffDto", staffDto);
+        model.addAttribute("myTeamName", myTeam.getName());
+        return "staff/update";
+    }
+
+    // 5. XỬ LÝ CẬP NHẬT (FIX TRIỆT ĐỂ)
+    @PostMapping("/update")
+    public String updateStaff(@Valid @ModelAttribute("staffDto") StaffDto staffDto,
+                              BindingResult result,
+                              Principal principal,
+                              RedirectAttributes redirect,
+                              Model model) {
+        // 1. Lấy ID đội (Lúc này session đang bị bẩn do getOwnerTeam load Account lên)
+        Team dirtyTeam = getOwnerTeam(principal);
+        Long teamId = dirtyTeam.getId();
+
+        if (result.hasErrors()) {
+            model.addAttribute("myTeamName", dirtyTeam.getName());
+            return "staff/update";
+        }
+
+        // 2. XÓA SẠCH SESSION NGAY LẬP TỨC
+        // Lệnh này làm Hibernate quên hết cái "List<Account>" đang bị lỗi kia đi
+        entityManager.clear();
+
+        // 3. Load lại Staff từ Database (Lúc này Session đang sạch)
+        Staff existingStaff = staffService.findById(staffDto.getId());
+
+        // Check quyền
+        if (existingStaff == null || !existingStaff.getTeam().getId().equals(teamId)) {
+            return "redirect:/owner/staffs";
+        }
+
+        // 4. Cập nhật dữ liệu
+        // Copy properties TRỪ "id" và "team" và "joinDate" (để tránh null đè lên data cũ)
+        BeanUtils.copyProperties(staffDto, existingStaff, "id", "team", "joinDate");
+
+        // Nếu form có gửi joinDate thì mới set
+        if (staffDto.getJoinDate() != null) {
+            existingStaff.setJoinDate(staffDto.getJoinDate());
+        }
+
+        // 5. QUAN TRỌNG: Gán lại Team bằng Proxy (Chỉ chứa ID)
+        // Điều này ngăn Hibernate load lại danh sách Account của Team
+        existingStaff.setTeam(entityManager.getReference(Team.class, teamId));
+
+        // 6. Lưu
+        staffService.update(existingStaff);
+
+        redirect.addFlashAttribute("message", "Cập nhật thành công!");
+        return "redirect:/owner/staffs";
+    }
+
+    // 6. XỬ LÝ XÓA (FIX TRIỆT ĐỂ)
+    @PostMapping("/delete/{id}")
+    public String deleteStaff(@PathVariable Integer id, Principal principal, RedirectAttributes redirect) {
+        // 1. Lấy ID đội
+        Team dirtyTeam = getOwnerTeam(principal);
+        Long teamId = dirtyTeam.getId();
+
+        // 2. XÓA SẠCH SESSION
+        entityManager.clear();
+
+        // 3. Load lại Staff cần xóa (Session sạch)
+        Staff staffToDelete = staffService.findById(id);
+
+        // 4. Kiểm tra và xóa
+        if (staffToDelete != null && staffToDelete.getTeam().getId().equals(teamId)) {
+            staffService.delete(id);
+            redirect.addFlashAttribute("message", "Đã xóa!");
+        } else {
+            redirect.addFlashAttribute("error", "Không thể xóa nhân viên này!");
+        }
+
+        return "redirect:/owner/staffs";
+    }
+
+    @GetMapping("/{id}")
+    public String detail(@PathVariable Integer id, Model model, Principal principal) {
+        Team myTeam = getOwnerTeam(principal);
+        Staff staff = staffService.findById(id);
+
+        if (staff == null || !staff.getTeam().getId().equals(myTeam.getId())) {
+            return "redirect:/owner/staffs";
+        }
+
         model.addAttribute("staff", staff);
         return "staff/detail";
     }
 
-    // ==================== CẬP NHẬT ====================
-    @GetMapping("/update/{id}")
-    public String showUpdateForm(@PathVariable Integer id, Model model) {
-        Staff staff = staffService.findById(id);
-        if (staff == null) {
-            throw new StaffNotFoundException("Không tìm thấy nhân viên có ID: " + id);
-        }
-
-        StaffDto staffDto = new StaffDto();
-        BeanUtils.copyProperties(staff, staffDto);
-
-        // --- THÊM ĐOẠN NÀY ---
-        // Lấy ID đội bóng hiện tại gán vào DTO để không bị lỗi Validation @NotNull
-        // ---------------------
-
-        model.addAttribute("staffDto", staffDto);
-        return "staff/update";
-    }
-
-    // ==================== CẬP NHẬT NHÂN VIÊN ====================
-
-    // HIỂN THỊ FORM CẬP NHẬT
-    @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable("id") Integer id,
-                               Model model,
-                               RedirectAttributes redirectAttributes) {
-
-        Staff staff = staffService.findById(id);
-        if (staff == null) {
-            redirectAttributes.addFlashAttribute("message", "Không tìm thấy nhân viên");
-            return "redirect:/admin/staffs";
-        }
-
-        StaffDto staffDto = new StaffDto();
-        // copy từ entity sang dto để bind lên form
-        BeanUtils.copyProperties(staff, staffDto);
-
-        model.addAttribute("staffDto", staffDto);
-        model.addAttribute("formTitle", "Cập nhật nhân viên");
-        return "staff/update";   // trang form cập nhật nhân viên
-    }
-
-    // XỬ LÝ SUBMIT FORM CẬP NHẬT
-    @PostMapping("/{id}/edit")
-    public String updateStaff(@PathVariable("id") Integer id,
-                              @Valid @ModelAttribute("staffDto") StaffDto staffDto,
-                              BindingResult bindingResult,
-                              RedirectAttributes redirectAttributes,
-                              Model model) {
-
-        if (bindingResult.hasErrors()) {
-            // Có lỗi validate → quay lại form
-            model.addAttribute("formTitle", "Cập nhật nhân viên");
-            return "staff/update";
-        }
-
-        // Tìm nhân viên cũ theo id trên URL (không phụ thuộc vào staffDto.getId())
-        Staff existingStaff = staffService.findById(id);
-        if (existingStaff == null) {
-            throw new StaffNotFoundException("Không tìm thấy nhân viên để cập nhật");
-        }
-
-        // Cập nhật THỦ CÔNG từ DTO sang entity (an toàn)
-        existingStaff.setFullName(staffDto.getFullName());
-        existingStaff.setDateOfBirth(staffDto.getDateOfBirth());
-        existingStaff.setGender(staffDto.getGender());
-        existingStaff.setNationality(staffDto.getNationality());
-        existingStaff.setPosition(staffDto.getPosition());
-        existingStaff.setRole(staffDto.getRole());
-        existingStaff.setJoinDate(staffDto.getJoinDate());
-        existingStaff.setPhoneNumber(staffDto.getPhoneNumber());
-        existingStaff.setEmail(staffDto.getEmail());
-        existingStaff.setStatus(staffDto.getStatus());
-
-        // Nếu có nhập avatar mới thì update, không thì giữ ảnh cũ
-        if (staffDto.getAvatarUrl() != null && !staffDto.getAvatarUrl().isEmpty()) {
-            existingStaff.setAvatarUrl(staffDto.getAvatarUrl());
-        }
-
-        // TODO: nếu có teamId trong DTO thì set team ở đây
-
-        staffService.update(existingStaff);
-
-        redirectAttributes.addFlashAttribute("message", "Cập nhật nhân viên thành công!");
-        return "redirect:/admin/staffs";
-    }
-
-
-    // ==================== XÓA (Đã sửa) ====================
-    // Đổi từ @GetMapping sang @PostMapping để bảo mật hơn
-    @PostMapping("/delete/{id}")
-    public String deleteStaff(@PathVariable Integer id, RedirectAttributes redirect) {
-        Staff staff = staffService.findById(id);
-        if (staff == null) {
-            throw new StaffNotFoundException("Không tìm thấy nhân viên có ID: " + id);
-        }
-
-        staffService.delete(id);
-        redirect.addFlashAttribute("message", "Xóa nhân viên thành công!");
-        return "redirect:/admin/staffs";
+    private Team getOwnerTeam(Principal principal) {
+        if (principal == null) return null;
+        return accountService.findByUsername(principal.getName()).map(Account::getTeam).orElse(null);
     }
 }

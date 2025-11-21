@@ -10,4 +10,5 @@ public interface IPlayerRepository extends JpaRepository<Player, Long> {
      * Lấy danh sách cầu thủ của một đội
      */
     List<Player> findByTeamId(Long teamId);
+
 }
