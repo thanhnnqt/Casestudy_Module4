@@ -25,6 +25,7 @@ public class TicketOwner {
     public String tickets(Model model) {
         Pageable pageable = PageRequest.of(0, 1000);
         Page<MatchSchedule> matchSchedulePage = matchScheduleService.getAllMatches(pageable);
+        model.addAttribute("matchSchedulePage", matchSchedulePage);
         return "home/ticket";
     }
 }
