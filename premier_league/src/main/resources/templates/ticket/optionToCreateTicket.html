@@ -113,7 +113,7 @@
                     </div>
                 </div>
                 <!-- Nút chọn trận đấu -->
-                <a th:href="@{/admin/tickets/create(id=${match.getId()})}" class="btn btn-primary select-btn">Chọn</a>
+                <a th:href="@{/coach/tickets/__${teamId}__/createTicket/__${match.id}__}" class="btn btn-primary select-btn">Chọn</a>
             </div>
         </div>
     </div>
