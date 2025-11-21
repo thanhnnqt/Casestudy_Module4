@@ -52,7 +52,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
                 Long teamId = account.getTeam().getId();
 
                 // Chuyển đúng vào trang quản lý HLV theo team của chủ tịch
-                redirectUrl = "/owner/" + account.getTeam().getId();
+                redirectUrl = "/owner" ;
             }
         }
 

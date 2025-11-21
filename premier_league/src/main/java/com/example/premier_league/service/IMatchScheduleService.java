@@ -4,12 +4,19 @@ import com.example.premier_league.dto.CoachMatchScheduleDto;
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.MatchStatus;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.security.Principal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface IMatchScheduleService {
+    List<MatchSchedule> findAll();
     Page<MatchSchedule> getAllMatches(Pageable pageable);
     MatchSchedule save(MatchSchedule matchSchedule);
     MatchSchedule postponeMatch(Long id);

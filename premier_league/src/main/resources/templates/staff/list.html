@@ -24,11 +24,7 @@
 
   <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h3 class="fw-bold mb-1" style="color: var(--pl-purple);">Đội ngũ nhân viên</h3>
-        <p class="text-muted small mb-0">CLB: <span class="fw-bold text-dark" th:text="${myTeam != null ? myTeam.name : ''}"></span></p>
-      </div>
-      <a th:href="@{/admin/staffs/create}" class="btn btn-primary-pl"><i class="bi bi-plus-lg me-2"></i>Thêm Nhân Viên</a>
+      <a th:href="@{/owner/staffs/create}" class="btn btn-primary-pl"><i class="bi bi-plus-lg me-2"></i>Thêm Nhân Viên</a>
     </div>
 
     <div th:if="${message}" class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
@@ -49,17 +45,17 @@
       <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
         <div class="col" th:each="staff : ${entry.value}">
           <div class="card staff-card">
-            <a th:href="@{'/admin/staffs/' + ${staff.id}}" class="staff-avatar-wrapper">
+            <a th:href="@{'/owner/staffs/' + ${staff.id}}" class="staff-avatar-wrapper">
               <img class="staff-avatar" th:src="${staff.avatarUrl}" alt="avatar"
                    onerror="this.onerror=null; this.src='https://via.placeholder.com/300x400?text=No+Image';">
             </a>
             <div class="card-body d-flex flex-column p-3">
-              <a th:href="@{'/admin/staffs/' + ${staff.id}}" class="staff-name" th:text="${staff.fullName}">Name</a>
+              <a th:href="@{'/owner/staffs/' + ${staff.id}}" class="staff-name" th:text="${staff.fullName}">Name</a>
               <div class="text-muted small fw-bold text-uppercase mb-2" th:text="${staff.role}">Role</div>
 
               <div class="mt-auto border-top pt-3 d-flex justify-content-between align-items-center">
                 <span class="badge bg-light text-dark border" th:text="${staff.status}">Active</span>
-                <a th:href="@{'/admin/staffs/' + ${staff.id}}" class="btn btn-sm btn-light rounded-circle"><i class="bi bi-arrow-right"></i></a>
+                <a th:href="@{'/owner/staffs/' + ${staff.id}}" class="btn btn-sm btn-light rounded-circle"><i class="bi bi-arrow-right"></i></a>
               </div>
             </div>
           </div>

@@ -18,7 +18,7 @@ public interface IPlayerService {
 
     List<Player> findByName(String name);
 
-    void update(Player player);
+    void update(PlayerDto player);
 
     void delete(Long id);
 

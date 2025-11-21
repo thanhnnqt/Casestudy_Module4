@@ -20,7 +20,7 @@
             <h3 class="fw-bold" style="color: var(--pl-purple);">Cập nhật thông tin</h3>
         </div>
 
-        <form th:action="@{/admin/players/update}" th:object="${playerDto}" method="post">
+        <form th:action="@{/owner/players/update}" th:object="${playerDto}" method="post">
 
             <input type="hidden" th:field="*{id}"/>
 
@@ -50,19 +50,25 @@
             <div class="card card-form p-4 mb-4">
                 <div class="section-title">2. Thông tin chuyên môn</div>
                 <div class="row g-4">
+
                     <div class="col-md-6">
-                        <label class="form-label">Chọn đội</label>
-                        <select class="form-select" th:field="*{teamId}">
-                            <option value="">-- Chọn team --</option>
-                            <option th:each="t : ${teams}" th:value="${t.id}" th:text="${t.name}"></option>
-                        </select>
-                        <small class="text-danger" th:errors="*{teamId}"></small>
+                        <label class="form-label">Đội bóng chủ quản</label>
+                        <input type="text" class="form-control bg-light" th:value="${myTeamName}" readonly>
+                        <input type="hidden" th:field="*{teamId}">
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label">Vị trí</label>
-                        <input type="text" class="form-control" th:field="*{position}" placeholder="Ví dụ: Forward">
+                        <select class="form-select" th:field="*{position}">
+                            <option value="">-- Chọn vị trí --</option>
+                            <option value="Goalkeeper">Thủ môn (Goalkeeper)</option>
+                            <option value="Defender">Hậu vệ (Defender)</option>
+                            <option value="Midfielder">Tiền vệ (Midfielder)</option>
+                            <option value="Forward">Tiền đạo (Forward)</option>
+                        </select>
                         <small class="text-danger" th:errors="*{position}"></small>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label">Kinh nghiệm</label>
                         <input type="text" class="form-control" th:field="*{experience}">
@@ -72,7 +78,7 @@
             </div>
 
             <div class="d-flex justify-content-end gap-3 pb-5">
-                <a href="/admin/players" class="btn btn-light px-4 fw-bold text-muted border">Hủy bỏ</a>
+                <a href="/owner/players" class="btn btn-light px-4 fw-bold text-muted border">Hủy bỏ</a>
                 <button class="btn btn-save">
                     <i class="bi bi-save me-2"></i>Cập nhật
                 </button>

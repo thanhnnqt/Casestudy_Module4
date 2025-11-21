@@ -80,9 +80,25 @@ public class PlayerService implements IPlayerService {
 //    }
 
     @Override
-    public void update(Player player) {
-        if (playerRepository.existsById(player.getId())) {
-            playerRepository.save(player);
+    public void update(PlayerDto playerDto) {
+        // 1. Tìm Entity cũ đang nằm trong Database
+        Player existingPlayer = playerRepository.findById(playerDto.getId()).orElse(null);
+
+        if (existingPlayer != null) {
+            // 2. Copy dữ liệu từ DTO đè lên Entity cũ
+            // Lưu ý: "team" nên được loại bỏ khỏi copyProperties để tránh lỗi Hibernate cũ
+            // Chúng ta sẽ set Team thủ công bằng ID cho an toàn
+            BeanUtils.copyProperties(playerDto, existingPlayer, "team");
+
+            // 3. Cập nhật Team (nếu có thay đổi)
+            if (playerDto.getTeamId() != null) {
+                Team teamRef = new Team();
+                teamRef.setId(playerDto.getTeamId());
+                existingPlayer.setTeam(teamRef);
+            }
+
+            // 4. Bây giờ mới gọi save với đối tượng Entity
+            playerRepository.save(existingPlayer);
         }
     }
 

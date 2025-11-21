@@ -26,13 +26,7 @@
 
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold mb-1" style="color: var(--pl-purple);">Đội Hình Cầu Thủ</h3>
-                <p class="text-muted small mb-0">
-                    Danh sách cầu thủ CLB <span class="fw-bold text-dark" th:text="${myTeam.name}"></span>
-                </p>
-            </div>
-            <a th:href="@{/admin/players/create}" class="btn btn-primary-pl">
+            <a th:href="@{/owner/players/create}" class="btn btn-primary-pl">
                 <i class="bi bi-plus-lg me-2"></i>Thêm Cầu Thủ
             </a>
         </div>
@@ -42,17 +36,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <form class="mb-4" th:action="@{/admin/players}" method="get">
-            <div class="input-group search-box-player shadow-sm">
-                <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên cầu thủ..." th:value="${keyword}">
-                <button class="btn px-4" type="submit"><i class="bi bi-search"></i></button>
-            </div>
+        <form class="mb-4" th:action="@{/owner/players}" method="get">
         </form>
 
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
             <div class="col" th:each="p : ${players}">
                 <div class="card player-card h-100">
-                    <a th:href="@{'/admin/players/' + ${p.id}}" class="player-avatar-wrapper">
+                    <a th:href="@{'/owner/players/' + ${p.id}}" class="player-avatar-wrapper">
                         <span class="player-number">#</span>
                         <img class="player-avatar"
                              th:src="${p.avatar}"

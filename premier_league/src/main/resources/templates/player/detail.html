@@ -20,7 +20,7 @@
 
     <div class="container-fluid">
         <div class="mb-4">
-            <a href="/admin/players" class="text-decoration-none text-muted fw-bold small">
+            <a href="/owner/players" class="text-decoration-none text-muted fw-bold small">
                 <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
             </a>
         </div>
@@ -43,7 +43,7 @@
                         <span class="badge bg-danger rounded-pill px-3 py-2 mb-4" th:text="${player.position}">Position</span>
 
                         <div class="d-flex justify-content-center gap-2">
-                            <a th:href="@{'/admin/players/update/' + ${player.id}}" class="btn btn-action btn-edit w-50">
+                            <a th:href="@{'/owner/players/update/' + ${player.id}}" class="btn btn-action btn-edit w-50">
                                 <i class="bi bi-pencil-square me-2"></i>Sửa
                             </a>
                             <button type="button" class="btn btn-action btn-delete w-50"
@@ -96,7 +96,7 @@
                 <div class="modal-footer bg-light border-0 justify-content-center">
                     <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Quay lại</button>
 
-                    <form th:action="@{'/admin/players/delete/' + ${player.id}}" method="post">
+                    <form th:action="@{'/owner/players/delete/' + ${player.id}}" method="post">
                         <button type="submit" class="btn btn-danger fw-bold px-4">Xóa cầu thủ</button>
                     </form>
                 </div>

@@ -42,7 +42,7 @@
         </div>
 
         <form th:object="${coach}"
-              th:action="${coach.id != null} ? @{/admin/coaches/update} : @{/admin/coaches/create}"
+              th:action="${coach.id != null} ? @{/owner/coaches/update} : @{/owner/coaches/create}"
               method="post">
 
             <input type="hidden" th:field="*{id}">
@@ -53,6 +53,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" th:field="*{fullName}" placeholder="Nhập tên đầy đủ" required>
+                        <small class="text-danger" th:errors="*{fullName}"></small>
                     </div>
 
                     <div class="col-md-6">
@@ -72,12 +73,12 @@
 
                     <div class="col-md-6">
                         <label class="form-label">Đội bóng chủ quản</label>
-                        <input type="hidden" th:field="*{team}">
                         <input type="text" class="form-control bg-light" th:value="${myTeamName}" readonly>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label">Ngày sinh</label>
-                        <input type="date" class="form-control" name="dateOfBirth" th:value="${coach.dateOfBirth}">
+                        <input type="date" class="form-control" th:field="*{dateOfBirth}">
                     </div>
 
                     <div class="col-md-6">
@@ -110,7 +111,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Ngày gia nhập</label>
-                        <input type="date" class="form-control" name="joinDate" th:value="${coach.joinDate}">
+                        <input type="date" class="form-control" th:field="*{joinDate}">
                     </div>
 
                     <div class="col-md-4">
@@ -147,7 +148,7 @@
             </div>
 
             <div class="d-flex justify-content-end gap-3 pb-5">
-                <a th:href="@{/admin/coaches}" class="btn btn-cancel">Hủy bỏ</a>
+                <a th:href="@{/owner/coaches}" class="btn btn-cancel">Hủy bỏ</a>
                 <button type="submit" class="btn btn-save">
                     <i class="bi bi-check2-circle me-2"></i>Lưu thông tin
                 </button>
@@ -162,7 +163,12 @@
         document.addEventListener('DOMContentLoaded', function () {
             const el = document.getElementById('licenseSelect');
             if (el) {
-                new Choices(el, { removeItemButton: true, placeholderValue: 'Chọn chứng chỉ...', searchEnabled: true, shouldSort: false });
+                new Choices(el, {
+                    removeItemButton: true,
+                    placeholderValue: 'Chọn chứng chỉ...',
+                    searchEnabled: true,
+                    shouldSort: false
+                });
             }
         });
     </script>

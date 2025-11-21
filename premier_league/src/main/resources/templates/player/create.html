@@ -20,7 +20,7 @@
             <h3 class="fw-bold" style="color: var(--pl-purple);">Thêm Mới Cầu Thủ</h3>
         </div>
 
-        <form th:action="@{/admin/players/create}" th:object="${playerDto}" method="post">
+        <form th:action="@{/owner/players/create}" th:object="${playerDto}" method="post">
 
             <div class="card card-form p-4 mb-4">
                 <div class="section-title">1. Thông tin cơ bản</div>
@@ -76,7 +76,7 @@
             </div>
 
             <div class="d-flex justify-content-end gap-3 pb-5">
-                <a href="/admin/players" class="btn btn-light px-4 fw-bold text-muted border">Hủy bỏ</a>
+                <a href="/owner/players" class="btn btn-light px-4 fw-bold text-muted border">Hủy bỏ</a>
                 <button class="btn btn-save">
                     <i class="bi bi-check-lg me-2"></i>Lưu Cầu Thủ
                 </button>

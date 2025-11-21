@@ -33,13 +33,7 @@
 
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold mb-1" style="color: var(--pl-purple);">Ban Huấn Luyện</h3>
-                <p class="text-muted small mb-0">
-                    CLB: <span class="fw-bold text-dark" th:text="${myTeam != null ? myTeam.name : ''}">Team Name</span>
-                </p>
-            </div>
-            <a th:href="@{/admin/coaches/create}" class="btn btn-primary-pl">
+            <a th:href="@{/owner/coaches/create}" class="btn btn-primary-pl">
                 <i class="bi bi-plus-lg me-2"></i>Thêm Mới
             </a>
         </div>
@@ -64,7 +58,7 @@
             <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
                 <div class="col" th:each="coach : ${entry.value}">
                     <div class="card coach-card">
-                        <a th:href="@{'/admin/coaches/' + ${coach.id}}" class="coach-avatar-wrapper">
+                        <a th:href="@{'/owner/coaches/' + ${coach.id}}" class="coach-avatar-wrapper">
                             <img class="coach-avatar"
                                  th:src="${coach.avatarUrl}"
                                  alt="Coach Avatar"
@@ -74,7 +68,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <a th:href="@{'/admin/coaches/' + ${coach.id}}" class="coach-name d-block" th:text="${coach.fullName}">Name</a>
+                                    <a th:href="@{'/owner/coaches/' + ${coach.id}}" class="coach-name d-block" th:text="${coach.fullName}">Name</a>
                                     <div class="coach-role" th:text="${coach.role}">Role</div>
                                 </div>
                             </div>
@@ -99,7 +93,7 @@
                                       th:classappend="${coach.status == 'Active' ? 'bg-status-active' : 'bg-status-inactive'}"
                                       th:text="${coach.status}">
                                 </span>
-                                <a th:href="@{'/admin/coaches/' + ${coach.id}}" class="btn btn-sm btn-light rounded-circle" title="Chi tiết">
+                                <a th:href="@{'/owner/coaches/' + ${coach.id}}" class="btn btn-sm btn-light rounded-circle" title="Chi tiết">
                                     <i class="bi bi-arrow-right"></i>
                                 </a>
                             </div>

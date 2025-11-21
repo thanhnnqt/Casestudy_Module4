@@ -14,7 +14,7 @@
 
   <div class="container-fluid">
     <div class="mb-4">
-      <a href="/admin/staffs" class="text-decoration-none text-muted fw-bold small">
+      <a href="/owner/staffs" class="text-decoration-none text-muted fw-bold small">
         <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
       </a>
     </div>
@@ -30,7 +30,7 @@
             <span class="badge bg-info-subtle text-info-emphasis rounded-pill px-3 py-2 mb-3" th:text="${staff.role}">Role</span>
 
             <div class="d-flex justify-content-center gap-2 mt-2">
-              <a th:href="@{'/admin/staffs/update/' + ${staff.id}}" class="btn btn-edit px-4 py-2 rounded-3">
+              <a th:href="@{'/owner/staffs/update/' + ${staff.id}}" class="btn btn-edit px-4 py-2 rounded-3">
                 <i class="bi bi-pencil-square me-2"></i>Sửa
               </a>
               <button type="button" class="btn btn-delete px-3 py-2 rounded-3"
@@ -92,7 +92,7 @@
         </div>
         <div class="modal-footer justify-content-center border-0">
           <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-          <form th:action="@{'/admin/staffs/delete/' + ${staff.id}}" method="post">
+          <form th:action="@{'/owner/staffs/delete/' + ${staff.id}}" method="post">
             <button type="submit" class="btn btn-danger fw-bold">Xóa ngay</button>
           </form>
         </div>
