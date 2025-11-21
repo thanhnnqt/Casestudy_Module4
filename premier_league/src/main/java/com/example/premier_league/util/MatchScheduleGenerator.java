@@ -44,7 +44,6 @@ public class MatchScheduleGenerator {
             return;
         }
 
-        // KHÔNG RANDOM thứ tự đội nữa
         List<Team> teamList = new ArrayList<>(teams);
 
         int totalRounds = teamList.size() - 1;   // 19 vòng
@@ -90,7 +89,7 @@ public class MatchScheduleGenerator {
 
         /* ====================== LƯỢT VỀ ======================= */
 
-        // KHÔNG RANDOM lượt về nữa
+
         List<Team> reverseList = new ArrayList<>(teams);
 
         for (int round = 0; round < totalRounds; round++) {
