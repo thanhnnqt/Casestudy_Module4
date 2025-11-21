@@ -12,4 +12,5 @@ public interface ITicketService {
     Page<Ticket> findAll(Pageable pageable);
     List<Ticket> findAllList();
     Ticket findByHomeTeamAndAwayTeam(String homeTeam, String awayTeam);
+    List<Ticket> findAllByHomeTeam(String homeTeam);
 }

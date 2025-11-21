@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Controller
-@RequestMapping("/admin/tickets/{teamId}")
+@RequestMapping("/coach/tickets/{teamId}")
 public class TicketController {
     final ITicketService ticketService;
     final ITicketTypeService ticketTypeService;
@@ -36,7 +36,7 @@ public class TicketController {
     }
 
     @GetMapping()
-    public String showTicketList(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "2") int size, @PathVariable(value = "teamId") Integer teamId) {
+    public String showTicketList(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "100") int size, @PathVariable(value = "teamId") Integer teamId) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Ticket> ticketPage = ticketService.findAll(pageable);
         if (ticketPage.getContent().isEmpty()) {
@@ -44,18 +44,17 @@ public class TicketController {
         } else {
             model.addAttribute("ticketPage", ticketPage);
         }
-        System.out.println(ticketPage.getContent().size());
+        System.out.println(teamId);
         return "ticket/list";
     }
 
-    @GetMapping("/create")
-    public String showFormCreate(Model model, @RequestParam(value = "id") Long id, @PathVariable(value = "teamId") String teamId) {
+    @GetMapping("/createTicket/{id}")
+    public String showFormCreate(Model model, @PathVariable(value = "id", required = false) Long id, @PathVariable(value = "teamId") Integer teamId) {
         Ticket ticket = new Ticket();
         List<Stadium> stadiumList = stadiumService.findAll();
         MatchSchedule matchScheduleToCreateTicket = matchScheduleService.findById(id);
         String stadiumToMatch = "";
         String address = "";
-
         for (Stadium stadium : stadiumList) {
             if (Objects.equals(stadium.getTeam().getId(), matchScheduleToCreateTicket.getHomeTeam().getId())) {
                 stadiumToMatch = stadium.getName();
@@ -69,27 +68,28 @@ public class TicketController {
         ticket.setStadium(stadiumToMatch);
         ticket.setDateMatch(matchScheduleToCreateTicket.getMatchDate());
         ticket.setTimeMatch(matchScheduleToCreateTicket.getMatchTime());
+        System.out.println(teamId);
         model.addAttribute("ticket", ticket);
+        model.addAttribute("teamId", teamId);
         return "ticket/create";
     }
 
     @GetMapping("/optionToCreateTicket")
     public String showOptionToCreateTicket(Model model, @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                                           @RequestParam(value = "size", defaultValue = "100", required = false) int size, @PathVariable(value = "teamId") Integer teamId) {
+                                           @RequestParam(value = "size", defaultValue = "100", required = false) int size, @PathVariable(value = "teamId") Long teamId) {
         Pageable pageable = PageRequest.of(page, size);
         Page<MatchSchedule> matchScheduleList = matchScheduleService.getAllMatches(pageable);
         List<MatchSchedule> matchScheduleListToShow = new ArrayList<>();
-        MatchSchedule matchScheduleTest = matchScheduleList.getContent().get(0);
-        Long idHomeTeam = matchScheduleTest.getHomeTeam().getId();
+
         long between = 0;
-        for (MatchSchedule matchSchedule : matchScheduleList) {
+        for (MatchSchedule matchSchedule : matchScheduleList.getContent()) {
             between = ChronoUnit.DAYS.between(LocalDate.now(), matchSchedule.getMatchDate());
-            if (between >= 1 && between <= 20 && Objects.equals(matchSchedule.getHomeTeam().getId(), idHomeTeam)) {
+            if (between >= 1 && between <= 20 && Objects.equals(matchSchedule.getHomeTeam().getId(), teamId)) {
                 matchScheduleListToShow.add(matchSchedule);
             }
         }
         model.addAttribute("matchScheduleListToShow", matchScheduleListToShow);
-        System.out.println(matchScheduleListToShow.size());
+        model.addAttribute("teamId", teamId);
         return "ticket/optionToCreateTicket";
     }
 
@@ -101,7 +101,7 @@ public class TicketController {
         } else {
             System.out.println("Fail!");
         }
-        return "redirect:/admin/tickets";
+        return "redirect:/coach/tickets/" + teamId;
     }
 
     @GetMapping("/update")
