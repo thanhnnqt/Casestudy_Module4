@@ -11,6 +11,19 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+
+        /* Style cho cầu thủ bị treo giò */
+        .player-item.suspended {
+            opacity: 0.6;
+            background-color: #f8d7da !important; /* Màu đỏ nhạt cảnh báo */
+            cursor: not-allowed !important;
+            border: 1px solid #f5c6cb !important;
+        }
+
+        .player-item.suspended:active {
+            cursor: not-allowed !important;
+        }
+
         /* --- Variables --- */
         :root{
             --pl-deep: #38003c;    /* tím than */
@@ -277,8 +290,9 @@
 
                 <div class="scrollable-content drop-zone" id="playerPool" aria-label="Player pool">
                     <div th:each="p : ${allPlayersForTable}"
-                         class="player-draggable"
-                         draggable="true"
+                         class="player-draggable player-item"
+                         th:classappend="${p.suspensionMatchesRemaining > 0} ? 'suspended' : ''"
+                         th:attr="draggable=${p.suspensionMatchesRemaining == 0}, data-suspended=${p.suspensionMatchesRemaining > 0}"
                          th:data-id="${p.id}"
                          th:data-name="${p.name}"
                          th:data-pos="${p.position}">
@@ -287,16 +301,22 @@
                             <div class="pos-badge" th:classappend="'pos-' + ${p.position}" th:text="${p.position}">DF</div>
                             <div>
                                 <div class="name fw-bold" th:text="${p.name}">Nguyen Van A</div>
-                                <div class="sub small" th:text="${p.age} + ' tuổi · Exp: ' + ${p.experience}">22 tuổi · Exp: 3</div>
+                                <div th:if="${p.suspensionMatchesRemaining > 0}" class="text-danger small fw-bold">
+                                    <i class="bi bi-ban"></i> Treo giò (<span th:text="${p.suspensionMatchesRemaining}"></span> trận)
+                                </div>
+                                <div th:unless="${p.suspensionMatchesRemaining > 0}" class="sub small"
+                                     th:text="${p.age} + ' tuổi · Exp: ' + ${p.experience}">22 tuổi</div>
                             </div>
                         </div>
 
-                        <div class="text-end d-flex align-items-center">
-                            <div th:if="${p.yellowCards > 0}" class="me-2" title="Thẻ vàng">
-                                <i class="bi bi-square-fill" style="color: #ffc107"></i> <small class="text-muted" th:text="${p.yellowCards}">1</small>
+                        <div class="text-end d-flex align-items-center gap-2">
+                            <div th:if="${p.seasonYellowCards > 0}" class="d-flex align-items-center" title="Thẻ vàng tích lũy">
+                                <span class="fw-bold text-dark me-1" th:text="${p.seasonYellowCards}"></span>
+                                <i class="bi bi-square-fill" style="color: #ffc107; font-size: 0.8rem;"></i>
                             </div>
-                            <div th:if="${p.redCards > 0}" class="me-2" title="Thẻ đỏ">
-                                <i class="bi bi-square-fill" style="color: #dc3545"></i> <small class="text-muted" th:text="${p.redCards}">0</small>
+
+                            <div th:if="${p.suspensionMatchesRemaining > 0}" title="Đang bị treo giò">
+                                <i class="bi bi-square-fill" style="color: #dc3545; font-size: 0.8rem;"></i>
                             </div>
                         </div>
                     </div>
