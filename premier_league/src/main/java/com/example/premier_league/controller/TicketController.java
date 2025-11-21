@@ -2,8 +2,10 @@ package com.example.premier_league.controller;
 
 import com.example.premier_league.entity.MatchSchedule;
 import com.example.premier_league.entity.Stadium;
+import com.example.premier_league.entity.Team;
 import com.example.premier_league.entity.Ticket;
 import com.example.premier_league.service.IMatchScheduleService;
+import com.example.premier_league.service.ITeamService;
 import com.example.premier_league.service.impl.IStadiumService;
 import com.example.premier_league.service.impl.ITicketService;
 import com.example.premier_league.service.impl.ITicketTypeService;
@@ -27,18 +29,22 @@ public class TicketController {
     final ITicketTypeService ticketTypeService;
     final IMatchScheduleService matchScheduleService;
     final IStadiumService stadiumService;
+    final ITeamService teamService;
 
-    public TicketController(ITicketService ticketService, ITicketTypeService ticketTypeService, IMatchScheduleService matchScheduleService, IStadiumService stadiumService) {
+    public TicketController(ITicketService ticketService, ITicketTypeService ticketTypeService, IMatchScheduleService matchScheduleService, IStadiumService stadiumService, ITeamService teamService) {
         this.ticketService = ticketService;
         this.ticketTypeService = ticketTypeService;
         this.matchScheduleService = matchScheduleService;
         this.stadiumService = stadiumService;
+
+        this.teamService = teamService;
     }
 
     @GetMapping()
     public String showTicketList(Model model, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "100") int size, @PathVariable(value = "teamId") Integer teamId) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Ticket> ticketPage = ticketService.findAll(pageable);
+
         if (ticketPage.getContent().isEmpty()) {
             model.addAttribute("mess", "The list is empty");
         } else {
