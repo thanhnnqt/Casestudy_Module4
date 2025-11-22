@@ -641,38 +641,137 @@
             zone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 zone.classList.remove('drag-over');
+                if (!draggedItem) return;
                 if (!canDrop(draggedItem, zone)) return;
 
-                // Lấy data (bao gồm avatar)
-                const data = {
+                // Lấy data (bao gồm avatar) từ draggedItem
+                const draggedData = {
                     id: draggedItem.dataset.playerId,
                     name: draggedItem.dataset.playerName,
                     pos: draggedItem.dataset.pos,
                     yellows: draggedItem.dataset.yellows,
                     suspended: draggedItem.dataset.suspended,
-                    avatar: draggedItem.dataset.avatar // <--- LẤY AVATAR
+                    avatar: draggedItem.dataset.avatar
                 };
 
-                const originalSlot = draggedItem.closest('.player-slot, .bench-slot');
-                if (originalSlot) clearSlot(originalSlot);
-                else draggedItem.remove();
+                const sourceSlot = draggedItem.closest('.player-slot, .bench-slot, #available-players');
+                const sourceIsPool = (sourceSlot === playerPool);
+                const sourceIsBench = (sourceSlot && sourceSlot.classList && sourceSlot.classList.contains('bench-slot'));
+                const sourceIsPitchSlot = (sourceSlot && sourceSlot.classList && sourceSlot.classList.contains('player-slot'));
 
+                // If dropping back to pool
                 if (zone.id === 'available-players') {
-                    // Trả về list (truyền avatar vào)
-                    zone.appendChild(createPlayerElement(data.id, data.name, data.pos, data.yellows, data.suspended, data.avatar));
-                } else if (zone.classList.contains('player-slot')) {
-                    // Thả vào sân (truyền avatar vào)
-                    const slotLabel = zone.querySelector('.slot-label') ? zone.querySelector('.slot-label').innerText : '';
-                    zone.innerHTML = '';
-                    zone.appendChild(createFilledElement(data.id, data.name, data.pos, slotLabel, false, data.yellows, data.suspended, data.avatar));
-                    zone.classList.add('filled');
-                } else if (zone.classList.contains('bench-slot')) {
-                    // Thả vào ghế dự bị
-                    zone.innerHTML = '';
-                    zone.appendChild(createFilledElement(data.id, data.name, data.pos, '', true, data.yellows, data.suspended, data.avatar));
-                    zone.classList.add('filled');
+                    // move dragged back to pool
+                    if (sourceIsPitchSlot || sourceIsBench) {
+                        // remove from its slot and append a pool element
+                        if (sourceIsPitchSlot) clearSlot(sourceSlot);
+                        else if (sourceIsBench) { sourceSlot.classList.remove('filled'); sourceSlot.innerHTML = `<span class="slot-label">Dự bị ${sourceSlot.dataset.slotPos.split('_')[1]}</span>`; }
+                        playerPool.appendChild(createPlayerElement(draggedData.id, draggedData.name, draggedData.pos, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                        draggedItem.remove();
+                    } else if (!sourceIsPool) {
+                        // fallback
+                        playerPool.appendChild(createPlayerElement(draggedData.id, draggedData.name, draggedData.pos, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                        draggedItem.remove();
+                    }
+                    updateAllCounts();
+                    return;
                 }
-                updateAllCounts();
+
+                // If target is a player-slot or bench-slot
+                if (zone.classList.contains('player-slot') || zone.classList.contains('bench-slot')) {
+                    const targetIsBench = zone.classList.contains('bench-slot');
+                    const targetIsSlot = zone.classList.contains('player-slot');
+                    const targetHasPlayer = !!zone.querySelector('.player-item');
+
+                    if (!targetHasPlayer) {
+                        // empty slot -> place dragged here
+                        if (!sourceIsPool) {
+                            // clear source slot
+                            if (sourceIsPitchSlot) clearSlot(sourceSlot);
+                            else if (sourceIsBench) { sourceSlot.classList.remove('filled'); sourceSlot.innerHTML = `<span class="slot-label">Dự bị ${sourceSlot.dataset.slotPos.split('_')[1]}</span>`; }
+                            else draggedItem.remove();
+                        } else {
+                            // dragged from pool -> remove original element from pool
+                            draggedItem.remove();
+                        }
+
+                        zone.innerHTML = '';
+                        zone.appendChild(createFilledElement(draggedData.id, draggedData.name, draggedData.pos, '', targetIsBench, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                        zone.classList.add('filled');
+                        updateAllCounts();
+                        return;
+                    } else {
+                        // target already has a player -> DO SWAP
+                        const existingEl = zone.querySelector('.player-item');
+                        const existingData = {
+                            id: existingEl.dataset.playerId,
+                            name: existingEl.dataset.playerName || (existingEl.querySelector('.slot-player-name') ? existingEl.querySelector('.slot-player-name').innerText : ''),
+                            pos: existingEl.dataset.pos,
+                            yellows: existingEl.dataset.yellows,
+                            suspended: existingEl.dataset.suspended,
+                            avatar: existingEl.dataset.avatar || (existingEl.querySelector('.slot-avatar') ? existingEl.querySelector('.slot-avatar').getAttribute('src') : '')
+                        };
+
+                        // if draggedItem is from pool -> move existingEl back to pool
+                        if (sourceIsPool) {
+                            // Remove dragged element in pool and place new filled element in zone
+                            draggedItem.remove();
+
+                            // place existing player back to pool (create element)
+                            playerPool.appendChild(createPlayerElement(existingData.id, existingData.name, existingData.pos, existingData.yellows, existingData.suspended, existingData.avatar));
+
+                            // put dragged into target
+                            zone.innerHTML = '';
+                            zone.appendChild(createFilledElement(draggedData.id, draggedData.name, draggedData.pos, '', targetIsBench, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                            zone.classList.add('filled');
+
+                            // remove old existingEl from DOM (it is replaced)
+                            existingEl.remove();
+                            updateAllCounts();
+                            return;
+                        }
+
+                        // if draggedItem is from another slot (bench or pitch) -> swap places
+                        if (sourceIsPitchSlot || sourceIsBench) {
+                            // Clear target zone and source zone, then place swapped elements
+                            // Save reference to source container
+                            const sourceContainer = sourceSlot;
+
+                            // remove elements from both containers
+                            existingEl.remove();
+                            draggedItem.remove();
+
+                            // Put dragged data into target zone
+                            zone.innerHTML = '';
+                            zone.appendChild(createFilledElement(draggedData.id, draggedData.name, draggedData.pos, '', targetIsBench, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                            zone.classList.add('filled');
+
+                            // Put existing data into source container
+                            if (sourceContainer.classList.contains('player-slot')) {
+                                sourceContainer.innerHTML = '';
+                                sourceContainer.appendChild(createFilledElement(existingData.id, existingData.name, existingData.pos, '', sourceContainer.classList.contains('bench-slot'), existingData.yellows, existingData.suspended, existingData.avatar));
+                                sourceContainer.classList.add('filled');
+                            } else if (sourceContainer.classList.contains('bench-slot')) {
+                                sourceContainer.innerHTML = '';
+                                sourceContainer.appendChild(createFilledElement(existingData.id, existingData.name, existingData.pos, '', true, existingData.yellows, existingData.suspended, existingData.avatar));
+                                sourceContainer.classList.add('filled');
+                            }
+                            updateAllCounts();
+                            return;
+                        }
+
+                        // fallback: if source unknown, do safe swap: move existing to pool, put dragged into zone
+                        draggedItem.remove();
+                        playerPool.appendChild(createPlayerElement(existingData.id, existingData.name, existingData.pos, existingData.yellows, existingData.suspended, existingData.avatar));
+                        zone.innerHTML = '';
+                        zone.appendChild(createFilledElement(draggedData.id, draggedData.name, draggedData.pos, '', targetIsBench, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                        zone.classList.add('filled');
+                        updateAllCounts();
+                        return;
+                    }
+                }
+
+                // default fallback
             });
         });
 
@@ -680,18 +779,23 @@
             if (!item) return false;
             if (isLocked) return false;
             if (item.dataset.suspended === 'true') return false;
-            if (zone.classList.contains('filled')) return false;
-
+            if (zone.classList.contains('filled')) {
+                // we allow drop on filled if swap is permitted (unless suspended)
+                // ensure zone is a slot or bench
+                if (!(zone.classList.contains('player-slot') || zone.classList.contains('bench-slot'))) return false;
+            }
             if (zone.classList.contains('bench-slot')) {
                 const filledBenchSlots = document.querySelectorAll('.bench-slot.filled').length;
-                if (filledBenchSlots >= 9 && !item.closest('.bench-slot')) return false;
+                // if zone already filled, swap allowed; otherwise if bench full block new bench add from pool
+                if (!zone.classList.contains('filled') && filledBenchSlots >= 9 && !item.closest('.bench-slot')) return false;
             }
             if (zone.classList.contains('player-slot')) {
                 const filledPitchSlots = document.querySelectorAll('.player-slot.filled').length;
                 const activeFormation = document.querySelector('.formation:not([style*="display: none"])');
                 if (activeFormation) {
                     const totalSlotsInFormation = activeFormation.querySelectorAll('.player-slot').length;
-                    if (filledPitchSlots >= totalSlotsInFormation && !item.closest('.player-slot')) return false;
+                    // if zone empty and pitch full, block (unless swapping)
+                    if (!zone.classList.contains('filled') && filledPitchSlots >= totalSlotsInFormation && !item.closest('.player-slot')) return false;
                 }
             }
             return true;
@@ -791,7 +895,13 @@
                         else window.location.reload();
                     });
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Lưu thất bại' });
+                    // try to parse error message from server
+                    let text = 'Lưu thất bại';
+                    try {
+                        const json = await response.json();
+                        if (json && json.message) text = json.message;
+                    } catch(_) {}
+                    Swal.fire({ icon: 'error', title: 'Lưu thất bại', text: text });
                 }
             } catch (err) {
                 Swal.fire({ icon: 'error', title: 'Lỗi kết nối' });
