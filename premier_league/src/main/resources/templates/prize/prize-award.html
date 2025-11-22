@@ -27,7 +27,7 @@
     </div>
 
     <form th:action="@{/admin/prize/award/save}" th:object="${prizeDto}" method="post" class="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
-      <input type="hidden" th:field="*{id}">
+      <input type="hidden" th:field="*{prizeId}">
       <input type="hidden" th:field="*{type}">
 
       <div class="mb-8">
@@ -56,7 +56,10 @@
               <div class="relative">
                 <select id="teamSelectForPlayer" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white" onchange="loadPlayers()">
                   <option value="">-- Chọn đội bóng --</option>
-                  <option th:each="t : ${teams}" th:value="${t.id}" th:text="${t.name}"></option>
+                  <option th:each="t : ${teams}"
+                          th:value="${t.id}"
+                          th:text="${t.name}"
+                          th:selected="${selectedTeamId != null and t.id == selectedTeamId}"></option>
                 </select>
               </div>
             </div>
@@ -99,10 +102,13 @@
     </form>
   </div>
 
-  <script>
+  <script th:inline="javascript">
     function loadPlayers() {
       const teamId = document.getElementById('teamSelectForPlayer').value;
       const playerSelect = document.getElementById('playerSelect');
+      // Lấy ID cầu thủ hiện tại nếu đang sửa
+      /*[[${prizeDto.playerId}]]*/
+      const currentPlayerId = [[${prizeDto.playerId}]];
 
       if (!playerSelect) return;
 
@@ -116,23 +122,22 @@
         return;
       }
 
-      // Gọi API lấy cầu thủ
       fetch(`/admin/prize/api/players-by-team/${teamId}`)
-              .then(response => {
-                if (!response.ok) throw new Error("HTTP error " + response.status);
-                return response.json();
-              })
+              .then(response => response.json())
               .then(data => {
                 playerSelect.innerHTML = '<option value="">-- Chọn cầu thủ --</option>';
-
                 if (data.length === 0) {
                   playerSelect.innerHTML += '<option value="" disabled>Đội này chưa có cầu thủ</option>';
                 }
-
                 data.forEach(player => {
                   const option = document.createElement('option');
                   option.value = player.id;
                   option.text = `${player.name} (${player.position})`;
+
+                  // Auto chọn lại cầu thủ cũ
+                  if (currentPlayerId && player.id == currentPlayerId) {
+                    option.selected = true;
+                  }
                   playerSelect.add(option);
                 });
 
@@ -145,6 +150,14 @@
                 playerSelect.innerHTML = '<option value="">Lỗi kết nối server</option>';
               });
     }
+
+    // Tự động chạy khi mở trang nếu đã có đội chọn sẵn
+    document.addEventListener("DOMContentLoaded", function() {
+      const teamSelect = document.getElementById('teamSelectForPlayer');
+      if(teamSelect && teamSelect.value) {
+        loadPlayers();
+      }
+    });
   </script>
 </div>
 
