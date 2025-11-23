@@ -57,7 +57,7 @@ public class Team {
     // =================================================================
     // Vì Account là @ManyToOne (Nhiều Acc thuộc 1 Team)
     // Nên Team phải là @OneToMany (1 Team có danh sách các Acc)
-    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "team")
     @JsonIgnore
     private List<Account> accounts = new ArrayList<>();
 
