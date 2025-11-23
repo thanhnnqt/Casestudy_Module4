@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,6 @@ public class MatchEventService implements IMatchEventService {
     private final SimpMessagingTemplate messaging;
     private final ITeamRepository teamRepo;
     private final IPlayerRepository playerRepo;
-
-    // RankingsService để broadcast BXH realtime (nhưng không để MatchEventService cập nhật điểm trực tiếp)
     private final RankingsService rankingsService;
 
     private MatchEventResponse toDto(MatchEvent e) {
@@ -45,29 +44,34 @@ public class MatchEventService implements IMatchEventService {
     @Transactional
     public MatchEvent createEvent(MatchEvent event) {
 
-        if (event.getMatch() == null || event.getMatch().getId() == null) {
-            throw new RuntimeException("Thiếu matchId trong sự kiện");
-        }
-        Long matchId = event.getMatch().getId();
+        Long matchId = Optional.ofNullable(event.getMatch())
+                .orElseThrow(() -> new RuntimeException("Thiếu match reference"))
+                .getId();
 
         Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trận"));
 
-        // set team
+        // resolve team (nếu có)
         if (event.getTeam() != null && event.getTeam().getId() != null) {
-            Team team = teamRepo.findById(event.getTeam().getId())
+            Team t = teamRepo.findById(event.getTeam().getId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy team"));
-            if (!team.getId().equals(match.getHomeTeam().getId())
-                    && !team.getId().equals(match.getAwayTeam().getId())) {
+            // kiểm tra team thuộc match
+            if (!t.getId().equals(match.getHomeTeam().getId()) && !t.getId().equals(match.getAwayTeam().getId())) {
                 throw new RuntimeException("Đội này không thuộc trận đấu");
             }
-            event.setTeam(team);
+            event.setTeam(t);
         }
 
-        // set player
+        // resolve player (nếu có) và kiểm tra treo giò
         if (event.getPlayer() != null && event.getPlayer().getId() != null) {
             Player p = playerRepo.findById(event.getPlayer().getId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy cầu thủ"));
+
+            // đảm bảo không add sự kiện cho cầu thủ đang bị treo
+            if (p.getSuspensionMatchesRemaining() != null && p.getSuspensionMatchesRemaining() > 0) {
+                throw new RuntimeException("Cầu thủ " + p.getName() + " đang bị treo (" + p.getSuspensionMatchesRemaining() + " trận còn lại)");
+            }
+
             event.setPlayer(p);
         }
 
@@ -76,17 +80,17 @@ public class MatchEventService implements IMatchEventService {
 
         // ============================ GOAL =============================
         if ("GOAL".equalsIgnoreCase(saved.getType())) {
+
+            // nếu chưa LIVE -> set LIVE (hợp lý khi admin bắt đầu trận bằng event)
             if (match.getStatus() != MatchStatus.LIVE) {
-                throw new RuntimeException("Trận đấu chưa LIVE");
+                match.setStatus(MatchStatus.LIVE);
             }
 
-            Long scoringTeam = saved.getTeam().getId();
-            if (scoringTeam.equals(match.getHomeTeam().getId())) {
+            Long tid = saved.getTeam().getId();
+            if (tid.equals(match.getHomeTeam().getId())) {
                 match.setHomeScore((match.getHomeScore() == null ? 0 : match.getHomeScore()) + 1);
-            } else if (scoringTeam.equals(match.getAwayTeam().getId())) {
-                match.setAwayScore((match.getAwayScore() == null ? 0 : match.getAwayScore()) + 1);
             } else {
-                throw new RuntimeException("Đội ghi bàn không hợp lệ cho trận");
+                match.setAwayScore((match.getAwayScore() == null ? 0 : match.getAwayScore()) + 1);
             }
 
             matchRepo.save(match);
@@ -94,20 +98,74 @@ public class MatchEventService implements IMatchEventService {
             Map<String, Object> score = new HashMap<>();
             score.put("homeScore", match.getHomeScore());
             score.put("awayScore", match.getAwayScore());
-            score.put("status", match.getStatus() != null ? match.getStatus().name() : null);
+            score.put("status", match.getStatus().name());
 
             messaging.convertAndSend("/topic/match/" + matchId + "/score", score);
+        }
+
+        // ============================ YELLOW CARD (accumulation) =============================
+        if ("YELLOW_CARD".equalsIgnoreCase(saved.getType())) {
+            Player player = saved.getPlayer();
+            if (player != null) {
+                // safeguard nulls
+                Integer current = player.getSeasonYellowCards() == null ? 0 : player.getSeasonYellowCards();
+                current++;
+                player.setSeasonYellowCards(current);
+
+                // lưu ngay
+                playerRepo.save(player);
+
+                // nếu đạt ngưỡng = 2 -> treo giò 1 trận theo yêu cầu
+                if (current >= 2) {
+                    player.setSeasonYellowCards(0); // reset sau khi kỷ luật
+                    Integer remain = player.getSuspensionMatchesRemaining() == null ? 0 : player.getSuspensionMatchesRemaining();
+                    player.setSuspensionMatchesRemaining(remain + 1); // treo 1 trận
+                    playerRepo.save(player);
+
+                    // tạo event thông báo suspension (dùng để FE hiển thị)
+                    MatchEvent susp = new MatchEvent();
+                    susp.setMatch(match);
+                    susp.setPlayer(player);
+                    susp.setTeam(saved.getTeam());
+                    susp.setMinute(saved.getMinute());
+                    susp.setType("SUSPENSION");
+                    susp.setDescription("Treo giò 1 trận do tích lũy 2 thẻ vàng trong mùa giải");
+                    MatchEvent suspSaved = eventRepo.save(susp);
+                    messaging.convertAndSend("/topic/match/" + matchId + "/events", toDto(suspSaved));
+                }
+            }
+        }
+
+        // ============================ RED CARD (direct) =============================
+        if ("RED_CARD".equalsIgnoreCase(saved.getType())) {
+            Player player = saved.getPlayer();
+            if (player != null) {
+                Integer remain = player.getSuspensionMatchesRemaining() == null ? 0 : player.getSuspensionMatchesRemaining();
+                // đảm bảo treo tối thiểu 3 trận
+                if (remain < 3) {
+                    player.setSuspensionMatchesRemaining(3);
+                    playerRepo.save(player);
+                }
+            }
         }
 
         // ============================ MATCH END =============================
         if ("MATCH_END".equalsIgnoreCase(saved.getType())) {
 
-            boolean alreadyFinished = match.getStatus() == MatchStatus.FINISHED;
+            // Nếu trận đã FINISHED trước đó → bỏ qua cập nhật BXH (tránh cộng dồn)
+            if (match.getStatus() != MatchStatus.FINISHED) {
+                // chuyển trạng thái
+                match.setStatus(MatchStatus.FINISHED);
+                matchRepo.save(match);
 
-            match.setStatus(MatchStatus.FINISHED);
-            matchRepo.save(match);
+                // CẬP NHẬT BXH duy nhất tại đây (RankingsService xử lý cộng điểm/hieu so)
+                rankingsService.applyMatchResult(match);
+            } else {
+                // nếu đã finished, vẫn update trạng thái/tỉ số send cho FE nhưng không cập nhật BXH
+                matchRepo.save(match);
+            }
 
-            // send final score + event
+            // gửi realtime score + event MATCH_END
             Map<String, Object> finish = new HashMap<>();
             finish.put("homeScore", match.getHomeScore());
             finish.put("awayScore", match.getAwayScore());
@@ -115,14 +173,31 @@ public class MatchEventService implements IMatchEventService {
             messaging.convertAndSend("/topic/match/" + matchId + "/score", finish);
             messaging.convertAndSend("/topic/match/" + matchId + "/events", toDto(saved));
 
-            // only call rankingsService once (applyMatchResult is idempotent)
-            if (!alreadyFinished) {
-                rankingsService.applyMatchResult(match);
+            // Sau khi trận kết thúc → giảm 1 trận treo giò cho mọi cầu thủ 2 đội (nếu repository hỗ trợ)
+            try {
+                List<Player> homePlayers = playerRepo.findByTeamId(match.getHomeTeam().getId());
+                List<Player> awayPlayers = playerRepo.findByTeamId(match.getAwayTeam().getId());
+
+                for (Player p : homePlayers) {
+                    if (p.getSuspensionMatchesRemaining() != null && p.getSuspensionMatchesRemaining() > 0) {
+                        p.setSuspensionMatchesRemaining(p.getSuspensionMatchesRemaining() - 1);
+                        playerRepo.save(p);
+                    }
+                }
+                for (Player p : awayPlayers) {
+                    if (p.getSuspensionMatchesRemaining() != null && p.getSuspensionMatchesRemaining() > 0) {
+                        p.setSuspensionMatchesRemaining(p.getSuspensionMatchesRemaining() - 1);
+                        playerRepo.save(p);
+                    }
+                }
+            } catch (Exception ex) {
+                // nếu IPlayerRepository không có findByTeamId thì không block flow
             }
+
             return saved;
         }
 
-        // ============================ NORMAL EVENT =============================
+        // sự kiện thường (không phải MATCH_END)
         messaging.convertAndSend("/topic/match/" + matchId + "/events", toDto(saved));
         return saved;
     }
@@ -150,9 +225,9 @@ public class MatchEventService implements IMatchEventService {
         MatchEvent e = new MatchEvent();
         e.setMatch(match);
 
+        // nếu bắt đầu trận bằng event (first event) -> set LIVE
         if (match.getStatus() != MatchStatus.LIVE &&
                 !"MATCH_END".equalsIgnoreCase(dto.getType())) {
-
             match.setStatus(MatchStatus.LIVE);
             matchRepo.save(match);
         }
@@ -164,12 +239,22 @@ public class MatchEventService implements IMatchEventService {
         if (dto.getTeamId() != null) {
             Team t = teamRepo.findById(dto.getTeamId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy đội bóng"));
+            // kiểm tra team thuộc match
+            if (!t.getId().equals(match.getHomeTeam().getId()) && !t.getId().equals(match.getAwayTeam().getId())) {
+                throw new RuntimeException("Đội bóng không đá trận này");
+            }
             e.setTeam(t);
         }
 
         if (dto.getPlayerId() != null) {
             Player p = playerRepo.findById(dto.getPlayerId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy cầu thủ"));
+
+            // chặn nếu đang treo giò
+            if (p.getSuspensionMatchesRemaining() != null && p.getSuspensionMatchesRemaining() > 0) {
+                throw new RuntimeException("Cầu thủ " + p.getName() + " đang bị treo (" + p.getSuspensionMatchesRemaining() + " trận còn lại)");
+            }
+
             e.setPlayer(p);
         }
 
@@ -185,29 +270,4 @@ public class MatchEventService implements IMatchEventService {
     public MatchEvent getEvent(Long id) {
         return eventRepo.findById(id).orElse(null);
     }
-
-    /**
-     * Phương thức xử lý logic cộng dồn thẻ vàng theo luật Premier League
-     * Gọi phương thức này bên trong createEvent khi loại sự kiện là YELLOW_CARD
-     */
-    private void applySuspensionRules(Player player, int currentRound) {
-        int currentYellows = player.getSeasonYellowCards();
-
-        // Luật 1: 5 thẻ vàng trước vòng 19 -> Treo giò 1 trận
-        if (currentYellows == 5 && currentRound <= 19) {
-            player.setSuspensionMatchesRemaining(player.getSuspensionMatchesRemaining() + 1);
-        }
-        // Luật 2: 10 thẻ vàng trước vòng 32 -> Treo giò 2 trận
-        else if (currentYellows == 10 && currentRound <= 32) {
-            player.setSuspensionMatchesRemaining(player.getSuspensionMatchesRemaining() + 2);
-        }
-        // Luật 3: 15 thẻ vàng (bất kể vòng nào) -> Treo giò 3 trận
-        else if (currentYellows == 15) {
-            player.setSuspensionMatchesRemaining(player.getSuspensionMatchesRemaining() + 3);
-        }
-
-        // Lưu cập nhật
-        playerRepo.save(player);
-    }
-
 }
