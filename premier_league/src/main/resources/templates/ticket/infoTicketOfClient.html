@@ -142,9 +142,9 @@
     </div>
 
     <a class="back-btn"
-       th:href="@{/tickets/create(id=${matchId}, quantity = ${quantity}, standSessionId = ${standSessionId})}">Hủy</a>
-    <a class="back-btn"
        th:href="@{/payment/showFormToPay(total=${ticketDto.getTotalPay()})}">Thanh toán</a>
+    <a class="back-btn"
+       th:href="@{/tickets/create(id=${matchId}, quantity = ${quantity}, standSessionId = ${standSessionId})}">Hủy</a>
 
 </div>
 
