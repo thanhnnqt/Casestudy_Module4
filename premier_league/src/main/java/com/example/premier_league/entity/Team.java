@@ -58,7 +58,7 @@ public class Team {
     // Vì Account là @ManyToOne (Nhiều Acc thuộc 1 Team)
     // Nên Team phải là @OneToMany (1 Team có danh sách các Acc)
     @OneToMany(mappedBy = "team")
-    @JsonIgnore // Tránh vòng lặp vô tận khi convert sang JSON
+    @JsonIgnore
     private List<Account> accounts = new ArrayList<>();
 
     @JsonIgnore
