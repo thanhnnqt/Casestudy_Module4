@@ -1,0 +1,586 @@
+-- seed_data_full.sql
+USE casestudy_module4;
+
+-- Disable FK checks during seeding
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- -----------------------
+-- TEAMS
+-- -----------------------
+INSERT INTO teams (
+  id, name, short_name, country, city, stadium,
+  coach_name, logo_url, description,
+  total_players, win_count, draw_count, lose_count,
+  goals_for, goals_against, goal_difference, points
+) 
+VALUES
+(NULL, 'Arsenal', 'ARS', 'England', 'London', 'Emirates Stadium', 'Mikel Arteta', '/images/teams/ARS.png', 'Top team London', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Aston Villa', 'AVL', 'England', 'Birmingham', 'Villa Park', 'Unai Emery', '/images/teams/AVL.png', 'Strong competitive team', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Bournemouth', 'BOU', 'England', 'Bournemouth', 'Vitality Stadium', 'Andoni Iraola', '/images/teams/BOU.png', 'Solid EPL competitor', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Brentford', 'BRE', 'England', 'London', 'Gtech Community Stadium', 'Thomas Frank', '/images/teams/BRE.png', 'Strong counter-press team', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Brighton & Hove Albion', 'BHA', 'England', 'Brighton', 'Amex Stadium', 'Fabian Hürzeler', '/images/teams/BHA.png', 'Creative attacking team', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Burnley', 'BUR', 'England', 'Burnley', 'Turf Moor', 'Vincent Kompany', '/images/teams/BUR.png', 'Classic EPL club', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Chelsea', 'CHE', 'England', 'London', 'Stamford Bridge', 'Enzo Maresca', '/images/teams/CHE.png', 'Top 6 Premier League club', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Crystal Palace', 'CRY', 'England', 'London', 'Selhurst Park', 'Oliver Glasner', '/images/teams/CRY.png', 'South London football team', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Everton', 'EVE', 'England', 'Liverpool', 'Goodison Park', 'Sean Dyche', '/images/teams/EVE.png', 'Historic Premier League club', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Fulham', 'FUL', 'England', 'London', 'Craven Cottage', 'Marco Silva', '/images/teams/FUL.png', 'Balanced London club', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Leeds United', 'LEE', 'England', 'Leeds', 'Elland Road', 'Daniel Farke', '/images/teams/LEE.png', 'Northern powerhouse', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Liverpool', 'LIV', 'England', 'Liverpool', 'Anfield', 'Arne Slot', '/images/teams/LIV.png', 'One of the biggest clubs in the world', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Manchester City', 'MCI', 'England', 'Manchester', 'Etihad Stadium', 'Pep Guardiola', '/images/teams/MCI.png', 'Champions of England', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Manchester United', 'MUN', 'England', 'Manchester', 'Old Trafford', 'Erik ten Hag', '/images/teams/MUN.png', 'The Red Devils', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Newcastle United', 'NEW', 'England', 'Newcastle', 'St James'' Park', 'Eddie Howe', '/images/teams/NEW.png', 'Strong northern club', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Nottingham Forest', 'NFO', 'England', 'Nottingham', 'City Ground', 'Nuno Espírito Santo', '/images/teams/NFO.png', 'Historic English club', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Sunderland', 'SUN', 'England', 'Sunderland', 'Stadium of Light', 'Tony Mowbray', '/images/teams/SUN.png', 'North East traditional club', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Tottenham Hotspur', 'TOT', 'England', 'London', 'Tottenham Hotspur Stadium', 'Ange Postecoglou', '/images/teams/TOT.png', 'North London rivals', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'West Ham United', 'WHU', 'England', 'London', 'London Stadium', 'Julen Lopetegui', '/images/teams/WHU.png', 'East London club', 40, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 'Wolverhampton Wanderers', 'WOL', 'England', 'Wolverhampton', 'Molineux Stadium', 'Gary O''Neil', '/images/teams/WOL.png', 'Midlands club with strong identity', 40, 0, 0, 0, 0, 0, 0, 0);
+
+-- -----------------------
+-- PLAYERS (full insert with required numeric fields)
+-- Note: include yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining and avatar
+-- Column names must match entity: player_name, dob, experience, position, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining, card_id (nullable), team_id
+-- -----------------------
+
+-- TEAM 1 - ARSENAL (team_id = 1)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining)
+VALUES
+(NULL,'David Raya','GK',1,'1995-09-15',NULL,'10 năm','/images/player/arsenal/raya.png',0,0,0,0),
+(NULL,'Aaron Ramsdale','GK',1,'1998-05-14',NULL,'7 năm','/images/player/arsenal/ramsdale.png',0,0,0,0),
+(NULL,'William Saliba','DF',1,'2001-03-24',NULL,'4 năm','/images/player/arsenal/saliba.png',0,0,0,0),
+(NULL,'Gabriel Magalhães','DF',1,'1997-12-19',NULL,'8 năm','/images/player/arsenal/gabriel.png',0,0,0,0),
+(NULL,'Ben White','DF',1,'1997-11-08',NULL,'7 năm','/images/player/arsenal/white.png',0,0,0,0),
+(NULL,'Oleksandr Zinchenko','DF',1,'1996-12-15',NULL,'9 năm','/images/player/arsenal/zinchenko.png',0,0,0,0),
+(NULL,'Jakub Kiwior','DF',1,'2000-02-15',NULL,'3 năm','/images/player/arsenal/kiwior.png',0,0,0,0),
+(NULL,'Jurrien Timber','DF',1,'2001-06-17',NULL,'3 năm','/images/player/arsenal/timber.png',0,0,0,0),
+(NULL,'Declan Rice','MF',1,'1999-01-14',NULL,'8 năm','/images/player/arsenal/rice.png',0,0,0,0),
+(NULL,'Martin Ødegaard','MF',1,'1998-12-11',NULL,'10 năm','/images/player/arsenal/odegaard.png',0,0,0,0),
+(NULL,'Kai Havertz','MF',1,'1999-06-11',NULL,'7 năm','/images/player/arsenal/havertz.png',0,0,0,0),
+(NULL,'Alexandre Jorginho','MF',1,'1991-12-20',NULL,'13 năm','/images/player/arsenal/jorginho.png',0,0,0,0),
+(NULL,'Thomas Partey','MF',1,'1993-06-13',NULL,'12 năm','/images/player/arsenal/partey.png',0,0,0,0),
+(NULL,'Bukayo Saka','FW',1,'2001-09-05',NULL,'5 năm','/images/player/arsenal/saka.png',0,0,0,0),
+(NULL,'Gabriel Jesus','FW',1,'1997-04-03',NULL,'10 năm','/images/player/arsenal/jesus.png',0,0,0,0),
+(NULL,'Gabriel Martinelli','FW',1,'2001-06-18',NULL,'5 năm','/images/player/arsenal/martinelli.png',0,0,0,0),
+(NULL,'Viktor Gyökeres','FW',1,'1994-08-06',NULL,'6 năm','/images/player/arsenal/gyokeres.png',0,0,0,0),
+(NULL,'Noni Madueke','FW',1,'2002-11-10',NULL,'3 năm','/images/player/arsenal/madueke.png',0,0,0,0),
+(NULL,'Eddie Nketiah','FW',1,'1999-05-30',NULL,'6 năm','/images/player/arsenal/nketiah.png',0,0,0,0),
+(NULL,'Charlie Patino','MF',1,'2003-10-17',NULL,'2 năm','/images/player/arsenal/patino.png',0,0,0,0),
+(NULL,'Ethan Nwaneri','MF',1,'2007-03-21',NULL,'1 năm','/images/player/arsenal/nwaneri.png',0,0,0,0),
+(NULL,'Reuell Walters','DF',1,'2004-05-13',NULL,'1 năm','/images/player/arsenal/walters.png',0,0,0,0),
+(NULL,'Amario Cozier-Duberry','FW',1,'2005-05-29',NULL,'1 năm','/images/player/arsenal/cozier-duberry.png',0,0,0,0);
+
+-- TEAM 2 - ASTON VILLA (team_id = 2)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Emiliano Martínez','GK',2,'1992-09-02',NULL,'12 năm','',0,0,0,0),
+(NULL,'Robin Olsen','GK',2,'1990-01-08',NULL,'14 năm','',0,0,0,0),
+(NULL,'Matty Cash','DF',2,'1997-08-07',NULL,'7 năm','',0,0,0,0),
+(NULL,'Ezri Konsa','DF',2,'1997-10-23',NULL,'7 năm','',0,0,0,0),
+(NULL,'Pau Torres','DF',2,'1997-01-16',NULL,'8 năm','',0,0,0,0),
+(NULL,'Diego Carlos','DF',2,'1993-03-15',NULL,'11 năm','',0,0,0,0),
+(NULL,'Lucas Digne','DF',2,'1993-07-20',NULL,'12 năm','',0,0,0,0),
+(NULL,'Kortney Hause','DF',2,'1995-07-16',NULL,'8 năm','',0,0,0,0),
+(NULL,'Douglas Luiz','MF',2,'1998-05-09',NULL,'7 năm','',0,0,0,0),
+(NULL,'John McGinn','MF',2,'1994-10-18',NULL,'10 năm','',0,0,0,0),
+(NULL,'Jacob Ramsey','MF',2,'2001-05-28',NULL,'4 năm','',0,0,0,0),
+(NULL,'Boubacar Kamara','MF',2,'1999-01-23',NULL,'7 năm','',0,0,0,0),
+(NULL,'Youri Tielemans','MF',2,'1997-05-07',NULL,'9 năm','',0,0,0,0),
+(NULL,'Nicolo Zaniolo','MF',2,'1999-07-02',NULL,'6 năm','',0,0,0,0),
+(NULL,'Ollie Watkins','FW',2,'1995-12-30',NULL,'9 năm','',0,0,0,0),
+(NULL,'Leon Bailey','FW',2,'1997-08-09',NULL,'7 năm','',0,0,0,0),
+(NULL,'Moussa Diaby','FW',2,'1999-07-07',NULL,'6 năm','',0,0,0,0),
+(NULL,'Jhon Durán','FW',2,'2003-12-13',NULL,'2 năm','',0,0,0,0),
+(NULL,'Cameron Archer','FW',2,'2001-12-09',NULL,'3 năm','',0,0,0,0),
+(NULL,'Omari Kellyman','MF',2,'2005-09-15',NULL,'1 năm','',0,0,0,0),
+(NULL,'Kaine Kesler-Hayden','DF',2,'2003-10-21',NULL,'2 năm','',0,0,0,0),
+(NULL,'Filip Revan','DF',2,'2003-11-16',NULL,'1 năm','',0,0,0,0);
+
+-- TEAM 3 - BOURNEMOUTH (team_id = 3)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Neto','GK',3,'1989-07-19',NULL,'15 năm','',0,0,0,0),
+(NULL,'Mark Travers','GK',3,'1999-10-18',NULL,'5 năm','',0,0,0,0),
+(NULL,'Will Dennis','GK',3,'2000-07-10',NULL,'3 năm','',0,0,0,0),
+(NULL,'Max Aarons','DF',3,'2000-01-04',NULL,'5 năm','',0,0,0,0),
+(NULL,'Marcos Senesi','DF',3,'1997-05-10',NULL,'7 năm','',0,0,0,0),
+(NULL,'Illia Zabarnyi','DF',3,'2002-09-01',NULL,'3 năm','',0,0,0,0),
+(NULL,'Lloyd Kelly','DF',3,'1998-10-06',NULL,'6 năm','',0,0,0,0),
+(NULL,'Milos Kerkez','DF',3,'2003-11-07',NULL,'2 năm','',0,0,0,0),
+(NULL,'Chris Mepham','DF',3,'1997-11-05',NULL,'7 năm','',0,0,0,0),
+(NULL,'Lewis Cook','MF',3,'1997-02-03',NULL,'8 năm','',0,0,0,0),
+(NULL,'Ryan Christie','MF',3,'1995-02-22',NULL,'10 năm','',0,0,0,0),
+(NULL,'Philip Billing','MF',3,'1996-06-11',NULL,'8 năm','',0,0,0,0),
+(NULL,'Tyler Adams','MF',3,'1999-02-14',NULL,'6 năm','',0,0,0,0),
+(NULL,'Hamed Traoré','MF',3,'2000-02-16',NULL,'5 năm','',0,0,0,0),
+(NULL,'Dominic Solanke','FW',3,'1997-09-14',NULL,'8 năm','',0,0,0,0),
+(NULL,'Antoine Semenyo','FW',3,'2000-01-07',NULL,'5 năm','',0,0,0,0),
+(NULL,'Justin Kluivert','FW',3,'1999-05-05',NULL,'6 năm','',0,0,0,0),
+(NULL,'Luis Sinisterra','FW',3,'1999-07-17',NULL,'5 năm','',0,0,0,0),
+(NULL,'Dango Ouattara','FW',3,'2002-02-11',NULL,'3 năm','',0,0,0,0),
+(NULL,'Kieffer Moore','FW',3,'1992-08-08',NULL,'12 năm','',0,0,0,0),
+(NULL,'David Brooks','FW',3,'1997-07-08',NULL,'6 năm','',0,0,0,0),
+(NULL,'Zachary Kpame','DF',3,'2003-04-15',NULL,'1 năm','',0,0,0,0);
+
+-- TEAM 4 - BRENTFORD (team_id = 4)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Mark Flekken','GK',4,'1993-06-13',NULL,'10 năm','',0,0,0,0),
+(NULL,'Thomas Strakosha','GK',4,'1995-03-19',NULL,'9 năm','',0,0,0,0),
+(NULL,'Ethan Pinnock','DF',4,'1993-05-29',NULL,'10 năm','',0,0,0,0),
+(NULL,'Ben Mee','DF',4,'1989-09-21',NULL,'15 năm','',0,0,0,0),
+(NULL,'Nathan Collins','DF',4,'2001-04-30',NULL,'4 năm','',0,0,0,0),
+(NULL,'Aaron Hickey','DF',4,'2002-06-10',NULL,'3 năm','',0,0,0,0),
+(NULL,'Rico Henry','DF',4,'1997-07-07',NULL,'7 năm','',0,0,0,0),
+(NULL,'Mads Roerslev','DF',4,'1999-06-24',NULL,'4 năm','',0,0,0,0),
+(NULL,'Christian Nørgaard','MF',4,'1994-03-10',NULL,'10 năm','',0,0,0,0),
+(NULL,'Mathias Jensen','MF',4,'1996-01-18',NULL,'8 năm','',0,0,0,0),
+(NULL,'Vitaly Janelt','MF',4,'1998-05-10',NULL,'6 năm','',0,0,0,0),
+(NULL,'Frank Onyeka','MF',4,'1998-01-01',NULL,'5 năm','',0,0,0,0),
+(NULL,'Ivan Toney','FW',4,'1996-03-16',NULL,'9 năm','',0,0,0,0),
+(NULL,'Bryan Mbeumo','FW',4,'1999-08-07',NULL,'7 năm','',0,0,0,0),
+(NULL,'Yoane Wissa','FW',4,'1996-09-03',NULL,'7 năm','',0,0,0,0),
+(NULL,'Kevin Schade','FW',4,'2001-11-27',NULL,'3 năm','',0,0,0,0),
+(NULL,'Yoann Barbet','DF',4,'1993-02-10',NULL,'9 năm','',0,0,0,0);
+
+-- TEAM 5 - BRIGHTON (team_id = 5)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Bart Verbruggen','GK',5,'2002-08-18',NULL,'2 năm','',0,0,0,0),
+(NULL,'Jason Steele','GK',5,'1990-08-18',NULL,'12 năm','',0,0,0,0),
+(NULL,'Lewis Dunk','DF',5,'1991-11-21',NULL,'12 năm','',0,0,0,0),
+(NULL,'Adam Webster','DF',5,'1995-01-04',NULL,'9 năm','',0,0,0,0),
+(NULL,'Pervis Estupiñán','DF',5,'1998-01-21',NULL,'6 năm','',0,0,0,0),
+(NULL,'Tariq Lamptey','DF',5,'2000-09-30',NULL,'4 năm','',0,0,0,0),
+(NULL,'Milos Kerkez','DF',5,'2003-11-07',NULL,'2 năm','',0,0,0,0),
+(NULL,'Pascal Groß','MF',5,'1991-06-15',NULL,'12 năm','',0,0,0,0),
+(NULL,'Billy Gilmour','MF',5,'2001-06-11',NULL,'4 năm','',0,0,0,0),
+(NULL,'Carlos Baleba','MF',5,'2004-01-03',NULL,'1 năm','',0,0,0,0),
+(NULL,'João Pedro','FW',5,'2001-09-26',NULL,'4 năm','',0,0,0,0),
+(NULL,'Evan Ferguson','FW',5,'2004-10-06',NULL,'2 năm','',0,0,0,0),
+(NULL,'Kaoru Mitoma','FW',5,'1997-05-20',NULL,'5 năm','',0,0,0,0),
+(NULL,'Simon Adingra','FW',5,'2002-01-01',NULL,'2 năm','',0,0,0,0),
+(NULL,'Leandro Trossard','FW',5,'1994-12-04',NULL,'10 năm','',0,0,0,0),
+(NULL,'Solly March','FW',5,'1994-01-14',NULL,'7 năm','',0,0,0,0);
+
+-- TEAM 6 - BURNLEY (team_id = 6)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Arijanet Muric','GK',6,'1998-11-07',NULL,'6 năm','',0,0,0,0),
+(NULL,'James Trafford','GK',6,'2002-10-10',NULL,'2 năm','',0,0,0,0),
+(NULL,'Charlie Taylor','DF',6,'1993-09-18',NULL,'10 năm','',0,0,0,0),
+(NULL,'Jordan Beyer','DF',6,'2000-05-19',NULL,'4 năm','',0,0,0,0),
+(NULL,'Dara OShea','DF',6,'1999-03-04',NULL,'4 năm','',0,0,0,0),
+(NULL,'Hannes Delcroix','DF',6,'1999-02-28',NULL,'4 năm','',0,0,0,0),
+(NULL,'Connor Roberts','DF',6,'1995-09-23',NULL,'8 năm','',0,0,0,0),
+(NULL,'Josh Cullen','MF',6,'1996-04-07',NULL,'8 năm','',0,0,0,0),
+(NULL,'Sander Berge','MF',6,'1998-02-18',NULL,'6 năm','',0,0,0,0),
+(NULL,'Josh Brownhill','MF',6,'1995-12-09',NULL,'9 năm','',0,0,0,0),
+(NULL,'Aaron Ramsey','MF',6,'2003-01-21',NULL,'2 năm','',0,0,0,0),
+(NULL,'Lyle Foster','FW',6,'2000-09-03',NULL,'3 năm','',0,0,0,0),
+(NULL,'Zeki Amdouni','FW',6,'2000-12-04',NULL,'3 năm','',0,0,0,0),
+(NULL,'Jacob Bruun Larsen','FW',6,'1998-09-19',NULL,'7 năm','',0,0,0,0),
+(NULL,'Mike Tresor','FW',6,'1999-10-28',NULL,'4 năm','',0,0,0,0);
+
+-- TEAM 7 - CHELSEA (team_id = 7)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Robert Sánchez','GK',7,'1997-11-18',NULL,'7 năm','',0,0,0,0),
+(NULL,'Djordje Petrović','GK',7,'1999-10-08',NULL,'4 năm','',0,0,0,0),
+(NULL,'Reece James','DF',7,'1999-12-08',NULL,'6 năm','',0,0,0,0),
+(NULL,'Ben Chilwell','DF',7,'1996-12-21',NULL,'10 năm','',0,0,0,0),
+(NULL,'Axel Disasi','DF',7,'1998-03-11',NULL,'6 năm','',0,0,0,0),
+(NULL,'Levi Colwill','DF',7,'2003-02-26',NULL,'3 năm','',0,0,0,0),
+(NULL,'Malo Gusto','DF',7,'2003-05-19',NULL,'3 năm','',0,0,0,0),
+(NULL,'Benoit Badiashile','DF',7,'2001-03-26',NULL,'5 năm','',0,0,0,0),
+(NULL,'Wesley Fofana','DF',7,'2000-12-17',NULL,'5 năm','',0,0,0,0),
+(NULL,'Enzo Fernández','MF',7,'2001-01-17',NULL,'4 năm','',0,0,0,0),
+(NULL,'Moises Caicedo','MF',7,'2001-11-02',NULL,'4 năm','',0,0,0,0),
+(NULL,'Conor Gallagher','MF',7,'2000-02-06',NULL,'5 năm','',0,0,0,0),
+(NULL,'Carney Chukwuemeka','MF',7,'2003-10-20',NULL,'2 năm','',0,0,0,0),
+(NULL,'Christopher Nkunku','FW',7,'1997-11-14',NULL,'8 năm','',0,0,0,0),
+(NULL,'Raheem Sterling','FW',7,'1994-12-08',NULL,'12 năm','',0,0,0,0),
+(NULL,'Cole Palmer','FW',7,'2002-05-06',NULL,'3 năm','',0,0,0,0),
+(NULL,'Mykhailo Mudryk','FW',7,'2001-01-05',NULL,'4 năm','',0,0,0,0),
+(NULL,'Nicolas Jackson','FW',7,'2001-06-20',NULL,'4 năm','',0,0,0,0),
+(NULL,'Diego Moreira','FW',7,'2004-08-06',NULL,'1 năm','',0,0,0,0);
+
+-- TEAM 8 - CRYSTAL PALACE (team_id = 8)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Dean Henderson','GK',8,'1997-03-12',NULL,'7 năm','',0,0,0,0),
+(NULL,'Sam Johnstone','GK',8,'1993-03-25',NULL,'10 năm','',0,0,0,0),
+(NULL,'Marc Guéhi','DF',8,'2000-07-13',NULL,'5 năm','',0,0,0,0),
+(NULL,'Joachim Andersen','DF',8,'1996-05-31',NULL,'9 năm','',0,0,0,0),
+(NULL,'Tyrick Mitchell','DF',8,'1999-09-01',NULL,'4 năm','',0,0,0,0),
+(NULL,'Nathaniel Clyne','DF',8,'1991-04-05',NULL,'12 năm','',0,0,0,0),
+(NULL,'Chris Richards','DF',8,'2000-03-28',NULL,'4 năm','',0,0,0,0),
+(NULL,'Eberechi Eze','MF',8,'1998-06-29',NULL,'6 năm','',0,0,0,0),
+(NULL,'Michael Olise','MF',8,'2001-12-12',NULL,'4 năm','',0,0,0,0),
+(NULL,'Will Hughes','MF',8,'1995-04-17',NULL,'10 năm','',0,0,0,0),
+(NULL,'Cheick Doucouré','MF',8,'2000-01-08',NULL,'4 năm','',0,0,0,0),
+(NULL,'Odsonne Édouard','FW',8,'1998-01-16',NULL,'6 năm','',0,0,0,0),
+(NULL,'Jordan Ayew','FW',8,'1991-09-11',NULL,'12 năm','',0,0,0,0),
+(NULL,'Jean-Philippe Mateta','FW',8,'1997-06-28',NULL,'6 năm','',0,0,0,0),
+(NULL,'Jesurun Rak-Sakyi','FW',8,'2002-10-05',NULL,'2 năm','',0,0,0,0);
+
+-- TEAM 9 - EVERTON (team_id = 9)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Jordan Pickford','GK',9,'1994-03-07',NULL,'12 năm','',0,0,0,0),
+(NULL,'João Virgínia','GK',9,'1999-10-10',NULL,'4 năm','',0,0,0,0),
+(NULL,'James Tarkowski','DF',9,'1992-11-19',NULL,'11 năm','',0,0,0,0),
+(NULL,'Jarrad Branthwaite','DF',9,'2002-06-27',NULL,'3 năm','',0,0,0,0),
+(NULL,'Ben Godfrey','DF',9,'1998-01-15',NULL,'6 năm','',0,0,0,0),
+(NULL,'Vitaliy Mykolenko','DF',9,'1999-05-29',NULL,'5 năm','',0,0,0,0),
+(NULL,'Nathan Patterson','DF',9,'2001-10-16',NULL,'3 năm','',0,0,0,0),
+(NULL,'Seamus Coleman','DF',9,'1988-10-11',NULL,'15 năm','',0,0,0,0),
+(NULL,'Amadou Onana','MF',9,'2001-08-16',NULL,'3 năm','',0,0,0,0),
+(NULL,'Abdoulaye Doucouré','MF',9,'1993-01-01',NULL,'10 năm','',0,0,0,0),
+(NULL,'James Garner','MF',9,'2001-03-13',NULL,'3 năm','',0,0,0,0),
+(NULL,'Idrissa Gana Gueye','MF',9,'1989-09-26',NULL,'14 năm','',0,0,0,0),
+(NULL,'Dominic Calvert-Lewin','FW',9,'1997-03-16',NULL,'8 năm','',0,0,0,0),
+(NULL,'Dwight McNeil','FW',9,'1999-11-22',NULL,'5 năm','',0,0,0,0),
+(NULL,'Jack Harrison','FW',9,'1996-11-22',NULL,'8 năm','',0,0,0,0),
+(NULL,'Arnaut Danjuma','FW',9,'1997-01-31',NULL,'7 năm','',0,0,0,0);
+
+-- TEAM 10 - FULHAM (team_id = 10)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Bernd Leno','GK',10,'1992-03-04',NULL,'12 năm','',0,0,0,0),
+(NULL,'Marek Rodák','GK',10,'1996-12-13',NULL,'8 năm','',0,0,0,0),
+(NULL,'Antonee Robinson','DF',10,'1997-08-08',NULL,'7 năm','',0,0,0,0),
+(NULL,'Tim Ream','DF',10,'1987-10-05',NULL,'16 năm','',0,0,0,0),
+(NULL,'Issa Diop','DF',10,'1997-01-09',NULL,'8 năm','',0,0,0,0),
+(NULL,'Tosin Adarabioyo','DF',10,'1997-09-24',NULL,'7 năm','',0,0,0,0),
+(NULL,'Kenny Tete','DF',10,'1995-10-09',NULL,'9 năm','',0,0,0,0),
+(NULL,'Layvin Kurzawa','DF',10,'1992-09-04',NULL,'12 năm','',0,0,0,0),
+(NULL,'João Palhinha','MF',10,'1995-07-09',NULL,'9 năm','',0,0,0,0),
+(NULL,'Tom Cairney','MF',10,'1991-01-20',NULL,'12 năm','',0,0,0,0),
+(NULL,'Harrison Reed','MF',10,'1995-01-27',NULL,'9 năm','',0,0,0,0),
+(NULL,'Sasa Lukić','MF',10,'1996-08-13',NULL,'8 năm','',0,0,0,0),
+(NULL,'Andreas Pereira','MF',10,'1996-01-01',NULL,'10 năm','',0,0,0,0),
+(NULL,'Raúl Jiménez','FW',10,'1991-05-05',NULL,'12 năm','',0,0,0,0),
+(NULL,'Harry Wilson','FW',10,'1997-03-22',NULL,'8 năm','',0,0,0,0),
+(NULL,'Bobby De Cordova-Reid','FW',10,'1993-02-02',NULL,'10 năm','',0,0,0,0);
+
+-- TEAM 11 - LEEDS (team_id = 11)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Illan Meslier','GK',11,'2000-03-02',NULL,'5 năm','',0,0,0,0),
+(NULL,'Karl Darlow','GK',11,'1990-10-08',NULL,'12 năm','',0,0,0,0),
+(NULL,'Liam Cooper','DF',11,'1991-08-30',NULL,'12 năm','',0,0,0,0),
+(NULL,'Pascal Struijk','DF',11,'1999-08-11',NULL,'5 năm','',0,0,0,0),
+(NULL,'Charlie Cresswell','DF',11,'2002-08-17',NULL,'2 năm','',0,0,0,0),
+(NULL,'Junior Firpo','DF',11,'1996-08-22',NULL,'7 năm','',0,0,0,0),
+(NULL,'Luke Ayling','DF',11,'1991-08-25',NULL,'12 năm','',0,0,0,0),
+(NULL,'Glen Kamara','MF',11,'1995-10-28',NULL,'8 năm','',0,0,0,0),
+(NULL,'Archie Gray','MF',11,'2006-03-12',NULL,'1 năm','',0,0,0,0),
+(NULL,'Darko Gyabi','MF',11,'2004-02-18',NULL,'1 năm','',0,0,0,0),
+(NULL,'Ethan Ampadu','MF',11,'2000-09-14',NULL,'6 năm','',0,0,0,0),
+(NULL,'Georginio Rutter','FW',11,'2002-04-20',NULL,'3 năm','',0,0,0,0),
+(NULL,'Patrick Bamford','FW',11,'1993-09-05',NULL,'10 năm','',0,0,0,0),
+(NULL,'Dan James','FW',11,'1997-11-10',NULL,'6 năm','',0,0,0,0);
+
+-- TEAM 12 - LIVERPOOL (team_id = 12)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Alisson Becker','GK',12,'1992-10-02',NULL,'12 năm','',0,0,0,0),
+(NULL,'Giorgi Mamardashvili','GK',12,'2000-09-29',NULL,'4 năm','',0,0,0,0),
+(NULL,'Freddie Woodman','GK',12,'1997-03-04',NULL,'6 năm','',0,0,0,0),
+(NULL,'Virgil van Dijk','DF',12,'1991-07-08',NULL,'13 năm','',0,0,0,0),
+(NULL,'Ibrahima Konaté','DF',12,'1999-05-25',NULL,'6 năm','',0,0,0,0),
+(NULL,'Joe Gomez','DF',12,'1997-05-23',NULL,'9 năm','',0,0,0,0),
+(NULL,'Andy Robertson','DF',12,'1994-03-11',NULL,'10 năm','',0,0,0,0),
+(NULL,'Trent Alexander-Arnold','DF',12,'1998-10-07',NULL,'8 năm','',0,0,0,0),
+(NULL,'Jarell Quansah','DF',12,'2003-01-28',NULL,'2 năm','',0,0,0,0),
+(NULL,'Conor Bradley','DF',12,'2003-07-09',NULL,'2 năm','',0,0,0,0),
+(NULL,'Alexis Mac Allister','MF',12,'1998-12-24',NULL,'6 năm','',0,0,0,0),
+(NULL,'Dominik Szoboszlai','MF',12,'2000-10-25',NULL,'5 năm','',0,0,0,0),
+(NULL,'Curtis Jones','MF',12,'2001-01-30',NULL,'4 năm','',0,0,0,0),
+(NULL,'Harvey Elliott','MF',12,'2003-04-04',NULL,'3 năm','',0,0,0,0),
+(NULL,'Wataru Endo','MF',12,'1993-02-09',NULL,'10 năm','',0,0,0,0),
+(NULL,'Ryan Gravenberch','MF',12,'2002-05-16',NULL,'4 năm','',0,0,0,0),
+(NULL,'Mohamed Salah','FW',12,'1992-06-15',NULL,'12 năm','',0,0,0,0),
+(NULL,'Luis Díaz','FW',12,'1997-01-13',NULL,'7 năm','',0,0,0,0),
+(NULL,'Diogo Jota','FW',12,'1996-12-04',NULL,'7 năm','',0,0,0,0),
+(NULL,'Darwin Núñez','FW',12,'1999-06-24',NULL,'5 năm','',0,0,0,0),
+(NULL,'Cody Gakpo','FW',12,'1999-05-07',NULL,'5 năm','',0,0,0,0),
+(NULL,'Alexander Isak','FW',12,'1999-09-21',NULL,'6 năm','',0,0,0,0);
+
+-- TEAM 13 - MANCHESTER CITY (team_id = 13)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Ederson Moraes','GK',13,'1993-08-17',NULL,'12 năm','',0,0,0,0),
+(NULL,'Stefan Ortega','GK',13,'1992-11-06',NULL,'10 năm','',0,0,0,0),
+(NULL,'Kyle Walker','DF',13,'1990-05-28',NULL,'15 năm','',0,0,0,0),
+(NULL,'Rúben Dias','DF',13,'1997-05-14',NULL,'7 năm','',0,0,0,0),
+(NULL,'John Stones','DF',13,'1994-05-28',NULL,'10 năm','',0,0,0,0),
+(NULL,'Nathan Aké','DF',13,'1995-02-18',NULL,'9 năm','',0,0,0,0),
+(NULL,'Manuel Akanji','DF',13,'1995-07-19',NULL,'8 năm','',0,0,0,0),
+(NULL,'Joško Gvardiol','DF',13,'2002-01-23',NULL,'3 năm','',0,0,0,0),
+(NULL,'Rodri','MF',13,'1996-06-22',NULL,'8 năm','',0,0,0,0),
+(NULL,'Kevin De Bruyne','MF',13,'1991-06-28',NULL,'13 năm','',0,0,0,0),
+(NULL,'Bernardo Silva','MF',13,'1994-08-10',NULL,'11 năm','',0,0,0,0),
+(NULL,'Phil Foden','MF',13,'2000-05-28',NULL,'6 năm','',0,0,0,0),
+(NULL,'Mateo Kovačić','MF',13,'1994-05-06',NULL,'11 năm','',0,0,0,0),
+(NULL,'Matheus Nunes','MF',13,'1998-08-27',NULL,'6 năm','',0,0,0,0),
+(NULL,'Erling Haaland','FW',13,'2000-07-21',NULL,'5 năm','',0,0,0,0),
+(NULL,'Julián Álvarez','FW',13,'2000-05-31',NULL,'4 năm','',0,0,0,0),
+(NULL,'Jérémy Doku','FW',13,'2002-05-27',NULL,'3 năm','',0,0,0,0),
+(NULL,'Jack Grealish','FW',13,'1995-09-10',NULL,'9 năm','',0,0,0,0);
+
+-- TEAM 14 - MANCHESTER UNITED (team_id = 14)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'André Onana','GK',14,'1996-04-02',NULL,'9 năm','',0,0,0,0),
+(NULL,'Altay Bayındır','GK',14,'1998-04-14',NULL,'6 năm','',0,0,0,0),
+(NULL,'Lisandro Martínez','DF',14,'1998-01-18',NULL,'6 năm','',0,0,0,0),
+(NULL,'Raphaël Varane','DF',14,'1993-04-25',NULL,'14 năm','',0,0,0,0),
+(NULL,'Harry Maguire','DF',14,'1993-03-05',NULL,'12 năm','',0,0,0,0),
+(NULL,'Luke Shaw','DF',14,'1995-07-12',NULL,'10 năm','',0,0,0,0),
+(NULL,'Diogo Dalot','DF',14,'1999-03-18',NULL,'6 năm','',0,0,0,0),
+(NULL,'Aaron Wan-Bissaka','DF',14,'1997-11-26',NULL,'7 năm','',0,0,0,0),
+(NULL,'Bruno Fernandes','MF',14,'1994-09-08',NULL,'11 năm','',0,0,0,0),
+(NULL,'Casemiro','MF',14,'1992-02-23',NULL,'13 năm','',0,0,0,0),
+(NULL,'Mason Mount','MF',14,'1999-01-10',NULL,'6 năm','',0,0,0,0),
+(NULL,'Kobbie Mainoo','MF',14,'2005-04-19',NULL,'1 năm','',0,0,0,0),
+(NULL,'Christian Eriksen','MF',14,'1992-02-14',NULL,'14 năm','',0,0,0,0),
+(NULL,'Marcus Rashford','FW',14,'1997-10-31',NULL,'8 năm','',0,0,0,0),
+(NULL,'Rasmus Højlund','FW',14,'2003-02-04',NULL,'2 năm','',0,0,0,0),
+(NULL,'Alejandro Garnacho','FW',14,'2004-07-01',NULL,'1 năm','',0,0,0,0),
+(NULL,'Antony','FW',14,'2000-02-24',NULL,'4 năm','',0,0,0,0);
+
+-- TEAM 15 - NEWCASTLE (team_id = 15)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Nick Pope','GK',15,'1992-04-19',NULL,'12 năm','',0,0,0,0),
+(NULL,'Martin Dúbravka','GK',15,'1989-01-15',NULL,'14 năm','',0,0,0,0),
+(NULL,'Kieran Trippier','DF',15,'1990-09-19',NULL,'14 năm','',0,0,0,0),
+(NULL,'Sven Botman','DF',15,'2000-01-12',NULL,'4 năm','',0,0,0,0),
+(NULL,'Fabian Schär','DF',15,'1991-12-20',NULL,'12 năm','',0,0,0,0),
+(NULL,'Dan Burn','DF',15,'1992-05-09',NULL,'11 năm','',0,0,0,0),
+(NULL,'Tino Livramento','DF',15,'2002-11-12',NULL,'2 năm','',0,0,0,0),
+(NULL,'Lewis Hall','DF',15,'2004-09-08',NULL,'1 năm','',0,0,0,0),
+(NULL,'Bruno Guimarães','MF',15,'1997-11-16',NULL,'6 năm','',0,0,0,0),
+(NULL,'Sandro Tonali','MF',15,'2000-05-08',NULL,'5 năm','',0,0,0,0),
+(NULL,'Joelinton','MF',15,'1996-08-14',NULL,'9 năm','',0,0,0,0),
+(NULL,'Sean Longstaff','MF',15,'1997-10-30',NULL,'6 năm','',0,0,0,0),
+(NULL,'Alexander Isak','FW',15,'1999-09-21',NULL,'6 năm','',0,0,0,0),
+(NULL,'Callum Wilson','FW',15,'1992-02-27',NULL,'10 năm','',0,0,0,0),
+(NULL,'Anthony Gordon','FW',15,'2001-02-24',NULL,'4 năm','',0,0,0,0),
+(NULL,'Miguel Almirón','FW',15,'1994-02-10',NULL,'9 năm','',0,0,0,0);
+
+-- TEAM 16 - NOTTINGHAM FOREST (team_id = 16)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Matt Turner','GK',16,'1994-06-24',NULL,'8 năm','',0,0,0,0),
+(NULL,'Odysseas Vlachodimos','GK',16,'1994-04-26',NULL,'10 năm','',0,0,0,0),
+(NULL,'Joe Worrall','DF',16,'1997-01-10',NULL,'8 năm','',0,0,0,0),
+(NULL,'Moussa Niakhaté','DF',16,'1996-03-08',NULL,'8 năm','',0,0,0,0),
+(NULL,'Murillo','DF',16,'2002-09-10',NULL,'2 năm','',0,0,0,0),
+(NULL,'Neco Williams','DF',16,'2001-04-13',NULL,'3 năm','',0,0,0,0),
+(NULL,'Harry Toffolo','DF',16,'1995-08-19',NULL,'8 năm','',0,0,0,0),
+(NULL,'Ibrahim Sangaré','MF',16,'1997-12-02',NULL,'7 năm','',0,0,0,0),
+(NULL,'Ryan Yates','MF',16,'1998-11-21',NULL,'6 năm','',0,0,0,0),
+(NULL,'Nicolás Domínguez','MF',16,'1998-06-28',NULL,'6 năm','',0,0,0,0),
+(NULL,'Orel Mangala','MF',16,'1998-03-18',NULL,'6 năm','',0,0,0,0),
+(NULL,'Taiwo Awoniyi','FW',16,'1997-08-12',NULL,'7 năm','',0,0,0,0),
+(NULL,'Chris Wood','FW',16,'1991-12-07',NULL,'14 năm','',0,0,0,0),
+(NULL,'Morgan Gibbs-White','FW',16,'2000-01-27',NULL,'5 năm','',0,0,0,0),
+(NULL,'Callum Hudson-Odoi','FW',16,'2000-11-07',NULL,'5 năm','',0,0,0,0);
+
+-- TEAM 17 - SUNDERLAND (team_id = 17)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Anthony Patterson','GK',17,'2000-05-10',NULL,'4 năm','',0,0,0,0),
+(NULL,'Alex Bass','GK',17,'1998-04-01',NULL,'5 năm','',0,0,0,0),
+(NULL,'Luke O’Nien','DF',17,'1994-11-21',NULL,'10 năm','',0,0,0,0),
+(NULL,'Dan Ballard','DF',17,'1999-09-22',NULL,'4 năm','',0,0,0,0),
+(NULL,'Dennis Cirkin','DF',17,'2002-04-06',NULL,'3 năm','',0,0,0,0),
+(NULL,'Niall Huggins','DF',17,'2000-12-18',NULL,'3 năm','',0,0,0,0),
+(NULL,'Trai Hume','DF',17,'2002-01-18',NULL,'2 năm','',0,0,0,0),
+(NULL,'Corry Evans','MF',17,'1990-07-30',NULL,'14 năm','',0,0,0,0),
+(NULL,'Jobe Bellingham','MF',17,'2005-09-23',NULL,'1 năm','',0,0,0,0),
+(NULL,'Patrick Roberts','MF',17,'1997-02-05',NULL,'8 năm','',0,0,0,0),
+(NULL,'Pierre Ekwah','MF',17,'2002-01-15',NULL,'2 năm','',0,0,0,0),
+(NULL,'Jack Clarke','FW',17,'2000-11-23',NULL,'4 năm','',0,0,0,0),
+(NULL,'Ross Stewart','FW',17,'1996-07-27',NULL,'7 năm','',0,0,0,0),
+(NULL,'Nazariy Rusyn','FW',17,'1998-10-25',NULL,'5 năm','',0,0,0,0);
+
+-- TEAM 18 - TOTTENHAM (team_id = 18)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Guglielmo Vicario','GK',18,'1996-10-07',NULL,'7 năm','',0,0,0,0),
+(NULL,'Fraser Forster','GK',18,'1988-03-17',NULL,'16 năm','',0,0,0,0),
+(NULL,'Cristian Romero','DF',18,'1998-04-27',NULL,'7 năm','',0,0,0,0),
+(NULL,'Micky van de Ven','DF',18,'2001-04-19',NULL,'3 năm','',0,0,0,0),
+(NULL,'Pedro Porro','DF',18,'1999-09-13',NULL,'5 năm','',0,0,0,0),
+(NULL,'Destiny Udogie','DF',18,'2002-11-28',NULL,'3 năm','',0,0,0,0),
+(NULL,'Emerson Royal','DF',18,'1999-01-14',NULL,'5 năm','',0,0,0,0),
+(NULL,'Ben Davies','DF',18,'1993-04-24',NULL,'11 năm','',0,0,0,0),
+(NULL,'James Maddison','MF',18,'1996-11-23',NULL,'9 năm','',0,0,0,0),
+(NULL,'Yves Bissouma','MF',18,'1996-08-30',NULL,'8 năm','',0,0,0,0),
+(NULL,'Pape Matar Sarr','MF',18,'2002-09-14',NULL,'3 năm','',0,0,0,0),
+(NULL,'Rodrigo Bentancur','MF',18,'1997-06-25',NULL,'8 năm','',0,0,0,0),
+(NULL,'Oliver Skipp','MF',18,'2000-09-16',NULL,'4 năm','',0,0,0,0),
+(NULL,'Dejan Kulusevski','FW',18,'2000-04-25',NULL,'4 năm','',0,0,0,0),
+(NULL,'Brennan Johnson','FW',18,'2001-05-23',NULL,'3 năm','',0,0,0,0),
+(NULL,'Manor Solomon','FW',18,'1999-07-24',NULL,'5 năm','',0,0,0,0);
+
+-- TEAM 19 - WEST HAM (team_id = 19)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'Alphonse Areola','GK',19,'1993-02-27',NULL,'12 năm','',0,0,0,0),
+(NULL,'Łukasz Fabiański','GK',19,'1985-04-18',NULL,'18 năm','',0,0,0,0),
+(NULL,'Kurt Zouma','DF',19,'1994-10-27',NULL,'10 năm','',0,0,0,0),
+(NULL,'Nayef Aguerd','DF',19,'1996-03-30',NULL,'7 năm','',0,0,0,0),
+(NULL,'Vladimír Coufal','DF',19,'1992-08-22',NULL,'10 năm','',0,0,0,0),
+(NULL,'Emerson Palmieri','DF',19,'1994-08-03',NULL,'9 năm','',0,0,0,0),
+(NULL,'Ben Johnson','DF',19,'2000-01-24',NULL,'4 năm','',0,0,0,0),
+(NULL,'Lucas Paquetá','MF',19,'1997-08-27',NULL,'7 năm','',0,0,0,0),
+(NULL,'James Ward-Prowse','MF',19,'1994-11-01',NULL,'11 năm','',0,0,0,0),
+(NULL,'Tomáš Souček','MF',19,'1995-02-27',NULL,'8 năm','',0,0,0,0),
+(NULL,'Edson Álvarez','MF',19,'1997-10-24',NULL,'7 năm','',0,0,0,0),
+(NULL,'Mohammed Kudus','MF',19,'2000-08-02',NULL,'4 năm','',0,0,0,0),
+(NULL,'Jarrod Bowen','FW',19,'1996-12-20',NULL,'8 năm','',0,0,0,0),
+(NULL,'Michail Antonio','FW',19,'1990-03-28',NULL,'13 năm','',0,0,0,0),
+(NULL,'Maxwel Cornet','FW',19,'1996-09-27',NULL,'7 năm','',0,0,0,0);
+
+-- TEAM 20 - WOLVES (team_id = 20)
+INSERT INTO players (id, player_name, position, team_id, dob, card_id, experience, avatar, yellow_cards, red_cards, season_yellow_cards, suspension_matches_remaining) VALUES
+(NULL,'José Sá','GK',20,'1993-01-17',NULL,'10 năm','',0,0,0,0),
+(NULL,'Dan Bentley','GK',20,'1993-07-13',NULL,'10 năm','',0,0,0,0),
+(NULL,'Max Kilman','DF',20,'1997-05-23',NULL,'6 năm','',0,0,0,0),
+(NULL,'Craig Dawson','DF',20,'1990-05-06',NULL,'14 năm','',0,0,0,0),
+(NULL,'Toti Gomes','DF',20,'1999-01-16',NULL,'4 năm','',0,0,0,0),
+(NULL,'Rayan Aït-Nouri','DF',20,'2001-06-06',NULL,'4 năm','',0,0,0,0),
+(NULL,'Nelson Semedo','DF',20,'1993-11-16',NULL,'9 năm','',0,0,0,0),
+(NULL,'João Gomes','MF',20,'2001-02-12',NULL,'3 năm','',0,0,0,0),
+(NULL,'Mario Lemina','MF',20,'1993-09-01',NULL,'10 năm','',0,0,0,0),
+(NULL,'Boubacar Traoré','MF',20,'2001-08-20',NULL,'3 năm','',0,0,0,0),
+(NULL,'Jean-Ricner Bellegarde','MF',20,'1998-06-27',NULL,'5 năm','',0,0,0,0),
+(NULL,'Matheus Cunha','FW',20,'1999-05-27',NULL,'6 năm','',0,0,0,0),
+(NULL,'Pedro Neto','FW',20,'2000-03-09',NULL,'5 năm','',0,0,0,0),
+(NULL,'Hwang Hee-chan','FW',20,'1996-01-26',NULL,'8 năm','',0,0,0,0),
+(NULL,'Sasa Kalajdzic','FW',20,'1997-07-07',NULL,'5 năm','',0,0,0,0);
+
+-- -----------------------
+-- STADIUMS
+-- -----------------------
+INSERT INTO stadium (id, capacity, name, team_id, address) VALUES
+(NULL, 60704, 'Emirates Stadium', 1, 'London, England'),
+(NULL, 42785, 'Villa Park', 2, 'Birmingham, England'),
+(NULL, 11307, 'Vitality Stadium', 3, 'Bournemouth, England'),
+(NULL, 17250, 'Gtech Community Stadium', 4, 'London, England'),
+(NULL, 31800, 'Amex Stadium', 5, 'Brighton, England'),
+(NULL, 21444, 'Turf Moor', 6, 'Burnley, England'),
+(NULL, 40343, 'Stamford Bridge', 7, 'London, England'),
+(NULL, 25486, 'Selhurst Park', 8, 'London, England'),
+(NULL, 39414, 'Goodison Park', 9, 'Liverpool, England'),
+(NULL, 22384, 'Craven Cottage', 10, 'London, England'),
+(NULL, 37908, 'Elland Road', 11, 'Leeds, England'),
+(NULL, 54074, 'Anfield', 12, 'Liverpool, England'),
+(NULL, 53400, 'Etihad Stadium', 13, 'Manchester, England'),
+(NULL, 74310, 'Old Trafford', 14, 'Manchester, England'),
+(NULL, 52305, 'St James'' Park', 15, 'Newcastle upon Tyne, England'),
+(NULL, 30445, 'City Ground', 16, 'Nottingham, England'),
+(NULL, 48707, 'Stadium of Light', 17, 'Sunderland, England'),
+(NULL, 62850, 'Tottenham Hotspur Stadium', 18, 'London, England'),
+(NULL, 62500, 'London Stadium', 19, 'London, England'),
+(NULL, 32050, 'Molineux Stadium', 20, 'Wolverhampton, England');
+
+-- -----------------------
+-- SESSIONS (stands) - auto-generated per stadium
+-- -----------------------
+INSERT INTO session (capacity, last_assigned_seat, name, stadium_id)
+SELECT 
+    FLOOR(s.capacity / 4) AS capacity,
+    NULL AS last_assigned_seat,
+    x.stand_name AS name,
+    s.id AS stadium_id
+FROM stadium s
+JOIN (
+    SELECT 1 AS ord, 'Khu A' AS stand_name
+    UNION ALL SELECT 2, 'Khu B'
+    UNION ALL SELECT 3, 'Khu C'
+    UNION ALL SELECT 4, 'Khu D'
+) x
+ORDER BY s.id, x.ord;
+
+-- -----------------------
+-- ROLES
+-- -----------------------
+INSERT INTO role (id, role_name) VALUES
+ (1, 'ROLE_ADMIN'), 
+ (2, 'ROLE_COACH'), 
+ (3, 'ROLE_USER'), 
+ (4, 'ROLE_OWNER');
+
+-- -----------------------
+-- ACCOUNTS (admin/owners/coaches/users) - password hashes are placeholders
+-- -----------------------
+INSERT INTO account (id, username, password, team_id) VALUES
+(1, 'admin', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', NULL),
+(10, 'admin_ars', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 1),
+(11, 'admin_avl', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 2),
+(12, 'admin_bou', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 3),
+(13, 'admin_bre', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 4),
+(14, 'admin_bha', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 5),
+(15, 'admin_bur', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 6),
+(16, 'admin_che', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 7),
+(17, 'admin_cry', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdFhCcE4bm.RSuOa', 8),
+(18, 'admin_eve', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 9),
+(19, 'admin_ful', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 10),
+(20, 'admin_lee', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 11),
+(21, 'admin_liv', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 12),
+(22, 'admin_mci', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 13),
+(23, 'admin_mun', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 14),
+(24, 'admin_new', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 15),
+(25, 'admin_nfo', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 16),
+(26, 'admin_sun', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 17),
+(27, 'admin_tot', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 18),
+(28, 'admin_whu', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 19),
+(29, 'admin_wol', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 20),
+(30, 'coach_ars', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 1),
+(31, 'coach_avl', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 2),
+(32, 'coach_bou', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 3),
+(33, 'coach_bre', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 4),
+(34, 'coach_bha', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 5),
+(35, 'coach_bur', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 6),
+(36, 'coach_che', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 7),
+(37, 'coach_cry', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 8),
+(38, 'coach_eve', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 9),
+(39, 'coach_ful', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 10),
+(40, 'coach_lee', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 11),
+(41, 'coach_liv', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 12),
+(42, 'coach_mci', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 13),
+(43, 'coach_mun', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 14),
+(44, 'coach_new', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 15),
+(45, 'coach_nfo', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 16),
+(46, 'coach_sun', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 17),
+(47, 'coach_tot', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cFMqzxayZdIpeCHCcE4bm.RSuOa', 18),
+(48, 'coach_whu', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 19),
+(49, 'coach_wol', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', 20),
+(50, 'user1', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', NULL),
+(51, 'user2', '$2a$10$bo30fpVpSxRyzBdFqhnywuc/4cXFMqzxayZdIpeCHCcE4bm.RSuOa', NULL);
+
+-- -----------------------
+-- ACCOUNT_ROLE
+-- -----------------------
+INSERT INTO account_role (account_id, role_id) VALUES
+(1, 1),
+(10, 4), (11, 4), (12, 4), (13, 4), (14, 4), (15, 4), (16, 4), (17, 4), (18, 4), (19, 4),
+(20, 4), (21, 4), (22, 4), (23, 4), (24, 4), (25, 4), (26, 4), (27, 4), (28, 4), (29, 4),
+(30, 2), (31, 2), (32, 2), (33, 2), (34, 2), (35, 2), (36, 2), (37, 2), (38, 2), (39, 2),
+(40, 2), (41, 2), (42, 2), (43, 2), (44, 2), (45, 2), (46, 2), (47, 2), (48, 2), (49, 2),
+(50, 3), (51, 3);
+
+-- -----------------------
+-- TRAINING SCHEDULE (sample)
+-- -----------------------
+INSERT INTO training_schedule (id, title, description, location, start_time, end_time, team_id) VALUES
+(NULL, 'Tập chiến thuật', 'Chuẩn bị cho trận gặp Chelsea', 'London Colney', NOW() + INTERVAL 1 DAY, NOW() + INTERVAL 1 DAY + INTERVAL 2 HOUR, 1),
+(NULL, 'Tập thể lực', 'Bài tập sức bền và tốc độ', 'London Colney', NOW() + INTERVAL 2 DAY, NOW() + INTERVAL 2 DAY + INTERVAL 90 MINUTE, 1);
+
+-- -----------------------
+-- MATCH_LINEUP (sample)
+-- -----------------------
+USE casestudy_module4;
+INSERT INTO match_lineup (id, match_id, player_id, team_id, type, is_captain) VALUES
+(1, 1, 1, 1, 'MAIN', 0),
+(2, 1, 2, 1, 'MAIN', 0),
+(3, 1, 3, 1, 'MAIN', 0),
+(4, 1, 4, 1, 'MAIN', 0),
+(5, 1, 5, 1, 'MAIN', 0),
+(6, 1, 6, 1, 'MAIN', 0),
+(7, 1, 7, 1, 'MAIN', 1), -- <--- ĐỘI TRƯỞNG (Martin Ødegaard)
+(8, 1, 8, 1, 'MAIN', 0),
+(9, 1, 9, 1, 'MAIN', 0),
+(10, 1, 10, 1, 'MAIN', 0),
+(11, 1, 11, 1, 'MAIN', 0),
+(12, 1, 12, 1, 'SUB', 0),
+(13, 1, 13, 1, 'SUB', 0),
+(14, 1, 14, 1, 'SUB', 0),
+(15, 1, 15, 1, 'SUB', 0),
+(16, 1, 16, 1, 'SUB', 0);
