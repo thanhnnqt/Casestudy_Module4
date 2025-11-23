@@ -2,7 +2,13 @@ package com.example.premier_league.controller;
 
 import com.example.premier_league.vnpayconfig.VNPayConfig;
 import com.lowagie.text.*;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
 import com.lowagie.text.Font;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;

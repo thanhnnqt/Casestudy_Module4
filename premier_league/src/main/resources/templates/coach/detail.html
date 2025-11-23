@@ -4,71 +4,117 @@
 
 <th:block th:fragment="content">
 
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card mb-3">
-                <img class="coach-avatar"
-                     th:src="${coach.avatarUrl}"
-                     alt="avatar"
-                     onerror="this.onerror=null; this.src='/images/no-image.png';">
+    <style>
+        :root { --pl-purple: #38003c; --pl-pink: #ff0050; }
+        .card-profile { border: none; border-radius: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); background: #fff; overflow: hidden; }
+        .profile-img { width: 100%; height: 300px; object-fit: cover; object-position: top; }
+        .profile-name { color: var(--pl-purple); font-weight: 800; }
+        .btn-edit { background: var(--pl-purple); color: white; border: none; } .btn-edit:hover { background: #2a002d; color: white; }
+        .btn-delete { background: #fee2e2; color: #dc2626; border: none; } .btn-delete:hover { background: #fecaca; color: #b91c1c; }
+    </style>
 
-            </div>
+    <div class="container-fluid">
+        <div class="mb-4">
+            <a href="/owner/coaches" class="text-decoration-none text-muted small fw-bold">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+            </a>
         </div>
 
-        <div class="col-md-8">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="mb-0" th:text="${coach.fullName}">Tên HLV</h3>
-                <div>
-                    <a th:href="@{'/admin/coaches/' + ${coach.id} + '/edit'}" class="btn btn-sm btn-outline-primary">
-                        Sửa
-                    </a>
-                    <form th:action="@{'/admin/coaches/' + ${coach.id} + '/delete'}"
-                          method="post" class="d-inline"
-                          onsubmit="return confirm('Xóa huấn luyện viên này?');">
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card card-profile h-100">
+                    <img class="profile-img" th:src="${coach.avatarUrl}" alt="avatar"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/400x400?text=No+Image';">
+
+                    <div class="card-body text-center p-4">
+                        <h3 class="profile-name mb-1" th:text="${coach.fullName}">Full Name</h3>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 mb-3" th:text="${coach.role}">Role</span>
+
+                        <div class="d-flex justify-content-center gap-2 mt-2">
+                            <a th:href="@{'/owner/coaches/' + ${coach.id} + '/edit'}" class="btn btn-edit px-4 py-2 rounded-3">
+                                <i class="bi bi-pencil-square me-2"></i>Cập nhật
+                            </a>
+                            <button type="button" class="btn btn-delete px-3 py-2 rounded-3"
+                                    data-bs-toggle="modal" data-bs-target="#deleteCoachModal">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white p-4 border-top">
+                        <div class="mb-3">
+                            <div class="small fw-bold text-muted text-uppercase">Email</div>
+                            <div th:text="${coach.email}"></div>
+                        </div>
+                        <div>
+                            <div class="small fw-bold text-muted text-uppercase">Số điện thoại</div>
+                            <div th:text="${coach.phone}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card card-profile p-4 mb-4">
+                    <h5 class="fw-bold text-purple mb-4 border-bottom pb-2">Thông tin cá nhân</h5>
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <strong class="text-muted small text-uppercase">Quốc tịch</strong>
+                            <div class="fs-6"><i class="bi bi-globe me-1"></i> <span th:text="${coach.nationality}"></span></div>
+                        </div>
+                        <div class="col-md-6">
+                            <strong class="text-muted small text-uppercase">Ngày sinh</strong>
+                            <div class="fs-6" th:text="${#temporals.format(coach.dateOfBirth, 'dd/MM/yyyy')}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <strong class="text-muted small text-uppercase">Trạng thái</strong>
+                            <div><span class="badge bg-success" th:text="${coach.status}"></span></div>
+                        </div>
+                        <div class="col-md-6">
+                            <strong class="text-muted small text-uppercase">Đội bóng</strong>
+                            <div class="fw-bold text-primary" th:text="${coach.team != null ? coach.team.name : 'Tự do'}"></div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-purple mb-4 border-bottom pb-2 mt-2">Hồ sơ chuyên môn</h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <strong class="text-muted small text-uppercase">Kinh nghiệm</strong>
+                            <div class="fs-6" th:text="${coach.experienceYears + ' năm'}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <strong class="text-muted small text-uppercase">Ngày gia nhập</strong>
+                            <div class="fs-6" th:text="${#temporals.format(coach.joinDate, 'dd/MM/yyyy')}"></div>
+                        </div>
+                        <div class="col-12">
+                            <strong class="text-muted small text-uppercase mb-2 d-block">Chứng chỉ</strong>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span th:each="lic : ${coach.licenseLevels}" class="badge bg-light text-dark border" th:text="${lic}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteCoachModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header text-white" style="background-color: var(--pl-purple);">
+                    <h5 class="modal-title fw-bold">Xác nhận xóa</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <p>Bạn có chắc muốn xóa HLV <strong th:text="${coach.fullName}"></strong>?</p>
+                    <p class="text-muted small">Hành động này không thể hoàn tác.</p>
+                </div>
+                <div class="modal-footer justify-content-center border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <form th:action="@{'/owner/coaches/delete/' + ${coach.id}}" method="post">
+                        <button type="submit" class="btn btn-danger fw-bold">Xóa ngay</button>
                     </form>
                 </div>
             </div>
-
-            <p class="text-muted mb-1">
-                <i class="bi bi-person-badge"></i>
-                <span th:text="${coach.role}"></span>
-            </p>
-
-            <hr>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Quốc tịch:</strong> <span th:text="${coach.nationality}">Anh</span></p>
-                    <p><strong>Ngày sinh:</strong> <span th:text="${coach.dateOfBirth}"></span></p>
-                    <p><strong>Ngày gia nhập:</strong> <span th:text="${coach.joinDate}"></span></p>
-                    <p><strong>Đội:</strong>
-                        <span th:text="${coach.team != null ? coach.team.name : 'Chưa gán đội'}"></span>
-                    </p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Kinh nghiệm:</strong> <span th:text="${coach.experienceYears}">0</span> năm</p>
-                    <p>
-                        <strong>Chứng chỉ huấn luyện: </strong>
-                        <span th:if="${#lists.isEmpty(coach.licenseLevels)}">Chưa cập nhật</span>
-                        <span th:each="lic : ${coach.licenseLevels}"
-                              class="badge bg-primary me-1"
-                              th:text="${lic}">
-    </span>
-                    </p>
-
-                    <p><strong>Trạng thái:</strong> <span th:text="${coach.status}"></span></p>
-                    <p><strong>SĐT:</strong> <span th:text="${coach.phone}"></span></p>
-                    <p><strong>Email:</strong> <span th:text="${coach.email}"></span></p>
-                </div>
-            </div>
-
-            <hr>
-
-            <h6>Ghi chú</h6>
-            <p th:text="${coach.note}">Không có ghi chú.</p>
-
-            <a href="/admin/coaches" class="btn btn-secondary mt-2">Quay lại danh sách</a>
         </div>
     </div>
 

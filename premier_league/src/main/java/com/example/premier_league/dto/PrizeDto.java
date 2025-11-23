@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class PrizeDto {
 
-    private Long id;
+    private Long prizeId;
 
     @NotBlank(message = "Tên giải thưởng không được để trống")
     private String name;

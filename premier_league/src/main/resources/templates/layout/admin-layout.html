@@ -9,13 +9,23 @@
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { primary: '#4f46e5', secondary: '#00ff85' } } }
+            theme: {extend: {colors: {primary: '#4f46e5', secondary: '#00ff85'}}}
         }
     </script>
     <style>
-        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background-color: rgba(99, 102, 241, 0.2); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans h-screen overflow-hidden flex">
@@ -24,7 +34,7 @@
     <div class="h-16 flex items-center px-6 border-b">
         <a th:href="@{/}" class="flex items-center gap-3">
             <div class="w-10 h-10 overflow-hidden">
-                <img th:src="@{/images/logoo.png}" alt="Logo" class="w-full h-full object-contain" />
+                <img th:src="@{/images/logoo.png}" alt="Logo" class="w-full h-full object-contain"/>
             </div>
             <span class="text-xl font-bold text-primary">Premier League</span>
         </a>
@@ -73,7 +83,8 @@
                 <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">A</div>
             </div>
             <form th:action="@{/admin/logout}" method="post" class="border-l pl-4 border-gray-200">
-                <button type="submit" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">
+                <button type="submit"
+                        class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                 </button>
             </form>

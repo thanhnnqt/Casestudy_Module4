@@ -3,103 +3,160 @@
       th:replace="layout :: layout('Thêm nhân viên', 'staffs', ~{::content})">
 
 <th:block th:fragment="content">
-  <div class="container mt-4">
-    <h2 class="text-center mb-4">Thêm nhân viên mới</h2>
 
-    <form th:action="@{/admin/staffs/create}" th:object="${staffDto}" method="post" class="card p-4 shadow">
+  <style>
+    :root { --pl-purple: #38003c; --pl-pink: #ff0050; }
+    .card-form { border: none; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: #fff; }
+    .form-label { font-weight: 600; font-size: 0.9rem; color: #4b5563; }
+    .form-control, .form-select { border-radius: 0.5rem; padding: 0.6rem 1rem; border: 1px solid #e5e7eb; }
+    .form-control:focus, .form-select:focus { border-color: var(--pl-pink); box-shadow: 0 0 0 4px rgba(255, 0, 80, 0.1); }
+    .btn-save { background-color: var(--pl-pink); border: none; color: white; padding: 0.75rem 2rem; font-weight: 600; border-radius: 0.5rem; }
+    .btn-save:hover { background-color: #d10042; transform: translateY(-2px); }
+    .section-title { color: var(--pl-purple); font-weight: 700; text-transform: uppercase; font-size: 0.85rem; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px; margin-bottom: 20px; }
+  </style>
 
-      <div class="row">
-        <div class="col-md-6">
-          <div class="mb-3">
-            <label class="form-label fw-bold">Họ và tên</label>
-            <input type="text" class="form-control" th:field="*{fullName}">
-            <div class="text-danger" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+  <div class="container-fluid" style="max-width: 1000px;">
+    <div class="mb-4">
+      <h3 class="fw-bold" style="color: var(--pl-purple);">Thêm Nhân Viên Mới</h3>
+    </div>
+
+    <form th:action="@{/owner/staffs/create}" th:object="${staffDto}" method="post">
+
+      <div class="card card-form p-4 mb-4">
+        <div class="section-title">1. Thông tin cá nhân</div>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" th:field="*{fullName}" placeholder="Nhập họ tên">
+            <small class="text-danger" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></small>
           </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">Ngày sinh</label>
+          <div class="col-md-6">
+            <label class="form-label">Ngày sinh</label>
             <input type="date" class="form-control" th:field="*{dateOfBirth}">
-            <div class="text-danger" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></div>
+            <small class="text-danger" th:errors="*{dateOfBirth}"></small>
           </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">Giới tính</label>
+          <div class="col-md-4">
+            <label class="form-label">Giới tính</label>
             <select class="form-select" th:field="*{gender}">
-              <option value="">-- Chọn giới tính --</option>
+              <option value="">-- Chọn --</option>
               <option value="Male">Nam</option>
               <option value="Female">Nữ</option>
               <option value="Other">Khác</option>
             </select>
-            <div class="text-danger" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
+            <small class="text-danger" th:errors="*{gender}"></small>
           </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">Quốc tịch</label>
-            <input type="text" class="form-control" th:field="*{nationality}">
-            <div class="text-danger" th:if="${#fields.hasErrors('nationality')}" th:errors="*{nationality}"></div>
+          <div class="col-md-4">
+            <label class="form-label">Số điện thoại</label>
+            <input type="text" class="form-control" th:field="*{phoneNumber}" placeholder="09xxxxxxxx">
+            <small class="text-danger" th:errors="*{phoneNumber}"></small>
           </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">Số điện thoại</label>
-            <input type="text" class="form-control" th:field="*{phoneNumber}">
-            <div class="text-danger" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+          <div class="col-md-4">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" th:field="*{email}" placeholder="abc@domain.com">
+            <small class="text-danger" th:errors="*{email}"></small>
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">Quốc tịch</label>
+            <input type="text" class="form-control" th:field="*{nationality}" placeholder="Ví dụ: Việt Nam">
+            <small class="text-danger" th:errors="*{nationality}"></small>
           </div>
         </div>
+      </div>
 
-        <div class="col-md-6">
-          <div class="mb-3">
-            <label class="form-label fw-bold">Vị trí công tác</label>
-            <input type="text" class="form-control" th:field="*{position}">
-            <div class="text-danger" th:if="${#fields.hasErrors('position')}" th:errors="*{position}"></div>
+      <div class="card card-form p-4 mb-4">
+        <div class="section-title">2. Thông tin công việc</div>
+        <div class="row g-4">
+
+          <div class="col-md-6">
+            <label class="form-label">Vị trí công tác <span class="text-danger">*</span></label>
+            <select class="form-select" id="positionSelect" th:field="*{position}">
+              <option value="">-- Chọn vị trí --</option>
+              <option value="Medical">Bộ phận Y tế</option>
+              <option value="Technical">Kỹ thuật & Phân tích</option>
+              <option value="Operations">Vận hành & Hậu cần</option>
+              <option value="Media">Truyền thông & Marketing</option>
+              <option value="Management">Quản lý & Văn phòng</option>
+            </select>
+            <small class="text-danger" th:errors="*{position}"></small>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-bold">Vai trò trong đội</label>
-            <input type="text" class="form-control" th:field="*{role}">
-            <div class="text-danger" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
+          <div class="col-md-6">
+            <label class="form-label">Vai trò cụ thể</label>
+            <select class="form-select" id="roleSelect" th:field="*{role}">
+              <option value="">-- Vui lòng chọn vị trí trước --</option>
+            </select>
+            <small class="text-danger" th:errors="*{role}"></small>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-bold">Ngày gia nhập</label>
+          <div class="col-md-4">
+            <label class="form-label">Ngày gia nhập</label>
             <input type="date" class="form-control" th:field="*{joinDate}">
-            <div class="text-danger" th:if="${#fields.hasErrors('joinDate')}" th:errors="*{joinDate}"></div>
+            <small class="text-danger" th:errors="*{joinDate}"></small>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-bold">Email</label>
-            <input type="email" class="form-control" th:field="*{email}">
-            <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+          <div class="col-md-4">
+            <label class="form-label">Đội bóng</label>
+            <input type="hidden" th:field="*{teamId}">
+            <input type="text" class="form-control bg-light" th:value="${myTeamName}" readonly>
           </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">Trạng thái</label>
+          <div class="col-md-4">
+            <label class="form-label">Trạng thái</label>
             <select class="form-select" th:field="*{status}">
-              <option value="">-- Chọn trạng thái --</option>
               <option value="Active">Đang làm việc</option>
-              <option value="Inactive">Nghỉ</option>
+              <option value="Inactive">Đã nghỉ</option>
               <option value="On Loan">Cho mượn</option>
             </select>
-            <div class="text-danger" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
+          </div>
+
+          <div class="col-md-12">
+            <label class="form-label">Link ảnh đại diện</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-link-45deg"></i></span>
+              <input type="text" class="form-control" th:field="*{avatarUrl}" placeholder="https://...">
+            </div>
+            <small class="text-danger" th:errors="*{avatarUrl}"></small>
           </div>
         </div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label fw-bold">Link ảnh đại diện</label>
-        <input type="text" class="form-control" th:field="*{avatarUrl}" placeholder="https://example.com/image.jpg">
-        <div class="text-danger" th:if="${#fields.hasErrors('avatarUrl')}" th:errors="*{avatarUrl}"></div>
+      <div class="d-flex justify-content-end gap-3 pb-5">
+        <a href="/admin/staffs" class="btn btn-light px-4 fw-bold text-muted border">Hủy bỏ</a>
+        <button type="submit" class="btn btn-save"><i class="bi bi-save me-2"></i>Lưu Nhân Viên</button>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label fw-bold">ID Đội bóng (Nếu có)</label>
-        <input type="number" class="form-control" th:field="*{teamId}">
-      </div>
-
-      <div class="d-flex justify-content-between mt-3">
-        <a href="/admin/staffs" class="btn btn-secondary">Quay lại</a>
-        <button type="submit" class="btn btn-success px-4">Lưu nhân viên</button>
-      </div>
     </form>
   </div>
+
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      const rolesData = {
+        "Medical": ["Head Doctor", "Physiotherapist", "Masseur", "Nutritionist", "Psychologist"],
+        "Technical": ["Data Analyst", "Scout", "Performance Analyst", "Sport Scientist"],
+        "Operations": ["Kit Manager", "Groundskeeper", "Bus Driver", "Security Officer", "Chef"],
+        "Media": ["Social Media Manager", "Photographer", "Videographer", "Press Officer"],
+        "Management": ["HR Manager", "Finance Officer", "Administrator"]
+      };
+
+      const positionSelect = document.getElementById('positionSelect');
+      const roleSelect = document.getElementById('roleSelect');
+
+      function updateRoles(selectedPos) {
+        roleSelect.innerHTML = '<option value="">-- Chọn vai trò --</option>';
+        if (selectedPos && rolesData[selectedPos]) {
+          rolesData[selectedPos].forEach(function(roleName) {
+            const option = document.createElement('option');
+            option.value = roleName;
+            option.text = roleName;
+            roleSelect.appendChild(option);
+          });
+        }
+      }
+
+      positionSelect.addEventListener('change', function() {
+        updateRoles(this.value);
+      });
+    });
+  </script>
+
 </th:block>
 </html>
