@@ -102,12 +102,12 @@
                            th:text="${match.homeTeam.stadium}">Stadium</p>
                         <p class="text-sm font-semibold text-gray-600 mt-1"
                            th:text="${match.matchDate + ' – ' + match.matchTime}"></p>
-                        <div class="mt-2 flex items-center justify-center gap-1 text-sm font-semibold">
-                            <i data-lucide="clock" class="w-4 h-4"
-                               th:classappend="${#strings.equalsIgnoreCase(match.status,'finished')} ? 'text-gray-500' : 'text-green-600'"></i>
-                            <span th:text="${#strings.equalsIgnoreCase(match.status,'finished') ? 'Đã kết thúc' : 'Sắp diễn ra'}"
-                                  th:classappend="${#strings.equalsIgnoreCase(match.status,'finished')} ? 'text-gray-500' : 'text-green-600'"></span>
-                        </div>
+<!--                        <div class="mt-2 flex items-center justify-center gap-1 text-sm font-semibold">-->
+<!--                            <i data-lucide="clock" class="w-4 h-4"-->
+<!--                               th:classappend="${#strings.equalsIgnoreCase(match.status,'finished')} ? 'text-gray-500' : 'text-green-600'"></i>-->
+<!--                            <span th:text="${#strings.equalsIgnoreCase(match.status,'finished') ? 'Đã kết thúc' : 'Sắp diễn ra'}"-->
+<!--                                  th:classappend="${#strings.equalsIgnoreCase(match.status,'finished')} ? 'text-gray-500' : 'text-green-600'"></span>-->
+<!--                        </div>-->
                     </div>
 
                     <!-- Away -->
@@ -201,8 +201,8 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         lucide.createIcons();
-        loadRanking();
         initWebSocket();
+        loadRanking();
     });
 </script>
 

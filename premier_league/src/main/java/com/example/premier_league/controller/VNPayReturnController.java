@@ -1,10 +1,20 @@
 package com.example.premier_league.controller;
 
+import com.example.premier_league.entity.Account;
+import com.example.premier_league.service.IAccountService;
+import com.example.premier_league.service.impl.IClientTicketService;
 import com.example.premier_league.vnpayconfig.VNPayConfig;
 import com.lowagie.text.*;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
 import com.lowagie.text.Font;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +41,6 @@ import java.util.List;
 
 import com.example.premier_league.dto.TicketDto;
 
-import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 
 import java.awt.Color;
@@ -40,6 +49,15 @@ import java.util.Locale;
 @Controller
 @RequestMapping("/vnpay_return")
 public class VNPayReturnController {
+    private final IAccountService accountService;
+    private final IClientTicketService clientTicketService;
+
+    public VNPayReturnController(IAccountService accountService,
+                                 IClientTicketService clientTicketService) {
+        this.accountService = accountService;
+        this.clientTicketService = clientTicketService;
+    }
+
     private void addRow(PdfPTable table, String label, String value,
                         Font labelFont, Font valueFont) {
 
@@ -56,84 +74,155 @@ public class VNPayReturnController {
     }
 
 
+//    @GetMapping
+//    public String result(HttpServletRequest request, Model model) throws Exception {
+//
+//        // 1. Lấy tất cả tham số trả về từ VNPay
+//        Map<String, String> fields = new HashMap<>();
+//        for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements(); ) {
+//            String fieldName = params.nextElement();
+//            String fieldValue = request.getParameter(fieldName);
+//            if (fieldValue != null && !fieldValue.isEmpty()) {
+//                fields.put(fieldName, fieldValue);
+//            }
+//        }
+//
+//        // 2. Lấy vnp_SecureHash và vnp_ResponseCode
+//        String vnp_SecureHash = fields.remove("vnp_SecureHash");
+//        String responseCode = fields.get("vnp_ResponseCode");
+//
+//        // 3. Tạo hashData (sắp xếp & encode giống servlet cũ)
+//        List<String> fieldNames = new ArrayList<>(fields.keySet());
+//        Collections.sort(fieldNames); // Sắp xếp tham số theo thứ tự bảng chữ cái
+//
+//        StringBuilder hashData = new StringBuilder();
+//        for (int i = 0; i < fieldNames.size(); i++) {
+//            String fieldName = fieldNames.get(i);
+//            String fieldValue = fields.get(fieldName);
+//            if (fieldValue != null && !fieldValue.isEmpty()) {
+//                if (hashData.length() > 0) {
+//                    hashData.append('&');
+//                }
+//                hashData.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8))
+//                        .append('=')
+//                        .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
+//            }
+//        }
+//
+//        // Debug
+//        System.out.println("Return fields     : " + fields);
+//        System.out.println("Return hashData   : " + hashData);
+//        System.out.println("Return vnp_SecureHash : " + vnp_SecureHash);
+//        System.out.println("Return responseCode   : " + responseCode);
+//        System.out.println("Return SECRET_KEY     : " + VNPayConfig.vnp_HashSecret);
+//
+//        // 4. Kiểm tra SECRET_KEY
+//        if (VNPayConfig.vnp_HashSecret == null || VNPayConfig.vnp_HashSecret.isEmpty()) {
+//            model.addAttribute("mess", "Khóa bí mật chưa được cấu hình");
+//            return "vnpay/fail";
+//        }
+//
+//        // 5. Kiểm tra hashData
+//        if (hashData.length() == 0) {
+//            model.addAttribute("mess", "Không có tham số hợp lệ để xác minh chữ ký");
+//            return "vnpay/fail";
+//        }
+//
+//        // 6. Tạo chữ ký server-side
+//        String signValue = VNPayConfig.hmacSHA512(VNPayConfig.vnp_HashSecret, hashData.toString());
+//        System.out.println("Return signValue      : " + signValue);
+//
+//        // 7. Kiểm tra chữ ký + mã phản hồi
+//        if (signValue.equals(vnp_SecureHash) && "00".equals(responseCode)) {
+//            model.addAttribute("mess", "Thanh toán thành công!");
+//            model.addAttribute("responseCode", responseCode);
+//            model.addAttribute("fields", fields);
+//            return "vnpay/success"; // -> templates/vnpay/success.html
+//        } else {
+//            String errorMessage = "Thanh toán thất bại! Mã lỗi: "
+//                    + (responseCode != null ? responseCode : "Không xác định");
+//
+//            if (!signValue.equals(vnp_SecureHash)) {
+//                errorMessage += " (Chữ ký không hợp lệ: signValue=" + signValue
+//                        + ", vnp_SecureHash=" + vnp_SecureHash + ")";
+//            }
+//
+//            model.addAttribute("message", errorMessage);
+//            model.addAttribute("responseCode", responseCode);
+//            model.addAttribute("fields", fields);
+//            return "vnpay/fail";
+//        }
+//    }
+
     @GetMapping
-    public String result(HttpServletRequest request, Model model) {
-        // 1. Lấy tất cả tham số trả về từ VNPay
+    public String result(HttpServletRequest request,
+                         HttpSession sessionHttp,
+                         Model model) throws Exception {
+
         Map<String, String> fields = new HashMap<>();
+
+        // Chỉ lấy param VNPay trả về
         for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements(); ) {
             String fieldName = params.nextElement();
+
+            if (!fieldName.startsWith("vnp_"))
+                continue; // cực quan trọng!!!
+
             String fieldValue = request.getParameter(fieldName);
-            if (fieldValue != null && !fieldValue.isEmpty()) {
+            if (fieldValue != null && fieldValue.length() > 0) {
                 fields.put(fieldName, fieldValue);
             }
         }
 
-        // 2. Lấy vnp_SecureHash và vnp_ResponseCode
-        String vnp_SecureHash = fields.remove("vnp_SecureHash");
-        String responseCode = fields.get("vnp_ResponseCode");
+        String vnp_SecureHash = request.getParameter("vnp_SecureHash");
+        String vnp_ResponseCode = request.getParameter("vnp_ResponseCode");
+        String vnp_TxnRef = request.getParameter("vnp_TxnRef");
 
-        // 3. Tạo hashData
+        fields.remove("vnp_SecureHashType");
+        fields.remove("vnp_SecureHash");
+
+// Tạo hashData y như servlet gốc
         List<String> fieldNames = new ArrayList<>(fields.keySet());
-        Collections.sort(fieldNames); // Sắp xếp tham số theo thứ tự bảng chữ cái
+        Collections.sort(fieldNames);
 
         StringBuilder hashData = new StringBuilder();
         for (int i = 0; i < fieldNames.size(); i++) {
             String fieldName = fieldNames.get(i);
             String fieldValue = fields.get(fieldName);
             if (fieldValue != null && !fieldValue.isEmpty()) {
-                if (hashData.length() > 0) {
-                    hashData.append('&');
-                }
+                if (i > 0) hashData.append('&');
                 hashData.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8))
                         .append('=')
                         .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
             }
         }
 
-        // Debug
-        System.out.println("Return fields     : " + fields);
-        System.out.println("Return hashData   : " + hashData);
-        System.out.println("Return vnp_SecureHash : " + vnp_SecureHash);
-        System.out.println("Return responseCode   : " + responseCode);
-        System.out.println("Return SECRET_KEY     : " + VNPayConfig.vnp_HashSecret);
-
-        // 4. Kiểm tra SECRET_KEY
-        if (VNPayConfig.vnp_HashSecret == null || VNPayConfig.vnp_HashSecret.isEmpty()) {
-            model.addAttribute("mess", "Khóa bí mật chưa được cấu hình");
-            return "vnpay/fail";
-        }
-
-        // 5. Kiểm tra hashData
-        if (hashData.length() == 0) {
-            model.addAttribute("mess", "Không có tham số hợp lệ để xác minh chữ ký");
-            return "vnpay/fail";
-        }
-
-        // 6. Tạo chữ ký server-side
         String signValue = VNPayConfig.hmacSHA512(VNPayConfig.vnp_HashSecret, hashData.toString());
-        System.out.println("Return signValue      : " + signValue);
 
-        // 7. Kiểm tra chữ ký + mã phản hồi
-        if (signValue.equals(vnp_SecureHash) && "00".equals(responseCode)) {
-            model.addAttribute("mess", "Thanh toán thành công!");
-            model.addAttribute("responseCode", responseCode);
-            model.addAttribute("fields", fields);
-            return "vnpay/success"; // -> templates/vnpay/success.html
-        } else {
-            String errorMessage = "Thanh toán thất bại! Mã lỗi: "
-                    + (responseCode != null ? responseCode : "Không xác định");
 
-            if (!signValue.equals(vnp_SecureHash)) {
-                errorMessage += " (Chữ ký không hợp lệ: signValue=" + signValue
-                        + ", vnp_SecureHash=" + vnp_SecureHash + ")";
+        TicketDto latestTicket = (TicketDto) sessionHttp.getAttribute("latestTicket");
+        model.addAttribute("ticketDto", latestTicket);
+
+        if (signValue.equals(vnp_SecureHash) && "00".equals(vnp_ResponseCode)) {
+
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            Account loggedIn = accountService.findByUsername(username).orElse(null);
+
+            if (loggedIn != null && latestTicket != null) {
+                clientTicketService.saveFromTicketDto(latestTicket, loggedIn, vnp_TxnRef);
             }
 
-            model.addAttribute("message", errorMessage);
-            model.addAttribute("responseCode", responseCode);
-            model.addAttribute("fields", fields);
+            model.addAttribute("mess", "Thanh toán thành công! Vé của bạn đã được lưu vào lịch sử.");
+            return "vnpay/success";
+        } else {
+            model.addAttribute("mess", "Thanh toán thất bại hoặc không hợp lệ. Vui lòng thử lại.");
             return "vnpay/fail";
         }
+
+
     }
+
+
 
     @GetMapping(value = "/printTicket", produces = "application/pdf")
     public ResponseEntity<byte[]> printTicket(HttpSession session) throws Exception {

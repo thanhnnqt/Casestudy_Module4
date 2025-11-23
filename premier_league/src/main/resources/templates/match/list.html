@@ -125,11 +125,27 @@
         }
 
         /* ========================= BADGE =========================== */
-        .badge.bg-info { background-color: #00c0ff !important; }
-        .badge.bg-success { background-color: var(--pl-green) !important; color: #38003c !important; }
-        .badge.bg-danger { background-color: #e0003c !important; }
-        .badge.bg-warning { background-color: #ffd000 !important; color: #38003c !important; }
-        .badge.bg-secondary { background-color: #666 !important; }
+        .badge.bg-info {
+            background-color: #00c0ff !important;
+        }
+
+        .badge.bg-success {
+            background-color: var(--pl-green) !important;
+            color: #38003c !important;
+        }
+
+        .badge.bg-danger {
+            background-color: #e0003c !important;
+        }
+
+        .badge.bg-warning {
+            background-color: #ffd000 !important;
+            color: #38003c !important;
+        }
+
+        .badge.bg-secondary {
+            background-color: #666 !important;
+        }
 
         /* ========================= PAGINATION =========================== */
         .pagination .page-link {
@@ -178,6 +194,7 @@
 
             <h2 class="mb-4 text-center">Danh Sách Lịch Thi Đấu Premier League</h2>
 
+
             <!-- SEARCH FORM -->
             <form class="row mb-4 search-form" th:action="@{/admin/matches}" method="get">
 
@@ -221,7 +238,7 @@
                     <th>Ngày</th>
                     <th>Giờ</th>
                     <th>Đội Nhà</th>
-<!--                    <th>Tỷ số</th>-->
+<!--                    <th class="text-center">Tỷ số</th>-->
                     <th>Đội Khách</th>
                     <th>Ghi chú</th>
                     <th>Trạng thái</th>
@@ -237,6 +254,23 @@
                     <td th:text="${#temporals.format(match.matchDate, 'dd/MM/yyyy')}"></td>
                     <td th:text="${match.matchTime}"></td>
                     <td th:text="${match.homeTeam.name}"></td>
+<!--                    <td>-->
+<!--    <span th:switch="${match.status}">-->
+<!--        <span th:case="${T(com.example.premier_league.entity.MatchStatus).FINISHED}">-->
+<!--            <span th:text="${match.match.homeScore}"></span>-->
+<!--            - -->
+<!--            <span th:text="${match.match.awayScore}"></span>-->
+<!--        </span>-->
+
+<!--        <span th:case="${T(com.example.premier_league.entity.MatchStatus).LIVE}">-->
+<!--            <span th:text="${match.match.homeScore}"></span>-->
+<!--            - -->
+<!--            <span th:text="${match.match.awayScore}"></span>-->
+<!--        </span>-->
+
+<!--        <span th:case="*">-</span>-->
+<!--    </span>-->
+<!--                    </td>-->
                     <td th:text="${match.awayTeam.name}"></td>
                     <td th:text="${match.note}"></td>
 
