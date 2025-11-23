@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:fragment="layout(pageTitle, activeMenu, content)">
+      th:fragment="layout(pageTitle, activeMenu, content)"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,7 +62,7 @@
             border-radius: 50%;
             padding: 4px;
             object-fit: contain;
-            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
 
         .sidebar .brand span {
@@ -116,7 +117,7 @@
         .sidebar-footer {
             margin-top: auto;
             padding-top: 1rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* ====== CONTENT WRAPPER ====== */
@@ -139,7 +140,7 @@
             position: sticky;
             top: 0;
             z-index: 90;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.03);
         }
 
         .search-box-wrapper {
@@ -210,8 +211,13 @@
 
         /* Responsive adjustments */
         @media (max-width: 992px) {
-            .sidebar { transform: translateX(-100%); }
-            .content-wrapper { margin-left: 0; }
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .content-wrapper {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -231,13 +237,16 @@
             <i class="bi bi-grid-1x2-fill"></i> Dashboard
         </a>
 
-        <div class="text-uppercase small fw-bold mt-3 mb-2 px-3" style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Quản lý đội bóng</div>
+        <div class="text-uppercase small fw-bold mt-3 mb-2 px-3"
+             style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Quản lý đội bóng
+        </div>
 
         <a href="/owner/players"
            class="nav-link"
            th:classappend="${activeMenu} == 'players' ? ' active'">
             <i class="bi bi-people-fill"></i> Cầu thủ
         </a>
+
         <a href="/owner/coaches"
            class="nav-link"
            th:classappend="${activeMenu} == 'coaches' ? ' active'">
@@ -249,7 +258,19 @@
             <i class="bi bi-person-badge"></i> Nhân viên
         </a>
 
-        <div class="text-uppercase small fw-bold mt-3 mb-2 px-3" style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Giải đấu</div>
+        <div class="text-uppercase small fw-bold mt-3 mb-2 px-3"
+             style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Tạo vé
+        </div>
+
+        <a class="nav-link"
+           th:href="@{/owner/tickets/__${loggedInTeam.id}__/optionToCreateTicket}">
+            <i class="bi bi-ticket-perforated"></i>
+            Tạo vé trận đấu
+        </a>
+
+        <div class="text-uppercase small fw-bold mt-3 mb-2 px-3"
+             style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Giải đấu
+        </div>
 
         <a th:href="@{/owner/matches}"
            class="nav-link"
@@ -270,6 +291,10 @@
         <div class="d-flex align-items-center">
             <h5 class="mb-0 fw-bold text-dark d-none d-md-block"
                 th:text="${pageTitle}">Tổng quan</h5>
+            <!-- Nút trở về trang chủ -->
+            <a href="/" class="btn btn-sm btn-outline-secondary ms-3 btn-back-home">
+                <i class="bi bi-arrow-left-circle me-1"></i>Trang chủ
+            </a>
         </div>
 
         <div class="d-flex align-items-center gap-4">
@@ -304,15 +329,21 @@
                                     <i class="bi bi-person me-2"></i>Hồ sơ CLB
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="/logout"><i
+                                    class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
                         </ul>
                     </div>
                 </div>
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
                     <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Hồ sơ cá nhân</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Đăng
+                        xuất</a></li>
                 </ul>
             </div>
         </div>

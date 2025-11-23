@@ -680,8 +680,8 @@
         <span class="notice-icon">⚠</span>
         <span th:text="${mess}"></span>
     </div>
-    <a href="/" class="btn btn-warning btn-back mt-2">
-        Quay về trang chủ
+    <a href="/ticket" class="btn btn-warning btn-back mt-2">
+        Danh sách các trận đấu khác
     </a>
 </div>
 
@@ -709,25 +709,6 @@
         }
 
         document.getElementById("standSessionId").value = sessionId;
-    }
-
-    function validateBeforeSubmit() {
-        const ticketTypeSelect = document.getElementById('ticketType');
-        const standSessionInput = document.getElementById('standSession');
-        const quantityInput = document.getElementById('quantityInput');
-
-        // if (!ticketTypeSelect || !ticketTypeSelect.value) {
-        //     alert("Vui lòng chọn loại vé.");
-        //     return false;
-        // }
-
-        // const quantity = parseInt(quantityInput.value, 10);
-        // if (isNaN(quantity) || quantity <= 0) {
-        //     alert("Vui lòng nhập số lượng ghế hợp lệ.");
-        //     return false;
-        // }
-
-        return true;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
