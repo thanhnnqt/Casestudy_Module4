@@ -47,6 +47,6 @@ public class Match {
     @OneToOne(mappedBy = "match")
     private MatchSchedule schedule;
 
-    @Column(name = "ranking_processed", nullable = false)
+    @Column(name = "ranking_processed")
     private boolean rankingProcessed = false;
 }
