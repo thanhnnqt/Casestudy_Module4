@@ -103,6 +103,29 @@ public class MatchEventService implements IMatchEventService {
             messaging.convertAndSend("/topic/match/" + matchId + "/score", score);
         }
 
+        // ============================ MATCH START =============================
+        if ("MATCH_START".equalsIgnoreCase(saved.getType())) {
+
+            // nếu trận chưa LIVE -> đặt LIVE
+            if (match.getStatus() != MatchStatus.LIVE) {
+                match.setStatus(MatchStatus.LIVE);
+                matchRepo.save(match);
+            }
+
+            // gửi realtime: status thay đổi
+            Map<String, Object> start = new HashMap<>();
+            start.put("homeScore", match.getHomeScore());
+            start.put("awayScore", match.getAwayScore());
+            start.put("status", match.getStatus().name());
+
+            messaging.convertAndSend("/topic/match/" + matchId + "/score", start);
+
+            // gửi event START xuống bảng sự kiện
+            messaging.convertAndSend("/topic/match/" + matchId + "/events", toDto(saved));
+
+            return saved;
+        }
+
         // ============================ YELLOW CARD (accumulation) =============================
         if ("YELLOW_CARD".equalsIgnoreCase(saved.getType())) {
             Player player = saved.getPlayer();
@@ -225,7 +248,12 @@ public class MatchEventService implements IMatchEventService {
         MatchEvent e = new MatchEvent();
         e.setMatch(match);
 
-        // nếu bắt đầu trận bằng event (first event) -> set LIVE
+        // MATCH_START → luôn phút 0
+        if ("MATCH_START".equalsIgnoreCase(dto.getType())) {
+            dto.setMinute(0);
+        }
+
+        // nếu trận bắt đầu bằng bất kỳ event nào khác MATCH_END → LIVE
         if (match.getStatus() != MatchStatus.LIVE &&
                 !"MATCH_END".equalsIgnoreCase(dto.getType())) {
             match.setStatus(MatchStatus.LIVE);
@@ -239,7 +267,6 @@ public class MatchEventService implements IMatchEventService {
         if (dto.getTeamId() != null) {
             Team t = teamRepo.findById(dto.getTeamId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy đội bóng"));
-            // kiểm tra team thuộc match
             if (!t.getId().equals(match.getHomeTeam().getId()) && !t.getId().equals(match.getAwayTeam().getId())) {
                 throw new RuntimeException("Đội bóng không đá trận này");
             }
@@ -250,9 +277,8 @@ public class MatchEventService implements IMatchEventService {
             Player p = playerRepo.findById(dto.getPlayerId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy cầu thủ"));
 
-            // chặn nếu đang treo giò
             if (p.getSuspensionMatchesRemaining() != null && p.getSuspensionMatchesRemaining() > 0) {
-                throw new RuntimeException("Cầu thủ " + p.getName() + " đang bị treo (" + p.getSuspensionMatchesRemaining() + " trận còn lại)");
+                throw new RuntimeException("Cầu thủ đang bị treo giò");
             }
 
             e.setPlayer(p);
@@ -260,6 +286,7 @@ public class MatchEventService implements IMatchEventService {
 
         createEvent(e);
     }
+
 
     @Override
     public Match findMatchById(Long matchId) {
