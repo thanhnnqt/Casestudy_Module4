@@ -67,8 +67,11 @@ public class MatchEventService implements IMatchEventService {
         // ============================ GOAL =============================
         if ("GOAL".equalsIgnoreCase(saved.getType())) {
 
-            if (match.getStatus() != MatchStatus.LIVE)
-                throw new RuntimeException("Trận chưa LIVE");
+            if (match.getStatus() != MatchStatus.LIVE) {
+                match.setStatus(MatchStatus.LIVE);
+                matchRepo.save(match);
+            }
+
 
             Long tid = saved.getTeam().getId();
             if (tid.equals(match.getHomeTeam().getId()))

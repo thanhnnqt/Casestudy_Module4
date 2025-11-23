@@ -24,8 +24,12 @@ public class Match {
     @JoinColumn(name = "away_team_id", nullable = false)
     private Team awayTeam;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer homeScore = 0;
+
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer awayScore = 0;
+
 
     private LocalDateTime matchDate;
 
