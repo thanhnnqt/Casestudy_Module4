@@ -9,12 +9,12 @@
 
     <style>
         :root {
-            --pl-bg: #181022;              /* nền tối tím than */
-            --pl-bg-card: #23152F;         /* nền card */
-            --pl-purple-soft: #E5D9FF;     /* chữ tím nhạt mềm */
-            --pl-green: #3AFF6E;           /* xanh rêu neon */
-            --pl-green-dark: #26C456;      /* xanh đậm hơn chút */
-            --pl-green-soft: #B8FFCC;      /* xanh nhạt highlight */
+            --pl-bg: #181022; /* nền tối tím than */
+            --pl-bg-card: #23152F; /* nền card */
+            --pl-purple-soft: #E5D9FF; /* chữ tím nhạt mềm */
+            --pl-green: #3AFF6E; /* xanh rêu neon */
+            --pl-green-dark: #26C456; /* xanh đậm hơn chút */
+            --pl-green-soft: #B8FFCC; /* xanh nhạt highlight */
         }
 
         body {
@@ -34,7 +34,7 @@
             text-align: center;
             font-size: 2.1rem;
             font-weight: 800;
-            margin-top: 40px;
+            margin-top: 16px;
             margin-bottom: 8px;
             letter-spacing: 0.04em;
             text-transform: uppercase;
@@ -46,6 +46,46 @@
             color: #b1a7d6;
             margin-bottom: 32px;
             font-size: 0.95rem;
+        }
+
+        /* Thanh nút trên cùng */
+        .top-link-wrap {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 32px;
+            margin-bottom: 8px;
+        }
+
+        .top-link-btn {
+            border-radius: 999px;
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(184, 255, 204, 0.5);
+            background: rgba(15, 23, 42, 0.7);
+            color: var(--pl-green-soft);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, filter 0.18s ease;
+        }
+
+        .top-link-btn:hover {
+            background: radial-gradient(circle at top left, rgba(58, 255, 110, 0.18), rgba(15, 23, 42, 0.95));
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+            text-decoration: none;
+            color: #f9fafb;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.9);
+        }
+
+        .top-link-icon {
+            font-size: 0.9rem;
         }
 
         /* Card trận đấu */
@@ -65,9 +105,8 @@
             content: "";
             position: absolute;
             inset: 0;
-            background:
-                    radial-gradient(circle at 10% 0%, rgba(58, 255, 110, 0.16) 0, transparent 55%),
-                    radial-gradient(circle at 100% 100%, rgba(229, 217, 255, 0.18) 0, transparent 65%);
+            background: radial-gradient(circle at 10% 0%, rgba(58, 255, 110, 0.16) 0, transparent 55%),
+            radial-gradient(circle at 100% 100%, rgba(229, 217, 255, 0.18) 0, transparent 65%);
             opacity: 0;
             transition: opacity 0.25s ease;
             pointer-events: none;
@@ -156,8 +195,6 @@
             color: #020617;
             box-shadow: 0 7px 18px rgba(0, 0, 0, 0.75);
             transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
-
-            /* BỎ GẠCH CHÂN */
             text-decoration: none !important;
         }
 
@@ -177,6 +214,10 @@
             .page-title {
                 font-size: 1.7rem;
             }
+
+            .top-link-wrap {
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -184,11 +225,19 @@
 <body>
 
 <div class="container page-wrapper">
+    <!-- Nút xem danh sách tạo vé -->
+    <div class="top-link-wrap">
+        <a th:href="@{/owner/tickets/__${teamId}__}" class="top-link-btn">
+            <span>Xem danh sách tạo vé</span>
+            <span class="top-link-icon">📋</span>
+        </a>
+    </div>
 
-    <h3 class="page-title">Chọn trận đấu để tạo vé</h3>
-    <p class="page-subtitle">Hãy chọn trận đấu trong lịch thi đấu để tạo vé xem bóng đá cho khán giả.</p>
-
-    <div class="row g-4">
+    <h3 th:if="${matchScheduleListToShow}" class="page-title">Chọn trận đấu để tạo vé</h3>
+    <p th:if="${matchScheduleListToShow}" class="page-subtitle">Hãy chọn trận đấu trong lịch thi đấu để tạo vé xem bóng
+        đá cho khán giả.</p>
+    <p th:if="${mess}" class="page-subtitle" th:text="${mess}"></p>
+    <div th:if="${matchScheduleListToShow}" class="row g-4">
         <div class="col-sm-10 col-md-6 col-lg-4 d-flex mx-auto mx-md-0"
              th:each="match : ${matchScheduleListToShow}">
             <div class="match-card w-100 h-100 d-flex">
@@ -196,17 +245,16 @@
 
                     <!-- Thông tin trận -->
                     <div>
-                        <p class="match-name" th:text="${match.name}">Match Name</p>
+                        <p class="match-name" th:text="${match.name}"></p>
 
                         <p class="match-round">
                             <span class="match-round-badge">
                                 <span class="round-dot"></span>
-                                Vòng <span th:text="${match.round}">1</span>
+                                Vòng <span th:text="${match.round}"></span>
                             </span>
                         </p>
 
                         <p class="match-date" th:text="${match.matchDate}">
-                            20/11/2025
                         </p>
                     </div>
 

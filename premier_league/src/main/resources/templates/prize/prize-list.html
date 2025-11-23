@@ -82,19 +82,32 @@
 
         <td class="p-4">
           <div class="flex justify-center gap-2 opacity-100 lg:opacity-60 group-hover:opacity-100 transition-opacity">
-            <a th:href="@{'/admin/prize/award/' + ${p.id}}"
-               class="bg-white border border-secondary text-green-600 hover:bg-secondary hover:text-white p-2 rounded-lg transition-colors shadow-sm" title="Trao giải">
+
+            <a th:if="${p.player == null and p.team == null}"
+               th:href="@{'/admin/prize/award/' + ${p.id}}"
+               class="bg-white border border-secondary text-green-600 hover:bg-secondary hover:text-white p-2 rounded-lg transition-colors shadow-sm"
+               title="Trao giải">
               <i data-lucide="gift" class="w-4 h-4"></i>
             </a>
 
+            <a th:if="${p.player != null or p.team != null}"
+               th:href="@{'/admin/prize/revoke/' + ${p.id}}"
+               onclick="return confirm('Bạn có chắc chắn muốn thu hồi giải thưởng này? Người nhận sẽ bị xóa khỏi giải.')"
+               class="bg-white border border-yellow-300 text-yellow-600 hover:bg-yellow-50 hover:border-yellow-400 p-2 rounded-lg transition-colors shadow-sm"
+               title="Thu hồi giải">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </a>
+
             <a th:href="@{'/admin/prize/edit/' + ${p.id}}"
-               class="bg-white border border-gray-200 text-blue-600 hover:bg-blue-50 hover:border-blue-200 p-2 rounded-lg transition-colors shadow-sm" title="Sửa">
+               class="bg-white border border-gray-200 text-blue-600 hover:bg-blue-50 hover:border-blue-200 p-2 rounded-lg transition-colors shadow-sm"
+               title="Sửa thông tin">
               <i data-lucide="edit-3" class="w-4 h-4"></i>
             </a>
 
             <a th:href="@{'/admin/prize/delete/' + ${p.id}}"
                onclick="return confirm('Bạn có chắc chắn muốn xóa giải thưởng này?')"
-               class="bg-white border border-gray-200 text-red-500 hover:bg-red-50 hover:border-red-200 p-2 rounded-lg transition-colors shadow-sm" title="Xóa">
+               class="bg-white border border-gray-200 text-red-500 hover:bg-red-50 hover:border-red-200 p-2 rounded-lg transition-colors shadow-sm"
+               title="Xóa">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </a>
           </div>

@@ -37,8 +37,8 @@ public class Player {
 
     private int redCards = 0;
 
-    private int seasonYellowCards = 0;     // thẻ vàng tích lũy
-    private int suspensionMatchesRemaining = 0; // số trận còn bị treo giò
+    private Integer seasonYellowCards = 0;     // thẻ vàng tích lũy
+    private Integer suspensionMatchesRemaining; // số trận còn bị treo giò
 
     // Hàm tính tuổi (Sửa lỗi Property 'age' not found)
     public int getAge() {

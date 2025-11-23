@@ -50,9 +50,6 @@ public class TicketOwner {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
 
-        // nếu còn dùng upcomingMatches thì lấy luôn từ page
-//        model.addAttribute("upcomingMatches", matchSchedulePage.getContent());
-
         return "home/ticket";
     }
 

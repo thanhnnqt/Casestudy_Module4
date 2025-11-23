@@ -102,4 +102,9 @@ public class TournamentService implements ITournamentService {
     public boolean existsBySeason(String season) {
         return tournamentRepository.existsBySeason(season);
     }
+
+    @Override
+    public void deleteTournament(Long id) {
+        tournamentRepository.deleteById(id);
+    }
 }
