@@ -43,6 +43,14 @@
             color: #37474f;
         }
 
+        /* NGĂN TRÀN DÒNG CHO TEXT DÀI (SỐ CHỖ) */
+        .info-value.long-text {
+            word-break: break-word;
+            white-space: normal;
+            display: block;
+            max-width: 100%;
+        }
+
         .back-btn {
             margin-top: 25px;
             display: block;
@@ -123,16 +131,20 @@
 
     <div class="info-row">
         <span class="info-label">Số chỗ: </span>
-        <span class="info-value" th:text="${ticketDto.seatNumber}"></span>
+        <!-- THÊM class long-text Ở ĐÂY -->
+        <span class="info-value long-text" th:text="${ticketDto.seatNumber}"></span>
     </div>
 
     <div class="info-row mt-2">
         <span class="info-label">Tổng tiền: </span>
-        <span class="info-value text-danger fs-5" th:text="${#numbers.formatDecimal(ticketDto.getTotalPay(), 0, 'COMMA', 0, 'POINT')}"></span><span> đ</span>
+        <span class="info-value text-danger fs-5"
+              th:text="${#numbers.formatDecimal(ticketDto.getTotalPay(), 0, 'COMMA', 0, 'POINT')}"></span><span> đ</span>
     </div>
 
-    <a class="back-btn" th:href="@{/tickets/create(id=${matchId}, quantity = ${quantity}, standSessionId = ${standSessionId})} ">Hủy</a>
-    <a class="back-btn" th:href="@{/payment/showFormToPay(total=${ticketDto.getTotalPay()})}">Thanh toán</a>
+    <a class="back-btn"
+       th:href="@{/tickets/create(id=${matchId}, quantity = ${quantity}, standSessionId = ${standSessionId})}">Hủy</a>
+    <a class="back-btn"
+       th:href="@{/payment/showFormToPay(total=${ticketDto.getTotalPay()})}">Thanh toán</a>
 
 </div>
 
