@@ -15,7 +15,7 @@ import java.time.LocalTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "match_schedule")
+@Table(name = "matches")
 public class MatchSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
