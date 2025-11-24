@@ -77,6 +77,7 @@
             <label class="font-semibold">Loại Sự Kiện</label>
             <select id="type"
                     class="w-full mt-1 px-4 py-3 border rounded-lg focus:border-primary">
+                <option value="MATCH_START">Bắt đầu trận đấu</option>
                 <option value="GOAL">Bàn thắng</option>
                 <option value="YELLOW_CARD">Thẻ vàng</option>
                 <option value="RED_CARD">Thẻ đỏ</option>
@@ -182,7 +183,7 @@
     document.getElementById('send').addEventListener('click', async () => {
 
         const matchId = +document.getElementById('matchId').value;
-        const minute = document.getElementById('minute').value;
+        let minute = document.getElementById('minute').value;
         const type = document.getElementById('type').value;
         const desc = document.getElementById('desc').value;
 
@@ -190,7 +191,10 @@
         const playerId = document.getElementById('playerSelect').value;
 
         if (!matchId) return alert("⛔ Phải nhập Match ID!");
-        if (!minute) return alert("⛔ Phải nhập phút!");
+        if (type !== "MATCH_START" && !minute) {
+            return alert("⛔ Phải nhập phút!");
+        }
+
 
         if (type === "GOAL" && !teamId) return alert("⛔ Ghi bàn phải chọn đội!");
         if (type === "GOAL" && !playerId) return alert("⛔ Ghi bàn phải chọn cầu thủ!");
@@ -200,7 +204,10 @@
                 return alert("⛔ Không thể gửi sự kiện! Cầu thủ đang bị treo giò.");
             }
         }
-
+        // MATCH_START luôn là phút 0
+        if (type === "MATCH_START") {
+            minute = 0;
+        }
         const payload = {
             teamId: teamId || null,
             playerId: playerId || null,

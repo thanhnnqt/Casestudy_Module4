@@ -8,111 +8,311 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+        :root {
+            --bg-main: #050017;
+            --card-bg-from: #1b2338;
+            --card-bg-to: #121421;
+            --accent-green: #4dff73;
+            --accent-purple: #8b5cf6;
+            --accent-blue: #38bdf8;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            background: #f3f6fb;
-            font-family: "Segoe UI", sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #1e1b4b 0, #020617 45%, #000 100%);
+            color: var(--text-main);
+            padding: 40px 16px;
         }
 
+        .ticket-page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* TITLE */
         .page-title {
-            font-weight: 700;
-            color: #0d6efd;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-align: center;
+            font-size: clamp(1.8rem, 3vw, 2.3rem);
+            color: var(--accent-green);
+            text-shadow: 0 0 18px rgba(77, 255, 115, 0.55);
+            margin-bottom: 6px;
         }
 
-        /* CARD VÉ */
+        .page-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            font-size: 0.95rem;
+        }
+
+        /* ADD BUTTON */
+        .btn-add {
+            border-radius: 999px;
+            padding: 0.6rem 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border: none;
+            background: radial-gradient(circle at top, #22c55e 0, #16a34a 45%, #15803d 90%);
+            color: #022c22;
+            box-shadow: 0 10px 28px rgba(21, 128, 61, 0.7),
+            0 0 0 1px rgba(34, 197, 94, 0.7);
+            font-size: 0.85rem;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+            box-shadow: 0 16px 36px rgba(22, 163, 74, 0.9),
+            0 0 0 1px rgba(34, 197, 94, 0.8);
+        }
+
+        /* CARD */
         .ticket-card {
-            border: 1px solid #dce3f0;
-            border-radius: 16px;
+            position: relative;
+            border-radius: 22px;
+            padding: 16px 16px 14px;
+            background: radial-gradient(circle at top left, rgba(148, 163, 253, 0.25), transparent 55%),
+            radial-gradient(circle at bottom right, rgba(45, 212, 191, 0.18), transparent 50%),
+            linear-gradient(135deg, var(--card-bg-from), var(--card-bg-to));
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.88),
+            0 0 0 1px rgba(148, 163, 184, 0.18);
             overflow: hidden;
-            background: white;
-            transition: 0.25s ease;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
         }
 
         .ticket-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.95),
+            0 0 0 1px rgba(129, 140, 248, 0.45);
         }
 
         /* HEADER */
         .ticket-header {
-            background: linear-gradient(135deg, #0d6efd, #63a4ff);
-            padding: 12px 18px;
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .ticket-match-title {
+            font-weight: 700;
+            font-size: 0.98rem;
+        }
+
+        /* TAG */
+        .ticket-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.55);
+            font-size: 0.75rem;
+        }
+
+        .ticket-tag-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: var(--accent-green);
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
         }
 
         /* BODY */
-        .ticket-body {
-            padding: 18px;
-        }
+        .ticket-body { margin-top: 8px; font-size: 0.85rem; }
 
-        .ticket-body p {
+        .ticket-info-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             margin-bottom: 6px;
-            font-size: 0.95rem;
+            color: var(--text-muted);
         }
 
-        .ticket-body strong {
-            color: #0d6efd;
+        .ticket-info-label {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            min-width: 90px;
+            color: #e5e7eb;
         }
 
-        /* BUTTONS */
-        .btn-add {
-            background: #0d6efd;
+        /* ACTION BUTTONS */
+        .ticket-actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 14px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.82rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn {
+            background: rgba(244, 63, 94, 0.18);
+            border: 1px solid rgba(244, 63, 94, 0.32);
+            color: #fecaca;
+        }
+
+        .delete-btn:hover {
+            background: rgba(244, 63, 94, 0.3);
+            border-color: rgba(244, 63, 94, 0.5);
             color: white;
-            font-weight: 500;
-            border-radius: 8px;
+            transform: translateY(-1px);
         }
 
-        .btn-add:hover {
-            background: #0b5ed7;
+        /* ---- MODAL CUSTOM ---- */
+        .modal-content {
+            background: #020617 !important;
+            border-radius: 18px;
+            border: 1px solid rgba(148,163,184,0.4);
         }
 
-        .btn-light-blue {
-            background: #eaf2ff;
-            color: #0d6efd;
-            border-radius: 8px;
-            font-weight: 500;
+        .modal-title {
+            color: #fecaca !important;
+            font-weight: 600;
         }
 
-        .btn-light-blue:hover {
-            background: #d8e8ff;
+        .modal-body-strong {
+            color: #e5e7eb !important;
+            opacity: 0.92;
+            font-size: 1rem;
+            line-height: 1.45rem;
+        }
+
+        .btn-danger {
+            background-color: #dc2626 !important;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #ef4444 !important;
+        }
+
+        .btn-secondary {
+            background-color: #4b5563 !important;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6b7280 !important;
+        }
+
+        .empty-message {
+            text-align: center;
+            margin-top: 32px;
+            color: var(--text-muted);
         }
     </style>
 </head>
 
 <body>
 
-<div class="container py-5">
+<div class="ticket-page-wrapper">
 
     <!-- TITLE -->
-    <h2 class="text-center mb-4 page-title">Danh sách vé</h2>
+    <h2 class="page-title">Danh sách vé</h2>
+    <p th:if="${ticketList != null and !#lists.isEmpty(ticketList)}" class="page-subtitle">Tất cả vé xem bóng đá đã được tạo cho câu lạc bộ của bạn.</p>
 
     <!-- ADD BUTTON -->
     <div class="d-flex justify-content-end mb-4">
-        <a th:href="@{/coach/tickets/__${teamId}__/optionToCreateTicket}" class="btn btn-add">
-            + Thêm vé mới
-        </a>
+        <a th:href="@{/owner/tickets/__${teamId}__/optionToCreateTicket}" class="btn-add">+ Thêm vé mới</a>
     </div>
 
     <!-- LIST -->
-    <div th:if="${ticketPage != null and !#lists.isEmpty(ticketPage.content)}" class="row g-4">
+    <div th:if="${ticketList != null and !#lists.isEmpty(ticketList)}"
+         class="row g-4">
 
-        <div class="col-md-4" th:each="ticket : ${ticketList}">
+        <div class="col-lg-4 col-md-6 col-12" th:each="ticket : ${ticketList}">
             <div class="ticket-card">
 
+                <!-- HEADER -->
                 <div class="ticket-header">
-                    Vé trận đấu
+                    <div class="ticket-match-title">
+                        <span th:text="${ticket.homeTeam}"></span>
+                        <span style="opacity:.6">vs</span>
+                        <span th:text="${ticket.awayTeam}"></span>
+                    </div>
+
+                    <div class="ticket-tag">
+                        <span class="ticket-tag-dot"></span>
+                        <span th:text="${ticket.dateMatch}"></span>
+                    </div>
                 </div>
 
+                <!-- BODY -->
                 <div class="ticket-body">
-                    <p><strong>Sân:</strong> <span th:text="${ticket.stadium}"></span></p>
-                    <p><strong>Ngày thi đấu:</strong> <span th:text="${ticket.dateMatch}"></span></p>
-                    <p><strong>Giờ thi đấu:</strong> <span th:text="${ticket.timeMatch}"></span></p>
-                    <p><strong>Đội nhà:</strong> <span th:text="${ticket.homeTeam}"></span></p>
-                    <p><strong>Đội khách:</strong> <span th:text="${ticket.awayTeam}"></span></p>
-                    <p><strong>Địa chỉ:</strong> <span th:text="${ticket.address}"></span></p>
-                    <p><strong>Số lượng vé:</strong> <span th:text="${ticket.quantity}"></span></p>
+                    <!-- stadium -->
+                    <div class="ticket-info-row">
+                        <span class="ticket-info-label">Sân</span>
+                        <span th:text="${ticket.stadium}"></span>
+                    </div>
+
+                    <!-- date -->
+                    <div class="ticket-info-row">
+                        <span class="ticket-info-label">Ngày đấu</span>
+                        <span th:text="${ticket.dateMatch}"></span>
+                    </div>
+
+                    <!-- time -->
+                    <div class="ticket-info-row">
+                        <span class="ticket-info-label">Giờ đấu</span>
+                        <span th:text="${ticket.timeMatch}"></span>
+                    </div>
+
+                    <!-- home team -->
+                    <div class="ticket-info-row">
+                        <span class="ticket-info-label">Đội nhà</span>
+                        <span th:text="${ticket.homeTeam}"></span>
+                    </div>
+
+                    <!-- away team -->
+                    <div class="ticket-info-row">
+                        <span class="ticket-info-label">Đội khách</span>
+                        <span th:text="${ticket.awayTeam}"></span>
+                    </div>
+
+                    <!-- address -->
+                    <div class="ticket-info-row">
+                        <span class="ticket-info-label">Địa chỉ</span>
+                        <span th:text="${ticket.address}"></span>
+                    </div>
+
+                    <!-- quantity -->
+                    <div class="ticket-info-row">
+                        <span class="ticket-info-label">Số vé</span>
+                        <span th:text="${ticket.quantity}"></span>
+                    </div>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="ticket-actions">
+                    <a href="#"
+                       class="action-btn delete-btn"
+                       data-bs-toggle="modal"
+                       data-bs-target="#confirmDeleteModal"
+                       th:attr="data-delete-url=@{/owner/tickets/__${teamId}__/delete/__${ticket.id}__}">
+                        🗑️ Xóa
+                    </a>
                 </div>
 
             </div>
@@ -120,12 +320,50 @@
 
     </div>
 
-    <!-- MESSAGE NO TICKET -->
-    <div th:if="${mess}" class="text-center text-muted mt-4">
+    <!-- EMPTY -->
+    <div th:if="${mess}" class="empty-message">
         <h5 th:text="${mess}"></h5>
     </div>
 
 </div>
+
+<!-- MODAL XÁC NHẬN XÓA -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Xóa vé</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body modal-body-strong">
+                Bạn có chắc chắn muốn xóa vé này không?<br>
+                Hành động này không thể hoàn tác.
+            </div>
+
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                <a href="#" id="confirmDeleteBtn" class="btn btn-danger btn-sm">Đồng ý xóa</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        var confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var deleteUrl = button.getAttribute('data-delete-url');
+            confirmDeleteBtn.setAttribute('href', deleteUrl);
+        });
+    });
+</script>
 
 </body>
 </html>

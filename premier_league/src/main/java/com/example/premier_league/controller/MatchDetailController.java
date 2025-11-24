@@ -40,5 +40,11 @@ public class MatchDetailController {
         model.addAttribute("matchId", id);
         return "match_detail";
     }
+    @ExceptionHandler(RuntimeException.class)
+    public String handleRuntimeError(RuntimeException e, Model model) {
+        model.addAttribute("message", e.getMessage());
+        return "error";   // Trỏ đến templates/error.html
+    }
+
 
 }

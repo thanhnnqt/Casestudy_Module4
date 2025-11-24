@@ -72,10 +72,10 @@ public class TournamentController {
     }
 
     // URL thực tế: /admin/tournaments/delete/{id}
-    @GetMapping("/tournaments/delete/{id}")
-    public String delete(@PathVariable Long id) {
-        tournamentService.delete(id);
-        // SỬA REDIRECT
+// SỬA LẠI NHƯ SAU
+    @GetMapping("/tournaments/delete/{tournamentId}")
+    public String deleteTournament(@PathVariable("tournamentId") Long tournamentId) {
+        tournamentService.deleteTournament(tournamentId);
         return "redirect:/admin/tournaments";
     }
 

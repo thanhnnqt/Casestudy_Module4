@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý đội hình - <span th:text="${teamName}"></span></title>
+    <title>SƠ ĐỒ CHIẾN THUẬT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
@@ -16,28 +16,6 @@
             display: grid;
             grid-template-columns: 280px 1fr;
             gap: 20px;
-        }
-
-        /* --- THÊM MỚI: Style cho cầu thủ bị treo giò --- */
-        .player-item.suspended {
-            opacity: 0.6;
-            background-color: #f8d7da !important;
-            cursor: not-allowed !important;
-            border: 1px solid #f5c6cb !important;
-        }
-        .player-item.suspended:active {
-            cursor: not-allowed !important;
-        }
-        /* Style cho icon thẻ trong danh sách */
-        .card-icon {
-            font-size: 0.75rem;
-            margin-left: 4px;
-        }
-        .status-icons {
-            margin-left: auto; /* Đẩy icon về bên phải */
-            display: flex;
-            align-items: center;
-            gap: 4px;
         }
 
         /* 1. DANH SÁCH CẦU THỦ BÊN TRÁI */
@@ -62,6 +40,7 @@
             cursor: grab;
             transition: background-color 0.2s;
             border: 1px solid #eee;
+            position: relative; /* Để căn chỉnh icon */
         }
         .player-item:hover {
             background-color: #f0f0f0;
@@ -90,86 +69,56 @@
         .player-item[data-pos="MF"] .position { background: #0275d8; }
         .player-item[data-pos="FW"] .position { background: #d9534f; }
 
-        /* --- 2. SÂN BÓNG BÊN PHẢI (VẼ BẰNG CSS) --- */
+        /* Style cho cầu thủ bị treo giò (trong list) */
+        .player-item.suspended {
+            opacity: 0.6;
+            background-color: #f8d7da !important;
+            cursor: not-allowed !important;
+            border: 1px solid #f5c6cb !important;
+        }
+        .player-item.suspended:active {
+            cursor: not-allowed !important;
+        }
+
+        /* Icon trạng thái (thẻ phạt) trong list */
+        .status-icons {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .card-icon {
+            font-size: 0.75rem;
+        }
+
+        /* --- 2. SÂN BÓNG BÊN PHẢI --- */
         .pitch-area {
-            /* Nền cỏ xanh */
             background-color: #438a38;
             background-image: repeating-linear-gradient(to right, rgba(255,255,255,0.03) 0 20px, transparent 20px 40px);
-
             height: 600px;
             border-radius: 8px;
             position: relative;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border: 4px solid #fff; /* Đường biên bao quanh */
-            overflow: hidden; /* Cắt các phần dư */
+            border: 4px solid #fff;
+            overflow: hidden;
             user-select: none;
         }
 
-        /* Vạch kẻ sân (Màu trắng mờ) */
+        /* Vạch kẻ sân */
         .pitch-marking {
             position: absolute;
             border: 2px solid rgba(255, 255, 255, 0.8);
-            pointer-events: none; /* Để không chặn click vào cầu thủ */
+            pointer-events: none;
         }
+        .pitch-halfway-line { top: 0; bottom: 0; left: 50%; width: 0; border-left: 2px solid rgba(255, 255, 255, 0.8); transform: translateX(-50%); }
+        .pitch-center-circle { top: 50%; left: 50%; width: 120px; height: 120px; border-radius: 50%; transform: translate(-50%, -50%); }
+        .pitch-center-spot { top: 50%; left: 50%; width: 8px; height: 8px; background: white; border-radius: 50%; transform: translate(-50%, -50%); }
+        .pitch-penalty-left { top: 50%; left: 0; width: 16%; height: 55%; transform: translateY(-50%); border-left: none; }
+        .pitch-penalty-right { top: 50%; right: 0; width: 16%; height: 55%; transform: translateY(-50%); border-right: none; }
+        .pitch-goal-area-left { top: 50%; left: 0; width: 6%; height: 25%; transform: translateY(-50%); border-left: none; }
+        .pitch-goal-area-right { top: 50%; right: 0; width: 6%; height: 25%; transform: translateY(-50%); border-right: none; }
 
-        /* Đường giữa sân */
-        .pitch-halfway-line {
-            top: 0; bottom: 0; left: 50%;
-            width: 0;
-            border-left: 2px solid rgba(255, 255, 255, 0.8);
-            transform: translateX(-50%);
-        }
-
-        /* Vòng tròn trung tâm */
-        .pitch-center-circle {
-            top: 50%; left: 50%;
-            width: 120px; height: 120px;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        /* Chấm giao bóng */
-        .pitch-center-spot {
-            top: 50%; left: 50%;
-            width: 8px; height: 8px;
-            background: white;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        /* Khu cấm địa (Vòng 16m50) - Trái */
-        .pitch-penalty-left {
-            top: 50%; left: 0;
-            width: 16%; height: 55%;
-            transform: translateY(-50%);
-            border-left: none;
-        }
-
-        /* Khu cấm địa (Vòng 16m50) - Phải */
-        .pitch-penalty-right {
-            top: 50%; right: 0;
-            width: 16%; height: 55%;
-            transform: translateY(-50%);
-            border-right: none;
-        }
-
-        /* Khu cầu môn (Vòng 5m50) - Trái */
-        .pitch-goal-area-left {
-            top: 50%; left: 0;
-            width: 6%; height: 25%;
-            transform: translateY(-50%);
-            border-left: none;
-        }
-
-        /* Khu cầu môn (Vòng 5m50) - Phải */
-        .pitch-goal-area-right {
-            top: 50%; right: 0;
-            width: 6%; height: 25%;
-            transform: translateY(-50%);
-            border-right: none;
-        }
-
-        /* Cầu thủ trên sân */
+        /* --- SLOT CẦU THỦ TRÊN SÂN --- */
         .player-slot {
             position: absolute;
             width: 90px;
@@ -185,41 +134,100 @@
             z-index: 10;
         }
 
-        /* Sửa lỗi hiển thị tên cầu thủ khi hover (theo yêu cầu trước) */
-        .player-slot .player-item:hover {
-            background-color: #2c0030 !important; /* Tím đậm */
-            color: #00ff85 !important;           /* Xanh neon */
-            border-color: #00ff85 !important;
-            transform: scale(1.05);
-            z-index: 100;
-        }
-
         .player-slot.drag-over {
             background: rgba(0, 255, 133, 0.7);
             border: 2px solid #fff;
             transform: scale(1.1);
         }
+
+        /* --- GIAO DIỆN MỚI KHI SLOT ĐÃ CÓ CẦU THỦ --- */
         .player-slot.filled {
-            border: 2px solid #00ff85;
-            background: rgba(56, 0, 60, 0.9);
-            color: white;
-            border-radius: 8px;
-            width: 110px;
+            border: none !important;       /* Xóa viền */
+            background: transparent !important; /* Nền trong suốt */
+            box-shadow: none !important;   /* Xóa bóng ô vuông */
+            width: 100px;                  /* Mở rộng để chứa tên dài */
             height: auto;
-            padding: 6px 4px;
-            font-size: 0.85rem;
-            text-align: center;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 0;
+            overflow: visible;
             cursor: grab;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 20;
         }
         .player-slot.filled:active { cursor: grabbing; }
-        .player-slot.filled .slot-label {
-            font-size: 0.7rem;
-            font-weight: bold;
-            color: #00ff85;
-            text-transform: uppercase;
-            margin-bottom: 2px;
+
+        /* Avatar trên sân */
+        .slot-avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            background-color: #e9ecef;
+            z-index: 2;
+            transition: transform 0.2s;
         }
+        .player-slot.filled:hover .slot-avatar {
+            transform: scale(1.15);
+            border-color: #00ff85;
+        }
+
+        /* Hộp thông tin (Vị trí + Tên) */
+        .player-info-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: -8px; /* Đẩy lên dính vào avatar */
+            z-index: 3;
+            position: relative;
+        }
+
+        /* Badge Vị trí nhỏ */
+        .slot-pos-badge {
+            background-color: #38003c;
+            color: #00ff85;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 4px;
+            border: 1px solid #fff;
+            margin-bottom: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Tên cầu thủ */
+        .slot-player-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,1);
+            white-space: nowrap;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* Icon thẻ phạt trên sân (treo góc avatar) */
+        .player-slot.filled .status-icons {
+            position: absolute;
+            top: 0;
+            right: 15px;
+            z-index: 4;
+        }
+        .player-slot.filled .card-icon {
+            font-size: 0.8rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Label vị trí chiến thuật (khi chưa có cầu thủ) */
         .player-slot .slot-label {
             font-weight: bold;
             color: #fff;
@@ -227,52 +235,41 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
-        /* VỊ TRÍ CẦU THỦ TRÊN SÂN (Horizontal Layout) */
-        /* 4-4-2 */
+        /* VỊ TRÍ CẦU THỦ TRÊN SÂN (Giữ nguyên CSS cũ) */
         .formation[data-formation="4-4-2"] .slot-GK  { top: 50%; left: 8%; transform: translate(-50%, -50%); }
-
         .formation[data-formation="4-4-2"] .slot-LB  { top: 15%; left: 25%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-4-2"] .slot-LCB { top: 38%; left: 22%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-4-2"] .slot-RCB { top: 62%; left: 22%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-4-2"] .slot-RB  { top: 85%; left: 25%; transform: translate(-50%, -50%); }
-
         .formation[data-formation="4-4-2"] .slot-LM  { top: 15%; left: 50%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-4-2"] .slot-LCM { top: 38%; left: 45%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-4-2"] .slot-RCM { top: 62%; left: 45%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-4-2"] .slot-RM  { top: 85%; left: 50%; transform: translate(-50%, -50%); }
-
         .formation[data-formation="4-4-2"] .slot-LST { top: 35%; left: 75%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-4-2"] .slot-RST { top: 65%; left: 75%; transform: translate(-50%, -50%); }
 
-        /* 4-3-3 */
         .formation[data-formation="4-3-3"] .slot-GK  { top: 50%; left: 8%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-3-3"] .slot-LB  { top: 15%; left: 25%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-3-3"] .slot-LCB { top: 38%; left: 22%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-3-3"] .slot-RCB { top: 62%; left: 22%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-3-3"] .slot-RB  { top: 85%; left: 25%; transform: translate(-50%, -50%); }
-
         .formation[data-formation="4-3-3"] .slot-LCM { top: 30%; left: 48%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-3-3"] .slot-CM  { top: 50%; left: 40%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-3-3"] .slot-RCM { top: 70%; left: 48%; transform: translate(-50%, -50%); }
-
         .formation[data-formation="4-3-3"] .slot-LW  { top: 20%; left: 75%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-3-3"] .slot-ST  { top: 50%; left: 80%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-3-3"] .slot-RW  { top: 80%; left: 75%; transform: translate(-50%, -50%); }
 
-        /* 4-2-3-1 */
         .formation[data-formation="4-2-3-1"] .slot-GK  { top: 50%; left: 8%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-2-3-1"] .slot-LB  { top: 15%; left: 25%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-2-3-1"] .slot-LCB { top: 38%; left: 22%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-2-3-1"] .slot-RCB { top: 62%; left: 22%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-2-3-1"] .slot-RB  { top: 85%; left: 25%; transform: translate(-50%, -50%); }
-
         .formation[data-formation="4-2-3-1"] .slot-LDM { top: 35%; left: 42%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-2-3-1"] .slot-RDM { top: 65%; left: 42%; transform: translate(-50%, -50%); }
-
         .formation[data-formation="4-2-3-1"] .slot-LAM { top: 20%; left: 65%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-2-3-1"] .slot-CAM { top: 50%; left: 60%; transform: translate(-50%, -50%); }
         .formation[data-formation="4-2-3-1"] .slot-RAM { top: 80%; left: 65%; transform: translate(-50%, -50%); }
-
         .formation[data-formation="4-2-3-1"] .slot-ST  { top: 50%; left: 82%; transform: translate(-50%, -50%); }
 
 
@@ -366,8 +363,9 @@
                          class="player-item"
                          th:classappend="${p.suspensionMatchesRemaining > 0} ? 'suspended' : ''"
                          th:attr="draggable=${p.suspensionMatchesRemaining == 0},
-                  data-suspended=${p.suspensionMatchesRemaining > 0},
-                  data-yellows=${p.seasonYellowCards}"
+                                  data-suspended=${p.suspensionMatchesRemaining > 0},
+                                  data-yellows=${p.seasonYellowCards},
+                                  data-avatar=${p.avatar}"
                          th:data-player-id="${p.id}"
                          th:data-player-name="${p.name}"
                          th:data-pos="${p.position}"
@@ -377,11 +375,11 @@
                         <span class="name" th:text="${p.name}"></span>
 
                         <div class="status-icons">
-            <span th:if="${p.seasonYellowCards > 0}" class="badge bg-warning text-dark card-icon"
-                  th:text="${p.seasonYellowCards}" title="Thẻ vàng tích lũy"></span>
+                            <span th:if="${p.seasonYellowCards > 0}" class="badge bg-warning text-dark card-icon"
+                                  th:text="${p.seasonYellowCards}" title="Thẻ vàng tích lũy"></span>
                             <span th:if="${p.suspensionMatchesRemaining > 0}" class="badge bg-danger card-icon" title="Bị treo giò">
-                <i class="bi bi-slash-circle"></i>
-            </span>
+                                <i class="bi bi-slash-circle"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -467,7 +465,7 @@
         const formEl = document.getElementById('lineup-form');
         const resetButton = document.getElementById('reset-button');
 
-        // LẤY TRẠNG THÁI TRẬN ĐẤU TỪ SERVER (Thymeleaf)
+        // LẤY TRẠNG THÁI TRẬN ĐẤU TỪ SERVER
         /*<![CDATA[*/
         const matchStatus = "[[${match.status}]]";
         /*]]>*/
@@ -480,10 +478,7 @@
             saveButton.innerHTML = '<i class="bi bi-lock-fill"></i> Trận đấu đã khóa';
             saveButton.classList.add('btn-secondary');
             saveButton.classList.remove('btn-primary');
-
             resetButton.disabled = true;
-
-            // Disable formation select
             formationSelect.disabled = true;
 
             Swal.fire({
@@ -503,7 +498,9 @@
         const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : null;
         const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.getAttribute('content') : (csrfToken ? 'X-CSRF-TOKEN' : null);
 
-        // === 2. HÀM HỖ TRỢ TẠO ELEMENT (Đã cập nhật để giữ thẻ vàng/đỏ) ===
+        // === 2. HÀM HỖ TRỢ TẠO ELEMENT ===
+
+        // 2a. Tạo Icon thẻ phạt
         function buildStatusIcons(yellows, isSuspended) {
             let html = '<div class="status-icons">';
             if (yellows > 0) {
@@ -516,21 +513,20 @@
             return html;
         }
 
-        function createPlayerElement(id, name, pos, yellows, suspended) {
+        // 2b. Tạo Item trong danh sách (Pool) - Giữ nguyên data avatar
+        function createPlayerElement(id, name, pos, yellows, suspended, avatar) {
             const el = document.createElement('div');
             el.className = `player-item ${suspended === 'true' ? 'suspended' : ''}`;
-            // Logic khóa kéo thả
-            if (isLocked || suspended === 'true') {
-                el.draggable = false;
-            } else {
-                el.draggable = true;
-            }
+
+            if (isLocked || suspended === 'true') el.draggable = false;
+            else el.draggable = true;
 
             el.dataset.playerId = id;
             el.dataset.playerName = name;
             el.dataset.pos = pos;
             el.dataset.yellows = yellows || 0;
             el.dataset.suspended = suspended || 'false';
+            el.dataset.avatar = avatar || '';
 
             el.innerHTML = `<span class="position">${pos}</span> <span class="name">${name}</span> ${buildStatusIcons(yellows, suspended)}`;
 
@@ -540,24 +536,48 @@
             return el;
         }
 
-        // Tạo element cho slot trên sân/ghế dự bị (cần giữ data thẻ phạt)
-        function createFilledElement(id, name, pos, slotLabel, isBench, yellows, suspended) {
+        // 2c. Tạo Item đã điền vào Slot (Sân/Ghế dự bị)
+        function createFilledElement(id, name, pos, slotLabel, isBench, yellows, suspended, avatar) {
             const el = document.createElement('div');
             el.className = 'player-item';
+
+            // Xử lý quyền kéo thả
             if (isLocked) el.draggable = false;
             else el.draggable = true;
 
+            // Gán dữ liệu
             el.dataset.playerId = id;
             el.dataset.playerName = name;
             el.dataset.pos = pos;
             el.dataset.yellows = yellows || 0;
             el.dataset.suspended = suspended || 'false';
+            el.dataset.avatar = avatar || '';
+
+            // URL Avatar mặc định
+            const avatarUrl = (avatar && avatar !== 'null' && avatar.trim() !== '')
+                ? avatar
+                : '/images/default-player.png';
 
             if (isBench) {
-                el.innerHTML = `<span class="position">${pos}</span> <span class="name">${name}</span> ${buildStatusIcons(yellows, suspended)}`;
+                // --- GIAO DIỆN GHẾ DỰ BỊ (Giữ nguyên dạng thẻ chữ nhật gọn gàng) ---
+                el.innerHTML = `
+                    <span class="position">${pos}</span>
+                    <span class="name" style="font-size: 0.8rem;">${name}</span>
+                    ${buildStatusIcons(yellows, suspended)}
+                `;
             } else {
-                // Trên sân thì hiển thị tên + label vị trí + icon thẻ (nếu muốn)
-                el.innerHTML = `<div class="slot-label">${slotLabel}</div> <span class="name">${name}</span> ${buildStatusIcons(yellows, suspended)}`;
+                // --- GIAO DIỆN TRÊN SÂN (Avatar to, nền trong suốt) ---
+                // Cấu trúc: Avatar -> Info Box (Position + Name) -> Status Icons
+                el.innerHTML = `
+                    <img src="${avatarUrl}" class="slot-avatar" onerror="this.src='/images/default-player.png'" alt="${name}"/>
+
+                    <div class="player-info-box">
+                        <span class="slot-pos-badge">${pos}</span>
+                        <span class="slot-player-name">${name}</span>
+                    </div>
+
+                    ${buildStatusIcons(yellows, suspended)}
+                `;
             }
 
             if (!isLocked) addDragEventsToPlayer(el);
@@ -581,36 +601,37 @@
 
         // === 3. Drag & Drop ===
         function addDragEventsToPlayer(player) {
-            // Nếu bị khóa hoặc treo giò thì không gán sự kiện
             if (isLocked || player.dataset.suspended === 'true') return;
 
             player.addEventListener('dragstart', (e) => {
-                // Double check logic treo giò
                 if (e.target.dataset.suspended === 'true') {
                     e.preventDefault();
                     Swal.fire({icon: 'error', title: 'Cầu thủ bị treo giò', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000});
                     return;
                 }
                 draggedItem = e.target;
-                setTimeout(() => e.target.classList.add('dragging'), 0);
+                // Tìm phần tử cha là player-item nếu click vào con
+                if (!draggedItem.classList.contains('player-item')) {
+                    draggedItem = draggedItem.closest('.player-item');
+                }
+                setTimeout(() => draggedItem.classList.add('dragging'), 0);
             });
+
             player.addEventListener('dragend', () => {
                 if (draggedItem) { draggedItem.classList.remove('dragging'); }
                 draggedItem = null;
             });
         }
 
-        // Init event cho các item có sẵn (từ server render)
+        // Init event cho list có sẵn
         document.querySelectorAll('.player-item').forEach(el => {
-            // Server render xong, nếu bị treo giò thì class 'suspended' đã có từ HTML
-            // Ta chỉ cần add event nếu KHÔNG bị khóa và KHÔNG treo giò
             if (!isLocked && el.dataset.suspended !== 'true') {
                 addDragEventsToPlayer(el);
             }
         });
 
         allDropZones.forEach(zone => {
-            if (isLocked) return; // Nếu khóa thì không lắng nghe drop
+            if (isLocked) return;
 
             zone.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -620,36 +641,137 @@
             zone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 zone.classList.remove('drag-over');
+                if (!draggedItem) return;
                 if (!canDrop(draggedItem, zone)) return;
 
-                // Lấy đầy đủ data từ item đang kéo
-                const data = {
+                // Lấy data (bao gồm avatar) từ draggedItem
+                const draggedData = {
                     id: draggedItem.dataset.playerId,
                     name: draggedItem.dataset.playerName,
                     pos: draggedItem.dataset.pos,
                     yellows: draggedItem.dataset.yellows,
-                    suspended: draggedItem.dataset.suspended
+                    suspended: draggedItem.dataset.suspended,
+                    avatar: draggedItem.dataset.avatar
                 };
 
-                // Xử lý vị trí cũ
-                const originalSlot = draggedItem.closest('.player-slot, .bench-slot');
-                if (originalSlot) clearSlot(originalSlot);
-                else draggedItem.remove();
+                const sourceSlot = draggedItem.closest('.player-slot, .bench-slot, #available-players');
+                const sourceIsPool = (sourceSlot === playerPool);
+                const sourceIsBench = (sourceSlot && sourceSlot.classList && sourceSlot.classList.contains('bench-slot'));
+                const sourceIsPitchSlot = (sourceSlot && sourceSlot.classList && sourceSlot.classList.contains('player-slot'));
 
-                // Tạo item mới tại vị trí thả
+                // If dropping back to pool
                 if (zone.id === 'available-players') {
-                    zone.appendChild(createPlayerElement(data.id, data.name, data.pos, data.yellows, data.suspended));
-                } else if (zone.classList.contains('player-slot')) {
-                    const slotLabel = zone.querySelector('.slot-label') ? zone.querySelector('.slot-label').innerText : '';
-                    zone.innerHTML = '';
-                    zone.appendChild(createFilledElement(data.id, data.name, data.pos, slotLabel, false, data.yellows, data.suspended));
-                    zone.classList.add('filled');
-                } else if (zone.classList.contains('bench-slot')) {
-                    zone.innerHTML = '';
-                    zone.appendChild(createFilledElement(data.id, data.name, data.pos, '', true, data.yellows, data.suspended));
-                    zone.classList.add('filled');
+                    // move dragged back to pool
+                    if (sourceIsPitchSlot || sourceIsBench) {
+                        // remove from its slot and append a pool element
+                        if (sourceIsPitchSlot) clearSlot(sourceSlot);
+                        else if (sourceIsBench) { sourceSlot.classList.remove('filled'); sourceSlot.innerHTML = `<span class="slot-label">Dự bị ${sourceSlot.dataset.slotPos.split('_')[1]}</span>`; }
+                        playerPool.appendChild(createPlayerElement(draggedData.id, draggedData.name, draggedData.pos, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                        draggedItem.remove();
+                    } else if (!sourceIsPool) {
+                        // fallback
+                        playerPool.appendChild(createPlayerElement(draggedData.id, draggedData.name, draggedData.pos, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                        draggedItem.remove();
+                    }
+                    updateAllCounts();
+                    return;
                 }
-                updateAllCounts();
+
+                // If target is a player-slot or bench-slot
+                if (zone.classList.contains('player-slot') || zone.classList.contains('bench-slot')) {
+                    const targetIsBench = zone.classList.contains('bench-slot');
+                    const targetIsSlot = zone.classList.contains('player-slot');
+                    const targetHasPlayer = !!zone.querySelector('.player-item');
+
+                    if (!targetHasPlayer) {
+                        // empty slot -> place dragged here
+                        if (!sourceIsPool) {
+                            // clear source slot
+                            if (sourceIsPitchSlot) clearSlot(sourceSlot);
+                            else if (sourceIsBench) { sourceSlot.classList.remove('filled'); sourceSlot.innerHTML = `<span class="slot-label">Dự bị ${sourceSlot.dataset.slotPos.split('_')[1]}</span>`; }
+                            else draggedItem.remove();
+                        } else {
+                            // dragged from pool -> remove original element from pool
+                            draggedItem.remove();
+                        }
+
+                        zone.innerHTML = '';
+                        zone.appendChild(createFilledElement(draggedData.id, draggedData.name, draggedData.pos, '', targetIsBench, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                        zone.classList.add('filled');
+                        updateAllCounts();
+                        return;
+                    } else {
+                        // target already has a player -> DO SWAP
+                        const existingEl = zone.querySelector('.player-item');
+                        const existingData = {
+                            id: existingEl.dataset.playerId,
+                            name: existingEl.dataset.playerName || (existingEl.querySelector('.slot-player-name') ? existingEl.querySelector('.slot-player-name').innerText : ''),
+                            pos: existingEl.dataset.pos,
+                            yellows: existingEl.dataset.yellows,
+                            suspended: existingEl.dataset.suspended,
+                            avatar: existingEl.dataset.avatar || (existingEl.querySelector('.slot-avatar') ? existingEl.querySelector('.slot-avatar').getAttribute('src') : '')
+                        };
+
+                        // if draggedItem is from pool -> move existingEl back to pool
+                        if (sourceIsPool) {
+                            // Remove dragged element in pool and place new filled element in zone
+                            draggedItem.remove();
+
+                            // place existing player back to pool (create element)
+                            playerPool.appendChild(createPlayerElement(existingData.id, existingData.name, existingData.pos, existingData.yellows, existingData.suspended, existingData.avatar));
+
+                            // put dragged into target
+                            zone.innerHTML = '';
+                            zone.appendChild(createFilledElement(draggedData.id, draggedData.name, draggedData.pos, '', targetIsBench, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                            zone.classList.add('filled');
+
+                            // remove old existingEl from DOM (it is replaced)
+                            existingEl.remove();
+                            updateAllCounts();
+                            return;
+                        }
+
+                        // if draggedItem is from another slot (bench or pitch) -> swap places
+                        if (sourceIsPitchSlot || sourceIsBench) {
+                            // Clear target zone and source zone, then place swapped elements
+                            // Save reference to source container
+                            const sourceContainer = sourceSlot;
+
+                            // remove elements from both containers
+                            existingEl.remove();
+                            draggedItem.remove();
+
+                            // Put dragged data into target zone
+                            zone.innerHTML = '';
+                            zone.appendChild(createFilledElement(draggedData.id, draggedData.name, draggedData.pos, '', targetIsBench, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                            zone.classList.add('filled');
+
+                            // Put existing data into source container
+                            if (sourceContainer.classList.contains('player-slot')) {
+                                sourceContainer.innerHTML = '';
+                                sourceContainer.appendChild(createFilledElement(existingData.id, existingData.name, existingData.pos, '', sourceContainer.classList.contains('bench-slot'), existingData.yellows, existingData.suspended, existingData.avatar));
+                                sourceContainer.classList.add('filled');
+                            } else if (sourceContainer.classList.contains('bench-slot')) {
+                                sourceContainer.innerHTML = '';
+                                sourceContainer.appendChild(createFilledElement(existingData.id, existingData.name, existingData.pos, '', true, existingData.yellows, existingData.suspended, existingData.avatar));
+                                sourceContainer.classList.add('filled');
+                            }
+                            updateAllCounts();
+                            return;
+                        }
+
+                        // fallback: if source unknown, do safe swap: move existing to pool, put dragged into zone
+                        draggedItem.remove();
+                        playerPool.appendChild(createPlayerElement(existingData.id, existingData.name, existingData.pos, existingData.yellows, existingData.suspended, existingData.avatar));
+                        zone.innerHTML = '';
+                        zone.appendChild(createFilledElement(draggedData.id, draggedData.name, draggedData.pos, '', targetIsBench, draggedData.yellows, draggedData.suspended, draggedData.avatar));
+                        zone.classList.add('filled');
+                        updateAllCounts();
+                        return;
+                    }
+                }
+
+                // default fallback
             });
         });
 
@@ -657,18 +779,23 @@
             if (!item) return false;
             if (isLocked) return false;
             if (item.dataset.suspended === 'true') return false;
-
-            if (zone.classList.contains('filled')) return false;
+            if (zone.classList.contains('filled')) {
+                // we allow drop on filled if swap is permitted (unless suspended)
+                // ensure zone is a slot or bench
+                if (!(zone.classList.contains('player-slot') || zone.classList.contains('bench-slot'))) return false;
+            }
             if (zone.classList.contains('bench-slot')) {
                 const filledBenchSlots = document.querySelectorAll('.bench-slot.filled').length;
-                if (filledBenchSlots >= 9 && !item.closest('.bench-slot')) return false;
+                // if zone already filled, swap allowed; otherwise if bench full block new bench add from pool
+                if (!zone.classList.contains('filled') && filledBenchSlots >= 9 && !item.closest('.bench-slot')) return false;
             }
             if (zone.classList.contains('player-slot')) {
                 const filledPitchSlots = document.querySelectorAll('.player-slot.filled').length;
                 const activeFormation = document.querySelector('.formation:not([style*="display: none"])');
                 if (activeFormation) {
                     const totalSlotsInFormation = activeFormation.querySelectorAll('.player-slot').length;
-                    if (filledPitchSlots >= totalSlotsInFormation && !item.closest('.player-slot')) return false;
+                    // if zone empty and pitch full, block (unless swapping)
+                    if (!zone.classList.contains('filled') && filledPitchSlots >= totalSlotsInFormation && !item.closest('.player-slot')) return false;
                 }
             }
             return true;
@@ -709,7 +836,7 @@
             const subCount = document.querySelectorAll('.bench-slot.filled .player-item').length;
             document.getElementById('bench-count').innerText = subCount;
 
-            if (isLocked) return; // Nếu khóa thì không update text nút save
+            if (isLocked) return;
 
             if (mainCount === 11 && subCount >= 1) {
                 saveButton.disabled = false;
@@ -729,7 +856,7 @@
             const subPlayers = document.querySelectorAll('.bench-slot.filled .player-item');
 
             if (mainPlayers.length !== 11) {
-                Swal.fire({ icon: 'error', title: 'Đội hình không hợp lệ', text: 'Đội hình chính phải có đúng 11 cầu thủ.'});
+                Swal.fire({ icon: 'error', title: 'Đội hình thiếu người', text: 'Đội hình chính phải có đúng 11 cầu thủ.'});
                 return;
             }
             if (subPlayers.length < 1) {
@@ -742,8 +869,7 @@
             subPlayers.forEach(p => fd.append('subPlayerIds', p.dataset.playerId));
 
             Swal.fire({
-                title: 'Đang lưu đội hình...',
-                html: 'Vui lòng chờ trong giây lát.',
+                title: 'Đang lưu...',
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); }
             });
@@ -758,62 +884,49 @@
                     headers: headers
                 });
 
-                let body = null;
-                const text = await response.text();
-                try { body = text ? JSON.parse(text) : null; } catch (e) { body = null; }
-
                 if (response.ok) {
-                    const message = (body && (body.message || body.successMessage)) ? (body.message || body.successMessage) : 'Lưu đội hình thành công.';
                     Swal.fire({
                         icon: 'success',
                         title: 'Thành công',
-                        text: message,
-                        confirmButtonText: 'Về lịch thi đấu'
-                    }).then((result) => {
-                        if (redirectAfterSave) {
-                            window.location.href = redirectAfterSave;
-                        } else {
-                            window.location.reload();
-                        }
+                        text: 'Lưu đội hình thành công.',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        if (redirectAfterSave) window.location.href = redirectAfterSave;
+                        else window.location.reload();
                     });
                 } else {
-                    const errMsg = (body && (body.error || body.message)) ? (body.error || body.message) : `Lỗi khi lưu (status ${response.status})`;
-                    Swal.fire({ icon: 'error', title: 'Lưu thất bại', text: errMsg });
+                    // try to parse error message from server
+                    let text = 'Lưu thất bại';
+                    try {
+                        const json = await response.json();
+                        if (json && json.message) text = json.message;
+                    } catch(_) {}
+                    Swal.fire({ icon: 'error', title: 'Lưu thất bại', text: text });
                 }
             } catch (err) {
-                console.error('Save error', err);
-                Swal.fire({ icon: 'error', title: 'Lỗi kết nối', text: 'Không thể kết nối tới máy chủ. Vui lòng thử lại.' });
+                Swal.fire({ icon: 'error', title: 'Lỗi kết nối' });
             }
         });
 
-        // === 7. Logic Reset (Xếp lại) ===
+        // === 7. Logic Reset ===
         resetButton.addEventListener('click', () => {
             if (isLocked) return;
-
             const filledCount = document.querySelectorAll('.player-slot.filled, .bench-slot.filled').length;
             if(filledCount === 0) {
-                Swal.fire({ icon: 'info', title: 'Thông báo', text: 'Sân chưa có cầu thủ nào để xếp lại.'});
+                Swal.fire({ icon: 'info', title: 'Thông báo', text: 'Sân chưa có cầu thủ nào.'});
                 return;
             }
 
             Swal.fire({
-                title: 'Xếp lại từ đầu?',
-                text: "Toàn bộ cầu thủ trên sân và dự bị sẽ quay về danh sách chờ.",
+                title: 'Xếp lại?',
+                text: "Toàn bộ cầu thủ sẽ quay về danh sách chờ.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Đồng ý, xếp lại!',
+                confirmButtonText: 'Đồng ý',
                 cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
                     performReset();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Đã làm mới',
-                        timer: 1000,
-                        showConfirmButton: false
-                    });
                 }
             });
         });
@@ -826,28 +939,25 @@
                     const id = playerItem.dataset.playerId;
                     const name = playerItem.dataset.playerName;
                     const pos = playerItem.dataset.pos;
-                    // Lấy thông tin thẻ để không bị mất
                     const yellows = playerItem.dataset.yellows;
                     const suspended = playerItem.dataset.suspended;
+                    const avatar = playerItem.dataset.avatar; // Lấy avatar
 
-                    // Trả về pool (sử dụng hàm mới để giữ icon thẻ)
-                    playerPool.appendChild(createPlayerElement(id, name, pos, yellows, suspended));
+                    playerPool.appendChild(createPlayerElement(id, name, pos, yellows, suspended, avatar));
                 }
-                // Xóa slot
                 clearSlot(slot);
             });
             updateAllCounts();
         }
 
-        // === 8. Khởi tạo dữ liệu ban đầu ===
+        // === 8. Khởi tạo dữ liệu ban đầu (Load từ Server) ===
         function loadInitialLineup() {
             initialMainPlayers.forEach(player => {
-                // Tìm cầu thủ trong pool để xóa đi
                 const playerEl = document.querySelector(`#available-players .player-item[data-player-id="${player.id}"]`);
 
-                // Lấy data thẻ từ player entity (nếu có) hoặc từ element trong pool
                 const yellows = playerEl ? playerEl.dataset.yellows : (player.seasonYellowCards || 0);
                 const suspended = playerEl ? playerEl.dataset.suspended : (player.suspensionMatchesRemaining > 0);
+                const avatar = player.avatar; // Lấy avatar từ object player (Java model)
 
                 if (playerEl) playerEl.remove();
 
@@ -856,8 +966,8 @@
                     const slotLabelEl = emptySlot.querySelector('.slot-label');
                     const slotLabel = slotLabelEl ? slotLabelEl.innerText : '';
                     emptySlot.innerHTML = '';
-                    // Tạo element đã fill trên sân (kèm icon thẻ)
-                    emptySlot.appendChild(createFilledElement(player.id, player.name, player.position, slotLabel, false, yellows, suspended));
+                    // Render có avatar
+                    emptySlot.appendChild(createFilledElement(player.id, player.name, player.position, slotLabel, false, yellows, suspended, avatar));
                     emptySlot.classList.add('filled');
                 }
             });
@@ -867,13 +977,14 @@
 
                 const yellows = playerEl ? playerEl.dataset.yellows : (player.seasonYellowCards || 0);
                 const suspended = playerEl ? playerEl.dataset.suspended : (player.suspensionMatchesRemaining > 0);
+                const avatar = player.avatar;
 
                 if (playerEl) playerEl.remove();
 
                 const emptyBenchSlot = document.querySelector('.bench-slot:not(.filled)');
                 if (emptyBenchSlot) {
                     emptyBenchSlot.innerHTML = '';
-                    emptyBenchSlot.appendChild(createFilledElement(player.id, player.name, player.position, '', true, yellows, suspended));
+                    emptyBenchSlot.appendChild(createFilledElement(player.id, player.name, player.position, '', true, yellows, suspended, avatar));
                     emptyBenchSlot.classList.add('filled');
                 }
             });

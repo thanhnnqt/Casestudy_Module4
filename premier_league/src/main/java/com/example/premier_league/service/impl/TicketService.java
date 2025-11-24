@@ -17,7 +17,7 @@ public class TicketService implements ITicketService {
     }
 
     @Override
-    public boolean create(Ticket ticket) {
+    public boolean save(Ticket ticket) {
         return ticketRepository.save(ticket) != null;
     }
 
@@ -40,5 +40,15 @@ public class TicketService implements ITicketService {
     @Override
     public List<Ticket> findAllByHomeTeam(String homeTeam) {
         return ticketRepository.findAllByHomeTeam(homeTeam);
+    }
+
+    @Override
+    public Ticket findById(Integer id) {
+        return ticketRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public void delete(Ticket ticket) {
+        ticketRepository.delete(ticket);
     }
 }
